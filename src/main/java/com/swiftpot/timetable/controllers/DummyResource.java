@@ -1,6 +1,6 @@
 package com.swiftpot.timetable.controllers;
 
-import com.swiftpot.timetable.util.BusinessLogicConfigValues;
+import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class DummyResource {
     @Autowired
-    BusinessLogicConfigValues businessLogicConfigValues;
+    BusinessLogicConfigurationProperties businessLogicConfigurationProperties;
 
     @RequestMapping(path = "/dummy",method= RequestMethod.GET)
     public String getDummyText(){
-        System.out.println(businessLogicConfigValues.PERIOD_DURATION_IN_SECONDS);
+        System.out.println(businessLogicConfigurationProperties.PERIOD_DURATION_IN_SECONDS);
         return "Hello";
     }
 

@@ -1,10 +1,9 @@
 package com.swiftpot.timetable;
 
-import com.swiftpot.timetable.util.BusinessLogicConfigValues;
+import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -17,7 +16,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 public class TimetableTechnicalApplicationTests {
 
     @Autowired
-    BusinessLogicConfigValues businessLogicConfigValues;
+    BusinessLogicConfigurationProperties businessLogicConfigurationProperties;
 
     @Test
     public void contextLoads() {
@@ -31,7 +30,7 @@ public class TimetableTechnicalApplicationTests {
     @Test
     public void testReadingFromCustomFile() {
         String charSequence = "[0-9]+";
-        String periodDuration = businessLogicConfigValues.PERIOD_DURATION_IN_SECONDS;
+        String periodDuration = businessLogicConfigurationProperties.PERIOD_DURATION_IN_SECONDS;
         System.out.println("periodDuration = " + periodDuration);
         assertThat((periodDuration.matches(charSequence)) && (!periodDuration.isEmpty()),
                 equalTo(true));
