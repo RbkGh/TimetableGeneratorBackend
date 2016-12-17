@@ -22,7 +22,7 @@ public class SubjectsAssigner {
 
     public List<Integer> getTotalSubjectPeriodAllocationAsList(int totalPeriodAllocationForSubject) {
 
-        List<Integer> finalSubjectPeriodAllocationAsList = new ArrayList<>(0);
+        List<Integer> finalSubjectPeriodAllocationAsList;
 
         switch (totalPeriodAllocationForSubject) {
             case 1:

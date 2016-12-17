@@ -21,6 +21,8 @@ public class ProgrammeGroup {
      */
     private List<String> yearGroupList;
 
+    private List<String> electiveSubjectsCodeList;
+
     private boolean technicalWorkshopOrLabRequired;
 
     public ProgrammeGroup() {
@@ -50,6 +52,15 @@ public class ProgrammeGroup {
 
     public ProgrammeGroup setYearGroupList(List<String> yearGroupList) {
         this.yearGroupList = yearGroupList;
+        return this;
+    }
+
+    public List<String> getElectiveSubjectsCodeList() {
+        return electiveSubjectsCodeList;
+    }
+
+    public ProgrammeGroup setElectiveSubjectsCodeList(List<String> electiveSubjectsCodeList) {
+        this.electiveSubjectsCodeList = electiveSubjectsCodeList;
         return this;
     }
 

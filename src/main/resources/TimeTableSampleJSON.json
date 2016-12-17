@@ -1,0 +1,109 @@
+{
+  "yearGroup": [
+    {
+      "yearName": "YEAR_ONE",
+      "yearNumber":1,
+      "programme": [
+        {
+          "programmeCode": "",
+          "periods": [
+            {
+              "periodName": "",
+              "periodNumber": 1,
+              "periodStartandEndTime": "07:30-08:10GMT",
+              "isAllocated": true,
+              "subjectCode": "ENG",
+              "tutorCode": "48"
+            },
+            {
+              "periodName": "",
+              "periodNumber": 1,
+              "periodStartandEndTime": "07:30-08:10GMT",
+              "isAllocated": true,
+              "subjectCode": "ENG",
+              "tutorCode": "48"
+            },
+            {
+              "periodName": "",
+              "periodNumber": 1,
+              "periodStartandEndTime": "07:30-08:10GMT",
+              "isAllocated": true,
+              "subjectCode": "ENG",
+              "tutorCode": "48"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "yearName": "YEAR_TWO",
+      "yearNumber":2,
+      "programme": [
+        {
+          "programmeCode": "",
+          "periods": [
+            {
+              "periodName": "",
+              "periodNumber": 1,
+              "periodStartandEndTime": "07:30-08:10GMT",
+              "isAllocated": true,
+              "subjectCode": "ENG",
+              "tutorCode": "48"
+            },
+            {
+              "periodName": "",
+              "periodNumber": 1,
+              "periodStartandEndTime": "07:30-08:10GMT",
+              "isAllocated": true,
+              "subjectCode": "ENG",
+              "tutorCode": "48"
+            },
+            {
+              "periodName": "",
+              "periodNumber": 1,
+              "periodStartandEndTime": "07:30-08:10GMT",
+              "isAllocated": true,
+              "subjectCode": "ENG",
+              "tutorCode": "48"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "yearName": "YEAR_THREE",
+      "yearNumber":3,
+      "programme": [
+        {
+          "programmeCode": "",
+          "periods": [
+            {
+              "periodName": "",
+              "periodNumber": 1,
+              "periodStartandEndTime": "07:30-08:10GMT",
+              "isAllocated": true,
+              "subjectCode": "ENG",
+              "tutorCode": "48"
+            },
+            {
+              "periodName": "",
+              "periodNumber": 1,
+              "periodStartandEndTime": "07:30-08:10GMT",
+              "isAllocated": true,
+              "subjectCode": "ENG",
+              "tutorCode": "48"
+            },
+            {
+              "periodName": "",
+              "periodNumber": 1,
+              "periodStartandEndTime": "07:30-08:10GMT",
+              "isAllocated": true,
+              "subjectCode": "ENG",
+              "tutorCode": "48"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
