@@ -1,6 +1,7 @@
 package com.swiftpot.timetable.repository.db.model;
 
 
+import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.util.YearGroupNamesAndNumber;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.data.annotation.Id;
@@ -19,7 +20,7 @@ public class PeriodAndTimeAndSubjectAndTutorAssignedDoc {
     @Id
     private String id;
 
-    private List<YearGroup> yearGroup = null;
+    private List<YearGroup> yearGroup;
 
     public List<YearGroup> getYearGroup() {
         return yearGroup;
@@ -79,12 +80,12 @@ public class PeriodAndTimeAndSubjectAndTutorAssignedDoc {
 
     /**
      * Programme Object,with
-     * programCode,and periods List
+     * programCode,and periodOrLectures List
      */
     public class Programme {
 
         private String programmeCode;
-        private List<Period> periods = null;
+        private List<PeriodOrLecture> periodOrLectures = null;
 
         public String getProgrammeCode() {
             return programmeCode;
@@ -94,83 +95,12 @@ public class PeriodAndTimeAndSubjectAndTutorAssignedDoc {
             this.programmeCode = programmeCode;
         }
 
-        public List<Period> getPeriods() {
-            return periods;
+        public List<PeriodOrLecture> getPeriodOrLectures() {
+            return periodOrLectures;
         }
 
-        public void setPeriods(List<Period> periods) {
-            this.periods = periods;
-        }
-
-        @Override
-        public String toString() {
-            return ToStringBuilder.reflectionToString(this);
-        }
-
-    }
-
-    /**
-     * Period Object
-     * with periodName,periodNumber,
-     * periodStartAndEndTime->eg 13:00-13:40GMT format,isAllocated type of boolean
-     * subjectCode->SubjectInitials,
-     * tutorCode->tutorCode eg 23,to retrieve Tutor info,like Name and details
-     */
-    public class Period {
-
-        private String periodName;
-        private int periodNumber;
-        private String periodStartandEndTime;
-        private boolean isAllocated;
-        private String subjectCode;
-        private String tutorCode;
-
-        public String getPeriodName() {
-            return periodName;
-        }
-
-        public void setPeriodName(String periodName) {
-            this.periodName = periodName;
-        }
-
-        public int getPeriodNumber() {
-            return periodNumber;
-        }
-
-        public void setPeriodNumber(int periodNumber) {
-            this.periodNumber = periodNumber;
-        }
-
-        public String getPeriodStartandEndTime() {
-            return periodStartandEndTime;
-        }
-
-        public void setPeriodStartandEndTime(String periodStartandEndTime) {
-            this.periodStartandEndTime = periodStartandEndTime;
-        }
-
-        public boolean getIsAllocated() {
-            return isAllocated;
-        }
-
-        public void setIsAllocated(boolean isAllocated) {
-            this.isAllocated = isAllocated;
-        }
-
-        public String getSubjectCode() {
-            return subjectCode;
-        }
-
-        public void setSubjectCode(String subjectCode) {
-            this.subjectCode = subjectCode;
-        }
-
-        public String getTutorCode() {
-            return tutorCode;
-        }
-
-        public void setTutorCode(String tutorCode) {
-            this.tutorCode = tutorCode;
+        public void setPeriodOrLectures(List<PeriodOrLecture> periodOrLectures) {
+            this.periodOrLectures = periodOrLectures;
         }
 
         @Override
@@ -179,4 +109,6 @@ public class PeriodAndTimeAndSubjectAndTutorAssignedDoc {
         }
 
     }
+
+
 }
