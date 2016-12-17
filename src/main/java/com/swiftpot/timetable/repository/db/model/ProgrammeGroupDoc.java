@@ -1,4 +1,7 @@
-package com.swiftpot.timetable.model;
+package com.swiftpot.timetable.repository.db.model;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
@@ -7,7 +10,11 @@ import java.util.List;
  *         <Rodney Kwabena Boachie at [rodney@swiftpot.com,rbk.unlimited@gmail.com]> on
  *         16-Dec-16 @ 3:09 PM
  */
-public class ProgrammeGroup {
+@Document
+public class ProgrammeGroupDoc {
+
+    @Id
+    private String id;
 
     private String programmeFullName;
 
@@ -25,14 +32,14 @@ public class ProgrammeGroup {
 
     private boolean technicalWorkshopOrLabRequired;
 
-    public ProgrammeGroup() {
+    public ProgrammeGroupDoc() {
     }
 
     public String getProgrammeFullName() {
         return programmeFullName;
     }
 
-    public ProgrammeGroup setProgrammeFullName(String programmeFullName) {
+    public ProgrammeGroupDoc setProgrammeFullName(String programmeFullName) {
         this.programmeFullName = programmeFullName;
         return this;
     }
@@ -41,7 +48,7 @@ public class ProgrammeGroup {
         return programmeCode;
     }
 
-    public ProgrammeGroup setProgrammeCode(String programmeCode) {
+    public ProgrammeGroupDoc setProgrammeCode(String programmeCode) {
         this.programmeCode = programmeCode;
         return this;
     }
@@ -50,7 +57,7 @@ public class ProgrammeGroup {
         return yearGroupList;
     }
 
-    public ProgrammeGroup setYearGroupList(List<String> yearGroupList) {
+    public ProgrammeGroupDoc setYearGroupList(List<String> yearGroupList) {
         this.yearGroupList = yearGroupList;
         return this;
     }
@@ -59,7 +66,7 @@ public class ProgrammeGroup {
         return electiveSubjectsCodeList;
     }
 
-    public ProgrammeGroup setElectiveSubjectsCodeList(List<String> electiveSubjectsCodeList) {
+    public ProgrammeGroupDoc setElectiveSubjectsCodeList(List<String> electiveSubjectsCodeList) {
         this.electiveSubjectsCodeList = electiveSubjectsCodeList;
         return this;
     }
@@ -68,7 +75,7 @@ public class ProgrammeGroup {
         return technicalWorkshopOrLabRequired;
     }
 
-    public ProgrammeGroup setTechnicalWorkshopOrLabRequired(boolean technicalWorkshopOrLabRequired) {
+    public ProgrammeGroupDoc setTechnicalWorkshopOrLabRequired(boolean technicalWorkshopOrLabRequired) {
         this.technicalWorkshopOrLabRequired = technicalWorkshopOrLabRequired;
         return this;
     }

@@ -1,11 +1,19 @@
-package com.swiftpot.timetable.model;
+package com.swiftpot.timetable.repository.db.model;
+
+import com.swiftpot.timetable.base.Person;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  * @author Ace Programmer Rbk
  *         <Rodney Kwabena Boachie at [rodney@swiftpot.com,rbk.unlimited@gmail.com]> on
  *         16-Dec-16 @ 2:11 PM
  */
-public class Tutor {
+@Document
+public class TutorDoc extends Person {
+
+    @Id
+    private String id;
 
     private String tutorCode;
 
@@ -26,14 +34,16 @@ public class Tutor {
         }
     }
 
-    public Tutor() {
+    public TutorDoc() {
+        super();
     }
+
 
     public String getTutorCode() {
         return tutorCode;
     }
 
-    public Tutor setTutorCode(String tutorCode) {
+    public TutorDoc setTutorCode(String tutorCode) {
         this.tutorCode = tutorCode;
         return this;
     }
@@ -42,7 +52,7 @@ public class Tutor {
         return currentPeriodLoad;
     }
 
-    public Tutor setCurrentPeriodLoad(int currentPeriodLoad) {
+    public TutorDoc setCurrentPeriodLoad(int currentPeriodLoad) {
         this.currentPeriodLoad = currentPeriodLoad;
         return this;
     }
@@ -51,7 +61,7 @@ public class Tutor {
         return minPeriodLoad;
     }
 
-    public Tutor setMinPeriodLoad(int minPeriodLoad) {
+    public TutorDoc setMinPeriodLoad(int minPeriodLoad) {
         this.minPeriodLoad = minPeriodLoad;
         return this;
     }
@@ -60,7 +70,7 @@ public class Tutor {
         return maxPeriodLoad;
     }
 
-    public Tutor setMaxPeriodLoad(int maxPeriodLoad) {
+    public TutorDoc setMaxPeriodLoad(int maxPeriodLoad) {
         this.maxPeriodLoad = maxPeriodLoad;
         return this;
     }
@@ -69,7 +79,7 @@ public class Tutor {
         return tutorSubjectSpeciality;
     }
 
-    public Tutor setTutorSubjectSpeciality(TutorSubjectSpeciality tutorSubjectSpeciality) {
+    public TutorDoc setTutorSubjectSpeciality(TutorSubjectSpeciality tutorSubjectSpeciality) {
         this.tutorSubjectSpeciality = tutorSubjectSpeciality;
         return this;
     }
