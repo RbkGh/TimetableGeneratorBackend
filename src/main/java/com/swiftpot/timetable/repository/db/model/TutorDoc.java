@@ -23,6 +23,8 @@ public class TutorDoc extends Person {
 
     private int maxPeriodLoad;
 
+    private String assignedYearGroup;
+
     private TutorSubjectSpeciality tutorSubjectSpeciality;
 
     public enum TutorSubjectSpeciality {
@@ -72,6 +74,15 @@ public class TutorDoc extends Person {
 
     public TutorDoc setMaxPeriodLoad(int maxPeriodLoad) {
         this.maxPeriodLoad = maxPeriodLoad;
+        return this;
+    }
+
+    public String getAssignedYearGroup() {
+        return assignedYearGroup;
+    }
+
+    public TutorDoc setAssignedYearGroup(String assignedYearGroup) {
+        this.assignedYearGroup = assignedYearGroup;
         return this;
     }
 
