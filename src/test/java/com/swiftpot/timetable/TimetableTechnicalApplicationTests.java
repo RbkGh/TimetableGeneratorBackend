@@ -1,6 +1,8 @@
 package com.swiftpot.timetable;
 
+import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.services.SubjectsAssigner;
+import com.swiftpot.timetable.services.TimeTablePeriodSchedulerFromFileImpl;
 import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,6 +26,8 @@ public class TimetableTechnicalApplicationTests {
     BusinessLogicConfigurationProperties businessLogicConfigurationProperties;
     @Autowired
     SubjectsAssigner subjectsAssigner;
+    @Autowired
+    TimeTablePeriodSchedulerFromFileImpl timeTablePeriodSchedulerFromFile;
 
     @Test
     public void contextLoads() {
@@ -94,6 +98,68 @@ public class TimetableTechnicalApplicationTests {
 
         }
 
+    }
+
+
+    @Test
+    public void testTotalPeriodsandTime() {
+        List<Integer> testSampleSpace = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        //start from i=1 ,since there is no 0 period in real world
+        for (int i = 1; i <= testSampleSpace.size(); i++) {
+            List<PeriodOrLecture> periodOrLectures = timeTablePeriodSchedulerFromFile.getFullPeriodsAndTimesForDayPerEachProgrammeGroup();
+            System.out.println(" period " + i + " \n");
+            for (PeriodOrLecture x : periodOrLectures) {
+                System.out.println("Period Name = "+x.getPeriodName() + " Period Duration = "+x.getPeriodStartandEndTime());
+            }
+
+            switch (i){
+                case 1 :
+                    System.out.println("case 1 object = "+periodOrLectures.get(1-1).toString());
+                    assertPeriodStartEndTimeIsCorrect(preparePeriodObjectExpected("07:30-08:10AM", 1, "PERIOD 1"), periodOrLectures.get(1 - 1));
+                    break;
+                case 2 :
+                    assertPeriodStartEndTimeIsCorrect(preparePeriodObjectExpected("08:10-08:50AM", 2, "PERIOD 2"), periodOrLectures.get(2 - 1));
+                    break;
+                case 3 :
+                    assertPeriodStartEndTimeIsCorrect(preparePeriodObjectExpected("09:20-10:00AM", 3, "PERIOD 3"), periodOrLectures.get(3 - 1));
+                    break;
+                case 4 :
+                    assertPeriodStartEndTimeIsCorrect(preparePeriodObjectExpected("10:00-10:40AM", 4, "PERIOD 4"), periodOrLectures.get(4 - 1));
+                    break;
+                case 5 :
+                    assertPeriodStartEndTimeIsCorrect(preparePeriodObjectExpected("10:40-11:20AM", 5, "PERIOD 5"), periodOrLectures.get(5 - 1));
+                    break;
+                case 6 :
+                    assertPeriodStartEndTimeIsCorrect(preparePeriodObjectExpected("11:20-12:00PM", 6, "PERIOD 6"), periodOrLectures.get(6 - 1));
+                    break;
+                case 7 :
+                    assertPeriodStartEndTimeIsCorrect(preparePeriodObjectExpected("12:00-12:40PM", 7, "PERIOD 7"), periodOrLectures.get(7 - 1));
+                    break;
+                case 8 :
+                    assertPeriodStartEndTimeIsCorrect(preparePeriodObjectExpected("01:00-01:40PM", 8, "PERIOD 8"), periodOrLectures.get(8 - 1));
+                    break;
+                case 9 :
+                    assertPeriodStartEndTimeIsCorrect(preparePeriodObjectExpected("01:40-02:20PM", 9, "PERIOD 9"), periodOrLectures.get(9 - 1));
+                    break;
+                case 10 :
+                    assertPeriodStartEndTimeIsCorrect(preparePeriodObjectExpected("02:20-03:00PM", 10, "PERIOD 10"), periodOrLectures.get(10 - 1));
+                    break;
+
+                default:
+                    System.out.println("Only 1-10 accepted");
+
+            }
+
+        }
+
+    }
+    private PeriodOrLecture preparePeriodObjectExpected(String periodStartandEndTime,int periodNumber,String periodName){
+        PeriodOrLecture periodOrLecture = new PeriodOrLecture(periodStartandEndTime,periodNumber,periodName);
+        periodOrLecture.setIsAllocated(false);
+        return periodOrLecture;
+    }
+    private void assertPeriodStartEndTimeIsCorrect(PeriodOrLecture periodOrLectureExpected, PeriodOrLecture periodOrLecturegenerated){
+        assert(periodOrLectureExpected.getPeriodStartandEndTime().equals(periodOrLecturegenerated.getPeriodStartandEndTime()));
     }
 
     private void assertTotalSubjectAllocationGenerationVariables(Integer[] val,List<Integer> totalSubjectAllocationList){

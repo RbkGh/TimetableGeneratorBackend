@@ -48,4 +48,40 @@ public class BusinessLogicConfigurationProperties {
 
     @Value("${subject.total.period.10}")
     public String SUBJECT_TOTAL_PERIOD_10;
+
+    //timetable periods
+    @Value("${timetable.period.1}")
+    public String TIMETABLE_PERIO_1;
+
+    @Value("${timetable.period.2}")
+    public String TIMETABLE_PERIO_2;
+
+    @Value("${timetable.period.3}")
+    public String TIMETABLE_PERIO_3;
+
+    @Value("${timetable.period.4}")
+    public String TIMETABLE_PERIO_4;
+
+    @Value("${timetable.period.5}")
+    public String TIMETABLE_PERIO_5;
+
+    @Value("${timetable.period.6}")
+    public String TIMETABLE_PERIO_6;
+
+    @Value("${timetable.period.7}")
+    public String TIMETABLE_PERIO_7;
+
+    @Value("${timetable.period.8}")
+    public String TIMETABLE_PERIO_8;
+
+    @Value("${timetable.period.9}")
+    public String TIMETABLE_PERIO_9;
+
+    @Value("${timetable.period.10}")
+    public String TIMETABLE_PERIO_10;
+    //timetable periods
+
+    //total periods for day
+    @Value("${timetable.period.total}")
+    public String TIMETABLE_PERIOD_TOTAL;
 }

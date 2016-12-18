@@ -72,6 +72,21 @@ public class PeriodOrLecture {
         this.tutorCode = tutorCode;
     }
 
+    public PeriodOrLecture() {
+    }
+
+    public PeriodOrLecture(String periodStartandEndTime, int periodNumber, String periodName) {
+        this.periodStartandEndTime = periodStartandEndTime;
+        this.periodNumber = periodNumber;
+        this.periodName = periodName;
+    }
+
+    public PeriodOrLecture(boolean isAllocated, String subjectCode, String tutorCode) {
+        this.isAllocated = isAllocated;
+        this.subjectCode = subjectCode;
+        this.tutorCode = tutorCode;
+    }
+
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
