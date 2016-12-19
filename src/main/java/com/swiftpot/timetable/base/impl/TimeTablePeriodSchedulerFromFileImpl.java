@@ -1,11 +1,11 @@
-package com.swiftpot.timetable.services;
+package com.swiftpot.timetable.base.impl;
 
-import com.swiftpot.timetable.base.TimeTablePeriodSchedule;
+import com.swiftpot.timetable.base.TimeTablePeriodScheduler;
 import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.repository.PeriodAndTimeAndSubjectAndTutorAssignedDocRepository;
-import com.swiftpot.timetable.repository.db.model.PeriodAndTimeAndSubjectAndTutorAssignedDoc;
 import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -16,8 +16,8 @@ import java.util.List;
  *         <Rodney Kwabena Boachie at [rodney@swiftpot.com,rbk.unlimited@gmail.com]> on
  *         17-Dec-16 @ 10:18 PM
  */
-@Service
-public class TimeTablePeriodSchedulerFromFileImpl implements TimeTablePeriodSchedule{
+@Component
+public class TimeTablePeriodSchedulerFromFileImpl implements TimeTablePeriodScheduler {
 
     @Autowired
     PeriodAndTimeAndSubjectAndTutorAssignedDocRepository ptstaDocRepository;
@@ -25,7 +25,7 @@ public class TimeTablePeriodSchedulerFromFileImpl implements TimeTablePeriodSche
     BusinessLogicConfigurationProperties businessLogicConfigurationProperties;
 
     @Override
-    public List<PeriodOrLecture> getFullPeriodsAndTimesForDayPerEachProgrammeGroup() {
+    public List<PeriodOrLecture> generateAllPeriodsOrLecture() {
         int totalTimeTablePeriods = Integer.valueOf(businessLogicConfigurationProperties.TIMETABLE_PERIOD_TOTAL);
         List<PeriodOrLecture> periodOrLectures = new ArrayList<>();
         //start from 1 instead of 0,as timetable periods is counted from 1 in the real world

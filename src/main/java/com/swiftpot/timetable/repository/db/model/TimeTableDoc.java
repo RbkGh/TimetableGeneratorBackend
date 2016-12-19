@@ -1,7 +1,6 @@
 package com.swiftpot.timetable.repository.db.model;
 
 import com.swiftpot.timetable.model.PeriodOrLecture;
-import com.swiftpot.timetable.util.YearGroupNamesAndNumber;
 import org.springframework.data.annotation.Id;
 
 import java.util.List;
@@ -11,7 +10,7 @@ import java.util.List;
  *         <Rodney Kwabena Boachie at [rodney@swiftpot.com,rbk.unlimited@gmail.com]> on
  *         18-Dec-16 @ 6:58 AM
  */
-public class TimeTable {
+public class TimeTableDoc {
 
     @Id
     private String id;
@@ -26,7 +25,7 @@ public class TimeTable {
 
     private List<PeriodOrLecture> periodOrLecture;
 
-    public TimeTable() {
+    public TimeTableDoc() {
 
     }
 
@@ -34,7 +33,7 @@ public class TimeTable {
         return id;
     }
 
-    public TimeTable setId(String id) {
+    public TimeTableDoc setId(String id) {
         this.id = id;
         return this;
     }
@@ -43,7 +42,7 @@ public class TimeTable {
         return yearGroupName;
     }
 
-    public TimeTable setYearGroupName(String yearGroupName) {
+    public TimeTableDoc setYearGroupName(String yearGroupName) {
         this.yearGroupName = yearGroupName;
         return this;
     }
@@ -52,7 +51,7 @@ public class TimeTable {
         return yearGroupNumber;
     }
 
-    public TimeTable setYearGroupNumber(String yearGroupNumber) {
+    public TimeTableDoc setYearGroupNumber(String yearGroupNumber) {
         this.yearGroupNumber = yearGroupNumber;
         return this;
     }
@@ -61,7 +60,7 @@ public class TimeTable {
         return programmeCode;
     }
 
-    public TimeTable setProgrammeCode(String programmeCode) {
+    public TimeTableDoc setProgrammeCode(String programmeCode) {
         this.programmeCode = programmeCode;
         return this;
     }
@@ -70,7 +69,7 @@ public class TimeTable {
         return programmeName;
     }
 
-    public TimeTable setProgrammeName(String programmeName) {
+    public TimeTableDoc setProgrammeName(String programmeName) {
         this.programmeName = programmeName;
         return this;
     }
@@ -79,7 +78,7 @@ public class TimeTable {
         return periodOrLecture;
     }
 
-    public TimeTable setPeriodOrLecture(List<PeriodOrLecture> periodOrLecture) {
+    public TimeTableDoc setPeriodOrLecture(List<PeriodOrLecture> periodOrLecture) {
         this.periodOrLecture = periodOrLecture;
         return this;
     }

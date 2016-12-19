@@ -1,5 +1,6 @@
 package com.swiftpot.timetable.repository.db.model;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -10,7 +11,7 @@ import java.util.List;
  *         <Rodney Kwabena Boachie at [rodney@swiftpot.com,rbk.unlimited@gmail.com]> on
  *         16-Dec-16 @ 3:09 PM
  */
-@Document
+@Document(collection = "ProgrammeGroupDoc")
 public class ProgrammeGroupDoc {
 
     @Id
@@ -18,6 +19,23 @@ public class ProgrammeGroupDoc {
 
     private String programmeFullName;
 
+    private String programmeInitials;
+
+    /**
+     * shows total number of same programmeGroup ,if more than 1,create
+     * the exact number and generate programmeCodes accordingly
+     */
+    private int numberOfClasses;
+
+    /*
+    The current yearGroup of the students offering the course
+     */
+    private int yearGroup;
+
+    /**
+     * programmeCode generation algorithm = programmeInitials+yearGroup+A,B,C,D,E in that order
+     *
+     */
     private String programmeCode;
 
     /**
@@ -39,44 +57,68 @@ public class ProgrammeGroupDoc {
         return programmeFullName;
     }
 
-    public ProgrammeGroupDoc setProgrammeFullName(String programmeFullName) {
+    public void setProgrammeFullName(String programmeFullName) {
         this.programmeFullName = programmeFullName;
-        return this;
+    }
+
+    public String getProgrammeInitials() {
+        return programmeInitials;
+    }
+
+    public void setProgrammeInitials(String programmeInitials) {
+        this.programmeInitials = programmeInitials;
+    }
+
+    public int getNumberOfClasses() {
+        return numberOfClasses;
+    }
+
+    public void setNumberOfClasses(int numberOfClasses) {
+        this.numberOfClasses = numberOfClasses;
+    }
+
+    public int getYearGroup() {
+        return yearGroup;
+    }
+
+    public void setYearGroup(int yearGroup) {
+        this.yearGroup = yearGroup;
     }
 
     public String getProgrammeCode() {
         return programmeCode;
     }
 
-    public ProgrammeGroupDoc setProgrammeCode(String programmeCode) {
+    public void setProgrammeCode(String programmeCode) {
         this.programmeCode = programmeCode;
-        return this;
     }
 
     public List<String> getYearGroupList() {
         return yearGroupList;
     }
 
-    public ProgrammeGroupDoc setYearGroupList(List<String> yearGroupList) {
+    public void setYearGroupList(List<String> yearGroupList) {
         this.yearGroupList = yearGroupList;
-        return this;
     }
 
     public List<String> getElectiveSubjectsCodeList() {
         return electiveSubjectsCodeList;
     }
 
-    public ProgrammeGroupDoc setElectiveSubjectsCodeList(List<String> electiveSubjectsCodeList) {
+    public void setElectiveSubjectsCodeList(List<String> electiveSubjectsCodeList) {
         this.electiveSubjectsCodeList = electiveSubjectsCodeList;
-        return this;
     }
 
     public boolean isTechnicalWorkshopOrLabRequired() {
         return technicalWorkshopOrLabRequired;
     }
 
-    public ProgrammeGroupDoc setTechnicalWorkshopOrLabRequired(boolean technicalWorkshopOrLabRequired) {
+    public void setTechnicalWorkshopOrLabRequired(boolean technicalWorkshopOrLabRequired) {
         this.technicalWorkshopOrLabRequired = technicalWorkshopOrLabRequired;
-        return this;
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 }
