@@ -1,10 +1,9 @@
 package com.swiftpot.timetable.controllers;
 
 import com.swiftpot.timetable.repository.db.model.ProgrammeGroupDoc;
-import com.swiftpot.timetable.services.ProgrammeGroupDocCreator;
+import com.swiftpot.timetable.services.ProgrammeGroupDocCreatorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -22,11 +21,11 @@ import java.util.List;
 public class ProgrammeGroupController {
 
     @Autowired
-    ProgrammeGroupDocCreator programmeGroupDocCreator;
+    ProgrammeGroupDocCreatorService programmeGroupDocCreatorService;
 
     @RequestMapping(path = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     private String createProgrammeGroup(@RequestBody List<ProgrammeGroupDoc> programmeGroupDocs) throws Exception {
-        programmeGroupDocCreator.createProgramGroupDocWithConstraintsCateredForAndSave(programmeGroupDocs);
+        programmeGroupDocCreatorService.createProgramGroupDocWithConstraintsCateredForAndSave(programmeGroupDocs);
         return "Hello";
     }
 }

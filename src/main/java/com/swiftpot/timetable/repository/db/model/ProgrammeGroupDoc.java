@@ -32,6 +32,11 @@ public class ProgrammeGroupDoc {
     private String programmeCode;
 
     /**
+     * default Classroomid  for programeGroup,ie eg. the classroom for Science 1
+     */
+    private String defaultClassRoomId;
+
+    /**
      * @param yearGroupList
      * <p>The specific years partaking in that course</p>
      * eg. Electronic Engineering may be a new course,hence
@@ -76,6 +81,14 @@ public class ProgrammeGroupDoc {
 
     public void setProgrammeCode(String programmeCode) {
         this.programmeCode = programmeCode;
+    }
+
+    public String getDefaultClassRoomId() {
+        return defaultClassRoomId;
+    }
+
+    public void setDefaultClassRoomId(String defaultClassRoomId) {
+        this.defaultClassRoomId = defaultClassRoomId;
     }
 
     public List<String> getYearGroupList() {

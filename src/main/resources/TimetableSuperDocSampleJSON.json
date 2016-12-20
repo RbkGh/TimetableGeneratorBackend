@@ -1,0 +1,211 @@
+{
+  "yearGroupsList": [
+    {
+      "yearName": "YEAR_ONE",
+      "yearNumber": 1,
+      "programmeGroupList": [
+        {
+          "programmeCode": "PCE",
+          "programmeDaysList": [
+            {
+              "dayName": "Monday",
+              "periodList": [
+                {
+                  "periodName": "PERIOD 1",
+                  "periodNumber": 1,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectCode": "ENG",
+                  "tutorCode": "48"
+                },
+                {
+                  "periodName": "PERIOD 2",
+                  "periodNumber": 2,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectCode": "ENG",
+                  "tutorCode": "48"
+                },
+                {
+                  "periodName": "PERIOD 3",
+                  "periodNumber": 3,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectCode": "ENG",
+                  "tutorCode": "48"
+                }
+              ]
+            },
+            {
+              "dayName": "Tuesday",
+              "periodList": [
+                {
+                  "periodName": "PERIOD 1",
+                  "periodNumber": 1,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectCode": "ENG",
+                  "tutorCode": "48"
+                },
+                {
+                  "periodName": "PERIOD 2",
+                  "periodNumber": 2,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectCode": "ENG",
+                  "tutorCode": "48"
+                },
+                {
+                  "periodName": "PERIOD 3",
+                  "periodNumber": 3,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectCode": "ENG",
+                  "tutorCode": "48"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "yearName": "YEAR_TWO",
+      "yearNumber": 2,
+      "programmeGroupList": [
+        {
+          "programmeCode": "PCE",
+          "programmeDaysList": [
+            {
+              "dayName": "Monday",
+              "periodList": [
+                {
+                  "periodName": "PERIOD 1",
+                  "periodNumber": 1,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectCode": "ENG",
+                  "tutorCode": "48"
+                },
+                {
+                  "periodName": "PERIOD 2",
+                  "periodNumber": 2,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectCode": "ENG",
+                  "tutorCode": "48"
+                },
+                {
+                  "periodName": "PERIOD 3",
+                  "periodNumber": 3,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectCode": "ENG",
+                  "tutorCode": "48"
+                }
+              ]
+            },
+            {
+              "dayName": "Tuesday",
+              "periodList": [
+                {
+                  "periodName": "PERIOD 1",
+                  "periodNumber": 1,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectCode": "ENG",
+                  "tutorCode": "48"
+                },
+                {
+                  "periodName": "PERIOD 2",
+                  "periodNumber": 2,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectCode": "ENG",
+                  "tutorCode": "48"
+                },
+                {
+                  "periodName": "PERIOD 3",
+                  "periodNumber": 3,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectCode": "ENG",
+                  "tutorCode": "48"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "yearName": "YEAR_THREE",
+      "yearNumber": 3,
+      "programmeGroupList": [
+        {
+          "programmeCode": "PCE",
+          "programmeDaysList": [
+            {
+              "dayName": "Monday",
+              "periodList": [
+                {
+                  "periodName": "PERIOD 1",
+                  "periodNumber": 1,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectCode": "ENG",
+                  "tutorCode": "48"
+                },
+                {
+                  "periodName": "PERIOD 2",
+                  "periodNumber": 2,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectCode": "ENG",
+                  "tutorCode": "48"
+                },
+                {
+                  "periodName": "PERIOD 3",
+                  "periodNumber": 3,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectCode": "ENG",
+                  "tutorCode": "48"
+                }
+              ]
+            },
+            {
+              "dayName": "Tuesday",
+              "periodList": [
+                {
+                  "periodName": "PERIOD 1",
+                  "periodNumber": 1,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectCode": "ENG",
+                  "tutorCode": "48"
+                },
+                {
+                  "periodName": "PERIOD 2",
+                  "periodNumber": 2,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectCode": "ENG",
+                  "tutorCode": "48"
+                },
+                {
+                  "periodName": "PERIOD 3",
+                  "periodNumber": 3,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectCode": "ENG",
+                  "tutorCode": "48"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

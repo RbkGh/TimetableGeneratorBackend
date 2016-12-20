@@ -18,20 +18,18 @@ public class TestObjectChangesInList {
     public void testObjectChanges() throws Exception {
         List<ProgrammeGroupDoc> programmeGroupDocList = new ArrayList<>();
         ProgrammeGroupDoc programmeGroupDoc = new ProgrammeGroupDoc();
-        programmeGroupDoc.setNumberOfClasses(2);
         programmeGroupDoc.setProgrammeInitials("Bus-IT");
         programmeGroupDoc.setYearGroup(3);
         programmeGroupDocList.add(programmeGroupDoc);
 
         List<ProgrammeGroupDoc> finalProgrammeGroupDocs = new ArrayList<>(0);
-        int numberOfProgrammeGroupsToCreate = programmeGroupDoc.getNumberOfClasses();
         String programmeInitials = programmeGroupDoc.getProgrammeInitials();
         int yearGroup =  programmeGroupDoc.getYearGroup();
 
 
 
         //add entities first without setting programcode
-        for (int i = 0; i < numberOfProgrammeGroupsToCreate; i++) {
+        for (int i = 0; i < programmeGroupDocList.size(); i++) {
             finalProgrammeGroupDocs.add(programmeGroupDoc);
         }
 

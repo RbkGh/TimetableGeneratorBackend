@@ -14,7 +14,7 @@ import java.util.List;
  *         18-Dec-16 @ 1:30 PM
  */
 @Service
-public class ProgrammeGroupDocCreator {
+public class ProgrammeGroupDocCreatorService {
 
     @Autowired
     ProgrammeGroupDocRepository programmeGroupDocRepository;

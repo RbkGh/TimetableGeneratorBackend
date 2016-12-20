@@ -1,8 +1,8 @@
 package com.swiftpot.timetable;
 
 import com.swiftpot.timetable.model.PeriodOrLecture;
-import com.swiftpot.timetable.services.ProgrammeGroupDocCreator;
-import com.swiftpot.timetable.services.SubjectsAssigner;
+import com.swiftpot.timetable.services.ProgrammeGroupDocCreatorService;
+import com.swiftpot.timetable.services.SubjectsAssignerService;
 import com.swiftpot.timetable.base.impl.TimeTablePeriodSchedulerFromFileImpl;
 import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
 import org.junit.Test;
@@ -26,11 +26,11 @@ public class TimetableTechnicalApplicationTests {
     @Autowired
     BusinessLogicConfigurationProperties businessLogicConfigurationProperties;
     @Autowired
-    SubjectsAssigner subjectsAssigner;
+    SubjectsAssignerService subjectsAssignerService;
     @Autowired
     TimeTablePeriodSchedulerFromFileImpl timeTablePeriodSchedulerFromFile;
     @Autowired
-    ProgrammeGroupDocCreator groupDocCreator;
+    ProgrammeGroupDocCreatorService groupDocCreator;
 
     @Test
     public void contextLoads() {
@@ -56,7 +56,7 @@ public class TimetableTechnicalApplicationTests {
         List<Integer> testSampleSpace = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
         //start from i=1 as periods allocation does not have 1 involved
         for (int i = 1; i <= testSampleSpace.size(); i++) {
-            List<Integer> totalSubjectAllocationList = subjectsAssigner.getTotalSubjectPeriodAllocationAsList(i);
+            List<Integer> totalSubjectAllocationList = subjectsAssignerService.getTotalSubjectPeriodAllocationAsList(i);
             System.out.println("Total Subject Allocation for " + i + " periods = \n");
             for (Integer x : totalSubjectAllocationList) {
                 System.out.println(x + "\n");

@@ -8,5 +8,5 @@ import org.springframework.stereotype.Service;
  *         18-Dec-16 @ 10:49 AM
  */
 @Service
-public class TimeTablePopulator {
+public class TimeTablePopulatorService {
 }

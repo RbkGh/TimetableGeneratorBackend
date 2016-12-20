@@ -3,10 +3,10 @@ package com.swiftpot.timetable.base.impl;
 import com.swiftpot.timetable.base.TimeTablePeriodScheduler;
 import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.repository.PeriodAndTimeAndSubjectAndTutorAssignedDocRepository;
+import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
 import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +70,7 @@ public class TimeTablePeriodSchedulerFromFileImpl implements TimeTablePeriodSche
     }
 
     private PeriodOrLecture preparePeriodObject(String periodStartandEndTime,int periodNumber,String periodName){
+        //TimeTableSuperDoc.PeriodOrLecture periodOrLecture = new TimeTableSuperDoc.PeriodOrLecture();
         PeriodOrLecture periodOrLecture = new PeriodOrLecture(periodStartandEndTime,periodNumber,periodName);
         periodOrLecture.setIsAllocated(false);
         return periodOrLecture;

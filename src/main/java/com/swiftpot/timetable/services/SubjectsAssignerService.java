@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  *         17-Dec-16 @ 12:43 AM
  */
 @Service
-public class SubjectsAssigner {
+public class SubjectsAssignerService {
 
     @Autowired
     BusinessLogicConfigurationProperties propFile;
