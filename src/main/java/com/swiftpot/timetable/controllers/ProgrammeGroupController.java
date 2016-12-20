@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * @author Ace Programmer Rbk
  *         <Rodney Kwabena Boachie at [rodney@swiftpot.com,rbk.unlimited@gmail.com]> on
@@ -22,9 +24,9 @@ public class ProgrammeGroupController {
     @Autowired
     ProgrammeGroupDocCreator programmeGroupDocCreator;
 
-    @RequestMapping(path = "",method = RequestMethod.POST,consumes = MediaType.APPLICATION_JSON_VALUE)
-    private String createProgrammeGroup(@RequestBody ProgrammeGroupDoc programmeGroupDoc) throws Exception{
-        programmeGroupDocCreator.createProgramGroupDocWithConstraintsCateredForAndSave(programmeGroupDoc);
+    @RequestMapping(path = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    private String createProgrammeGroup(@RequestBody List<ProgrammeGroupDoc> programmeGroupDocs) throws Exception {
+        programmeGroupDocCreator.createProgramGroupDocWithConstraintsCateredForAndSave(programmeGroupDocs);
         return "Hello";
     }
 }

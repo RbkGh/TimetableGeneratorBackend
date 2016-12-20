@@ -21,12 +21,6 @@ public class ProgrammeGroupDoc {
 
     private String programmeInitials;
 
-    /**
-     * shows total number of same programmeGroup ,if more than 1,create
-     * the exact number and generate programmeCodes accordingly
-     */
-    private int numberOfClasses;
-
     /*
     The current yearGroup of the students offering the course
      */
@@ -34,7 +28,6 @@ public class ProgrammeGroupDoc {
 
     /**
      * programmeCode generation algorithm = programmeInitials+yearGroup+A,B,C,D,E in that order
-     *
      */
     private String programmeCode;
 
@@ -67,14 +60,6 @@ public class ProgrammeGroupDoc {
 
     public void setProgrammeInitials(String programmeInitials) {
         this.programmeInitials = programmeInitials;
-    }
-
-    public int getNumberOfClasses() {
-        return numberOfClasses;
-    }
-
-    public void setNumberOfClasses(int numberOfClasses) {
-        this.numberOfClasses = numberOfClasses;
     }
 
     public int getYearGroup() {

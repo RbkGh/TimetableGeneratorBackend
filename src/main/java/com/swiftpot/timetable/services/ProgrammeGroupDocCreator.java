@@ -19,66 +19,47 @@ public class ProgrammeGroupDocCreator {
     @Autowired
     ProgrammeGroupDocRepository programmeGroupDocRepository;
 
-    public List<ProgrammeGroupDoc> createProgramGroupDocWithConstraintsCateredForAndSave(ProgrammeGroupDoc programmeGroupDoc) throws Exception {
+    public List<ProgrammeGroupDoc> createProgramGroupDocWithConstraintsCateredForAndSave(List<ProgrammeGroupDoc> programmeGroupDocs) throws Exception {
 
         List<ProgrammeGroupDoc> finalProgrammeGroupDocs = new ArrayList<>(0);
-
-        int numberOfProgrammeGroupsToCreate = programmeGroupDoc.getNumberOfClasses();
-        System.out.println("number of classes =" + numberOfProgrammeGroupsToCreate);
-        String programmeInitials = programmeGroupDoc.getProgrammeInitials();
-        int yearGroup = programmeGroupDoc.getYearGroup();
-
-        //add entities first without setting programcode
-        for (int i = 0; i < numberOfProgrammeGroupsToCreate; i++) {
-            finalProgrammeGroupDocs.add(programmeGroupDoc);
-        }
+        int numberOfProgrammeGroupDocs = programmeGroupDocs.size();
 
 
-        List<String> generatedProgramCodes = new ArrayList<>();
-        for (int i = 0; i < finalProgrammeGroupDocs.size(); i++) {
 
+
+        for (int i = 0; i < numberOfProgrammeGroupDocs; i++) {
+
+            String programmeInitials = programmeGroupDocs.get(i).getProgrammeInitials();
+            int yearGroup = programmeGroupDocs.get(i).getYearGroup();
             System.out.println("Current number=" + i);
             switch (i) {
                 case 0:
-                    generatedProgramCodes.add(createProgrammeCode(programmeInitials, yearGroup, "A"));
-                    System.out.println("generatedProgramCode for position"+0+" ="+generatedProgramCodes.get(0));
+                    programmeGroupDocs.get(i).setProgrammeCode(createProgrammeCode(programmeInitials, yearGroup, "A"));
                     break;
                 case 1:
-                    generatedProgramCodes.add(createProgrammeCode(programmeInitials, yearGroup, "B"));
-                    System.out.println("generatedProgramCode for position" +1+" ="+generatedProgramCodes.get(1));
+                    programmeGroupDocs.get(i).setProgrammeCode(createProgrammeCode(programmeInitials, yearGroup, "B"));
                     break;
                 case 2:
-                    generatedProgramCodes.add(createProgrammeCode(programmeInitials, yearGroup, "C"));
-                    System.out.println("generatedProgramCode for position" +2+" ="+generatedProgramCodes.get(2));
+                    programmeGroupDocs.get(i).setProgrammeCode(createProgrammeCode(programmeInitials, yearGroup, "C"));
                     break;
                 case 3:
-                    generatedProgramCodes.add(createProgrammeCode(programmeInitials, yearGroup, "D"));
-                    System.out.println("generatedProgramCode for position" +3+" ="+generatedProgramCodes.get(3));
+                    programmeGroupDocs.get(i).setProgrammeCode(createProgrammeCode(programmeInitials, yearGroup, "D"));
                     break;
                 case 4:
-                    generatedProgramCodes.add(createProgrammeCode(programmeInitials, yearGroup, "E"));
-                    System.out.println("generatedProgramCode for position" +4+" ="+generatedProgramCodes.get(4));
+                    programmeGroupDocs.get(i).setProgrammeCode(createProgrammeCode(programmeInitials, yearGroup, "E"));
                     break;
                 case 5:
-                    generatedProgramCodes.add(createProgrammeCode(programmeInitials, yearGroup, "F"));
-                    System.out.println("generatedProgramCode for position" +5+" ="+generatedProgramCodes.get(5));
+                    programmeGroupDocs.get(i).setProgrammeCode(createProgrammeCode(programmeInitials, yearGroup, "F"));
                     break;
                 case 6:
-                    generatedProgramCodes.add(createProgrammeCode(programmeInitials, yearGroup, "G"));
-                    System.out.println("generatedProgramCode for position" +6+" ="+generatedProgramCodes.get(6));
+                    programmeGroupDocs.get(i).setProgrammeCode(createProgrammeCode(programmeInitials, yearGroup, "G"));
                     break;
                 default:
                     throw new Exception("maximum of 7classes are allowed");
             }
         }
 
-        for (int i=0; i< generatedProgramCodes.size();i++) {
-            finalProgrammeGroupDocs.get(i).setProgrammeCode(generatedProgramCodes.get(i));
-            System.out.println("\nEntities before saved in db =" + finalProgrammeGroupDocs.get(i).toString());
-        }
-
-
-        List<ProgrammeGroupDoc> r3 = programmeGroupDocRepository.save(finalProgrammeGroupDocs);
+        List<ProgrammeGroupDoc> r3 = programmeGroupDocRepository.save(programmeGroupDocs);
         for (ProgrammeGroupDoc x2 : r3) {
             System.out.println("\n\nEntities after saved in db =" + x2.toString());
         }
