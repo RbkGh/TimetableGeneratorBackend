@@ -3,7 +3,6 @@ package com.swiftpot.timetable.base.impl;
 import com.swiftpot.timetable.base.TimeTablePeriodScheduler;
 import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.repository.PeriodAndTimeAndSubjectAndTutorAssignedDocRepository;
-import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
 import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,9 +23,13 @@ public class TimeTablePeriodSchedulerFromFileImpl implements TimeTablePeriodSche
     @Autowired
     BusinessLogicConfigurationProperties businessLogicConfigurationProperties;
 
+    public TimeTablePeriodSchedulerFromFileImpl() {
+    }
+
     @Override
     public List<PeriodOrLecture> generateAllPeriodsOrLecture() {
-        int totalTimeTablePeriods = Integer.valueOf(businessLogicConfigurationProperties.TIMETABLE_PERIOD_TOTAL);
+
+        int totalTimeTablePeriods = Integer.parseInt(businessLogicConfigurationProperties.TIMETABLE_PERIO_TOTAL);
         List<PeriodOrLecture> periodOrLectures = new ArrayList<>();
         //start from 1 instead of 0,as timetable periods is counted from 1 in the real world
         for (int i = 1; i <= totalTimeTablePeriods; i++) {

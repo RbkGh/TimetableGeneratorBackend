@@ -1,6 +1,7 @@
 package com.swiftpot.timetable.services;
 
 import com.swiftpot.timetable.repository.ProgrammeGroupDocRepository;
+import com.swiftpot.timetable.repository.TimeTableSuperDocRepository;
 import com.swiftpot.timetable.repository.db.model.ProgrammeGroupDoc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,14 +19,13 @@ public class ProgrammeGroupDocCreatorService {
 
     @Autowired
     ProgrammeGroupDocRepository programmeGroupDocRepository;
+    @Autowired
+    TimeTableSuperDocRepository timeTableSuperDocRepository;
 
     public List<ProgrammeGroupDoc> createProgramGroupDocWithConstraintsCateredForAndSave(List<ProgrammeGroupDoc> programmeGroupDocs) throws Exception {
 
         List<ProgrammeGroupDoc> finalProgrammeGroupDocs = new ArrayList<>(0);
         int numberOfProgrammeGroupDocs = programmeGroupDocs.size();
-
-
-
 
         for (int i = 0; i < numberOfProgrammeGroupDocs; i++) {
 

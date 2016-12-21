@@ -15,19 +15,20 @@ import org.springframework.stereotype.Component;
 @Component
 public class TimeTablePeriodSchedulerFactory {
 
+    @Autowired
+    TimeTablePeriodSchedulerFromFileImpl timeTablePeriodSchedulerFromFile;
+
     String timeTablePeriodSchedulerType;
-
-
 
     /**
      *
      * @return  TimeTablePeriodScheduler
      */
     public TimeTablePeriodScheduler getTimeTablePeriodScheduler(){
-        if(timeTablePeriodSchedulerType.equals("FROM_FILE")) {
-            return new TimeTablePeriodSchedulerFromFileImpl();
+        if(this.timeTablePeriodSchedulerType =="FROM_FILE") {
+            return timeTablePeriodSchedulerFromFile;
         }
-        else return new TimeTablePeriodSchedulerFromFileImpl();
+        else return timeTablePeriodSchedulerFromFile;
     }
 
 

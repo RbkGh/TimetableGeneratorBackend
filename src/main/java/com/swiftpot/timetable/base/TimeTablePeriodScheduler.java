@@ -1,7 +1,6 @@
 package com.swiftpot.timetable.base;
 
 import com.swiftpot.timetable.model.PeriodOrLecture;
-import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
 
 import java.util.List;
 

@@ -1,6 +1,15 @@
 package com.swiftpot.timetable.services;
 
+import com.swiftpot.timetable.model.ProgrammeGroup;
+import com.swiftpot.timetable.model.YearGroup;
+import com.swiftpot.timetable.repository.ProgrammeGroupDocRepository;
+import com.swiftpot.timetable.repository.db.model.ProgrammeGroupDoc;
+import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Ace Programmer Rbk
@@ -9,4 +18,52 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class TimeTablePopulatorService {
+
+    @Autowired
+    ProgrammeGroupDocRepository programmeGroupDocRepository;
+
+    private TimeTableSuperDoc partOneSetYearGroups() {
+        List<ProgrammeGroupDoc> allProgrammeGroupDocsListInDb = getAllProgrammeGroupDocsListInDb();
+
+        TimeTableSuperDoc timeTableSuperDoc = new TimeTableSuperDoc();
+        //set yearGroupList
+        List<YearGroup> yearGroupsList = new ArrayList<>();
+
+        int numberOfProgrammeGroupDocs = allProgrammeGroupDocsListInDb.size();
+        //go through ProgrammeGroupDoc list and set new YearGroup for each instance and add to yearGroupsList
+        for (int currentNo = 0; currentNo < numberOfProgrammeGroupDocs; currentNo++) {
+            String currentYearName = allProgrammeGroupDocsListInDb.get(currentNo).getProgrammeFullName();
+            int currentYearGroup = allProgrammeGroupDocsListInDb.get(currentNo).getYearGroup();
+
+            YearGroup yearGroup = new YearGroup();
+            yearGroup.setYearName(currentYearName);
+            yearGroup.setYearNumber(currentYearGroup);
+
+            //now to set programmeGroupList for YearGroup,fetch all ProgrammeGroupDoc from db with current yeargroup Number
+            List<ProgrammeGroup> programmeGroupList = new ArrayList<>();
+            ProgrammeGroup programmeGroup = new ProgrammeGroup();
+            List<ProgrammeGroupDoc> programmeGroupDocForCurrentYearGroupList = programmeGroupDocRepository.findByYearGroup(currentYearGroup);
+            //set each ProgrammeGroup's parameters from ProgramGroupDoc and add to ProgrammeGroup list
+            for (ProgrammeGroupDoc x : programmeGroupDocForCurrentYearGroupList) {
+                programmeGroup.setProgrammeCode(x.getProgrammeCode());
+                //Now we need to set programmeDaysList ,Initialize it typically from Monday To Friday with the days and the periodsList
+                programmeGroup.setProgrammeDaysList(new ArrayList<>(0));
+
+
+                //finally in this loop,finish off by setting the programmeGroup to the programmeGroupList
+                programmeGroupList.add(programmeGroup);
+            }
+            //now we can set programmeGroupList for YearGroup,as we have finished iterating through
+        }
+
+        return null;
+    }
+
+    private List<ProgrammeGroupDoc> getAllProgrammeGroupDocsListInDb() {
+        return programmeGroupDocRepository.findAll();
+    }
+
+    private ProgrammeGroup getAllProgramDays() {
+        return null;
+    }
 }

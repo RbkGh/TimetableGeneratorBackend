@@ -81,7 +81,36 @@ public class BusinessLogicConfigurationProperties {
     public String TIMETABLE_PERIO_10;
     //timetable periods
 
-    //total periods for day
+    /**
+     * total periods for day
+     */
     @Value("${timetable.period.total}")
-    public String TIMETABLE_PERIOD_TOTAL;
+    public String TIMETABLE_PERIO_TOTAL;
+
+    @Value("${timetable.day.1}")
+    public String TIMETABLE_DAY_1;
+
+    @Value("${timetable.day.2}")
+    public String TIMETABLE_DAY_2;
+
+    @Value("${timetable.day.3}")
+    public String TIMETABLE_DAY_3;
+
+    @Value("${timetable.day.4}")
+    public String TIMETABLE_DAY_4;
+
+    @Value("${timetable.day.5}")
+    public String TIMETABLE_DAY_5;
+
+    @Value("${timetable.day.6}")
+    public String TIMETABLE_DAY_6;
+
+    @Value("${timetable.day.7}")
+    public String TIMETABLE_DAY_7;
+
+    /**
+     * total days timetable is applicable
+     */
+    @Value("${timetable.day.total}")
+    public String TIMETABLE_DAY_TOTAL;
 }
