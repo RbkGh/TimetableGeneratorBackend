@@ -1,9 +1,8 @@
 package com.swiftpot.timetable.factory;
 
 
-import com.swiftpot.timetable.base.TimeTablePeriodScheduler;
-import com.swiftpot.timetable.base.impl.TimeTablePeriodSchedulerFromFileImpl;
-import com.swiftpot.timetable.util.TimeTablePeriodSchedulerType;
+import com.swiftpot.timetable.base.TimeTableInitialPeriodsScheduler;
+import com.swiftpot.timetable.base.impl.TimeTableInitialPeriodsSchedulerFromFileImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,18 +12,18 @@ import org.springframework.stereotype.Component;
  *         18-Dec-16 @ 9:47 AM
  */
 @Component
-public class TimeTablePeriodSchedulerFactory {
+public class TimeTableInitialPeriodSchedulerFactory {
 
     @Autowired
-    TimeTablePeriodSchedulerFromFileImpl timeTablePeriodSchedulerFromFile;
+    TimeTableInitialPeriodsSchedulerFromFileImpl timeTablePeriodSchedulerFromFile;
 
     String timeTablePeriodSchedulerType;
 
     /**
      *
-     * @return  TimeTablePeriodScheduler
+     * @return  TimeTableInitialPeriodsScheduler
      */
-    public TimeTablePeriodScheduler getTimeTablePeriodScheduler(){
+    public TimeTableInitialPeriodsScheduler getTimeTablePeriodScheduler(){
         if(this.timeTablePeriodSchedulerType =="FROM_FILE") {
             return timeTablePeriodSchedulerFromFile;
         }
@@ -37,7 +36,7 @@ public class TimeTablePeriodSchedulerFactory {
         return timeTablePeriodSchedulerType;
     }
 
-    public TimeTablePeriodSchedulerFactory setTimeTablePeriodSchedulerType(String timeTablePeriodSchedulerType) {
+    public TimeTableInitialPeriodSchedulerFactory setTimeTablePeriodSchedulerType(String timeTablePeriodSchedulerType) {
         this.timeTablePeriodSchedulerType = timeTablePeriodSchedulerType;
         return this;
     }

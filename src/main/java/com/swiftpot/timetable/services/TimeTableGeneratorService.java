@@ -1,6 +1,6 @@
 package com.swiftpot.timetable.services;
 
-import com.swiftpot.timetable.factory.TimeTablePeriodSchedulerFactory;
+import com.swiftpot.timetable.factory.TimeTableInitialPeriodSchedulerFactory;
 import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.model.ProgrammeDays;
 import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
@@ -19,7 +19,7 @@ import java.util.List;
 public class TimeTableGeneratorService {
 
     @Autowired
-    TimeTablePeriodSchedulerFactory timeTablePeriodSchedulerFactory;
+    TimeTableInitialPeriodSchedulerFactory timeTableInitialPeriodSchedulerFactory;
     @Autowired
     BusinessLogicConfigurationProperties businessLogicConfigurationProperties;
 
@@ -101,6 +101,6 @@ public class TimeTableGeneratorService {
     }
 
     private List<PeriodOrLecture> generateAllPeriodsOrLectureFirstTime() {
-        return timeTablePeriodSchedulerFactory.setTimeTablePeriodSchedulerType("FROM_FILE").getTimeTablePeriodScheduler().generateAllPeriodsOrLecture();
+        return timeTableInitialPeriodSchedulerFactory.setTimeTablePeriodSchedulerType("FROM_FILE").getTimeTablePeriodScheduler().generateAllPeriodsOrLecture();
     }
 }

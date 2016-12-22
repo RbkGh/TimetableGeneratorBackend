@@ -9,6 +9,6 @@ import java.util.List;
  *         <Rodney Kwabena Boachie at [rodney@swiftpot.com,rbk.unlimited@gmail.com]> on
  *         17-Dec-16 @ 10:23 PM
  */
-public interface TimeTablePeriodScheduler {
+public interface TimeTableInitialPeriodsScheduler {
     List<PeriodOrLecture> generateAllPeriodsOrLecture();
 }

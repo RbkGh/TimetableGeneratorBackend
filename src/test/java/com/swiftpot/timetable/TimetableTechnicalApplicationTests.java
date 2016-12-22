@@ -3,7 +3,7 @@ package com.swiftpot.timetable;
 import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.services.ProgrammeGroupDocCreatorService;
 import com.swiftpot.timetable.services.SubjectsAssignerService;
-import com.swiftpot.timetable.base.impl.TimeTablePeriodSchedulerFromFileImpl;
+import com.swiftpot.timetable.base.impl.TimeTableInitialPeriodsSchedulerFromFileImpl;
 import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,7 +28,7 @@ public class TimetableTechnicalApplicationTests {
     @Autowired
     SubjectsAssignerService subjectsAssignerService;
     @Autowired
-    TimeTablePeriodSchedulerFromFileImpl timeTablePeriodSchedulerFromFile;
+    TimeTableInitialPeriodsSchedulerFromFileImpl timeTablePeriodSchedulerFromFile;
     @Autowired
     ProgrammeGroupDocCreatorService groupDocCreator;
 

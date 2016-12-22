@@ -1,5 +1,6 @@
 package com.swiftpot.timetable.services;
 
+import com.swiftpot.timetable.factory.TimeTableDefaultPeriodsAllocatorFactory;
 import com.swiftpot.timetable.model.ProgrammeGroup;
 import com.swiftpot.timetable.model.YearGroup;
 import com.swiftpot.timetable.repository.ProgrammeGroupDocRepository;
@@ -23,6 +24,8 @@ public class TimeTablePopulatorService {
     ProgrammeGroupDocRepository programmeGroupDocRepository;
     @Autowired
     ProgrammeDaysGenerator programmeDaysGenerator;
+    @Autowired
+    TimeTableDefaultPeriodsAllocatorFactory timeTableDefaultPeriodsAllocatorFactory;
 
     private TimeTableSuperDoc partOneSetYearGroups() throws Exception {
         List<ProgrammeGroupDoc> allProgrammeGroupDocsListInDb = getAllProgrammeGroupDocsListInDb();
@@ -62,6 +65,11 @@ public class TimeTablePopulatorService {
         timeTableSuperDoc.setYearGroupsList(yearGroupsList);
 
         return timeTableSuperDoc;
+    }
+
+    public TimeTableSuperDoc partTwoSetDefaultPeriodsWithSubjects(String timeTableDefaultPeriodsAllocatorType,TimeTableSuperDoc timeTableSuperDocWithInitialDefaultDataSet){
+        return timeTableDefaultPeriodsAllocatorFactory.getTimeTableDefaultPeriodsAllocator(timeTableDefaultPeriodsAllocatorType).
+                allocateDefaultPeriodsOnTimeTable(timeTableSuperDocWithInitialDefaultDataSet);
     }
 
     private List<ProgrammeGroupDoc> getAllProgrammeGroupDocsListInDb() {

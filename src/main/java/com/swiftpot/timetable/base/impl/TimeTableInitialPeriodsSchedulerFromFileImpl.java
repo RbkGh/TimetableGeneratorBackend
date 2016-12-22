@@ -1,6 +1,6 @@
 package com.swiftpot.timetable.base.impl;
 
-import com.swiftpot.timetable.base.TimeTablePeriodScheduler;
+import com.swiftpot.timetable.base.TimeTableInitialPeriodsScheduler;
 import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.repository.PeriodAndTimeAndSubjectAndTutorAssignedDocRepository;
 import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
@@ -16,14 +16,14 @@ import java.util.List;
  *         17-Dec-16 @ 10:18 PM
  */
 @Component
-public class TimeTablePeriodSchedulerFromFileImpl implements TimeTablePeriodScheduler {
+public class TimeTableInitialPeriodsSchedulerFromFileImpl implements TimeTableInitialPeriodsScheduler {
 
     @Autowired
     PeriodAndTimeAndSubjectAndTutorAssignedDocRepository ptstaDocRepository;
     @Autowired
     BusinessLogicConfigurationProperties businessLogicConfigurationProperties;
 
-    public TimeTablePeriodSchedulerFromFileImpl() {
+    public TimeTableInitialPeriodsSchedulerFromFileImpl() {
     }
 
     @Override
