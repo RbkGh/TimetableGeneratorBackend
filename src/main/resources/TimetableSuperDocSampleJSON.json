@@ -9,6 +9,7 @@
           "programmeDaysList": [
             {
               "dayName": "Monday",
+              "isAllocated" : true,
               "periodList": [
                 {
                   "periodName": "PERIOD 1",
@@ -38,6 +39,7 @@
             },
             {
               "dayName": "Tuesday",
+              "isAllocated" : true,
               "periodList": [
                 {
                   "periodName": "PERIOD 1",
@@ -78,6 +80,7 @@
           "programmeDaysList": [
             {
               "dayName": "Monday",
+              "isAllocated" : true,
               "periodList": [
                 {
                   "periodName": "PERIOD 1",
@@ -107,6 +110,7 @@
             },
             {
               "dayName": "Tuesday",
+              "isAllocated" : true,
               "periodList": [
                 {
                   "periodName": "PERIOD 1",
@@ -147,6 +151,7 @@
           "programmeDaysList": [
             {
               "dayName": "Monday",
+              "isAllocated" : true,
               "periodList": [
                 {
                   "periodName": "PERIOD 1",
@@ -176,6 +181,7 @@
             },
             {
               "dayName": "Tuesday",
+              "isAllocated" : true,
               "periodList": [
                 {
                   "periodName": "PERIOD 1",

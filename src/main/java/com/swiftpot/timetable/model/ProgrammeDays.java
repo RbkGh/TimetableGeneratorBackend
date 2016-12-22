@@ -9,6 +9,7 @@ import java.util.List;
  */
 public class ProgrammeDays {
     private String dayName;
+    private String isAllocated;
     private List<PeriodOrLecture> periodList;
 
     public ProgrammeDays() {
@@ -25,6 +26,14 @@ public class ProgrammeDays {
 
     public void setDayName(String dayName) {
         this.dayName = dayName;
+    }
+
+    public String getIsAllocated() {
+        return isAllocated;
+    }
+
+    public void setIsAllocated(String isAllocated) {
+        this.isAllocated = isAllocated;
     }
 
     public List<PeriodOrLecture> getPeriodList() {
