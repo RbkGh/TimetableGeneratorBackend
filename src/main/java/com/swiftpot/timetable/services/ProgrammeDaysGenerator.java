@@ -18,7 +18,7 @@ public class ProgrammeDaysGenerator {
     @Autowired
     TimeTableGeneratorService timeTableGeneratorService;
 
-    private List<ProgrammeDays> generateAllProgrammeDays(String programmeCode) throws Exception {
+    public List<ProgrammeDays> generateAllProgrammeDays(String programmeCode) throws Exception {
 
         return timeTableGeneratorService.generateAllProgrammeDaysFirstTime();
     }

@@ -21,8 +21,10 @@ public class TimeTablePopulatorService {
 
     @Autowired
     ProgrammeGroupDocRepository programmeGroupDocRepository;
+    @Autowired
+    ProgrammeDaysGenerator programmeDaysGenerator;
 
-    private TimeTableSuperDoc partOneSetYearGroups() {
+    private TimeTableSuperDoc partOneSetYearGroups() throws Exception {
         List<ProgrammeGroupDoc> allProgrammeGroupDocsListInDb = getAllProgrammeGroupDocsListInDb();
 
         TimeTableSuperDoc timeTableSuperDoc = new TimeTableSuperDoc();
@@ -47,23 +49,23 @@ public class TimeTablePopulatorService {
             for (ProgrammeGroupDoc x : programmeGroupDocForCurrentYearGroupList) {
                 programmeGroup.setProgrammeCode(x.getProgrammeCode());
                 //Now we need to set programmeDaysList ,Initialize it typically from Monday To Friday with the days and the periodsList
-                programmeGroup.setProgrammeDaysList(new ArrayList<>(0));
-
-
-                //finally in this loop,finish off by setting the programmeGroup to the programmeGroupList
+                programmeGroup.setProgrammeDaysList(programmeDaysGenerator.generateAllProgrammeDays(x.getProgrammeCode()));
+                //finally in this loop,finish off by adding the programmeGroup to the programmeGroupList
                 programmeGroupList.add(programmeGroup);
             }
             //now we can set programmeGroupList for YearGroup,as we have finished iterating through
+            yearGroup.setProgrammeGroupList(programmeGroupList);
+            //now we can add current YearGroup Object to the yearGroupList
+            yearGroupsList.add(yearGroup);
         }
+        //now we can set yearGroupList to the timeTableSuperDoc and return it finally
+        timeTableSuperDoc.setYearGroupsList(yearGroupsList);
 
-        return null;
+        return timeTableSuperDoc;
     }
 
     private List<ProgrammeGroupDoc> getAllProgrammeGroupDocsListInDb() {
         return programmeGroupDocRepository.findAll();
     }
 
-    private ProgrammeGroup getAllProgramDays() {
-        return null;
-    }
 }
