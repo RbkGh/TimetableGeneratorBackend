@@ -1,5 +1,6 @@
 package com.swiftpot.timetable;
 
+import com.swiftpot.timetable.base.impl.TimeTableDefaultPeriodsAllocatorDefaultImpl;
 import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.services.ProgrammeGroupDocCreatorService;
 import com.swiftpot.timetable.services.SubjectsAssignerService;
@@ -31,6 +32,8 @@ public class TimetableTechnicalApplicationTests {
     TimeTableInitialPeriodsSchedulerFromFileImpl timeTablePeriodSchedulerFromFile;
     @Autowired
     ProgrammeGroupDocCreatorService groupDocCreator;
+    @Autowired
+    TimeTableDefaultPeriodsAllocatorDefaultImpl timeTableDefaultPeriodsAllocatorDefault;
 
     @Test
     public void contextLoads() {
@@ -166,6 +169,31 @@ public class TimetableTechnicalApplicationTests {
         System.out.println(c);
         assertThat("D", equalTo(String.valueOf(c).toUpperCase()));
 
+    }
+
+    @Test
+    public void testOriginalFirstPositionOfFalseIsFound(){
+        PeriodOrLecture p1 = new PeriodOrLecture();
+        p1.setIsAllocated(true);
+        PeriodOrLecture p2 = new PeriodOrLecture();
+        p2.setIsAllocated(false);
+        PeriodOrLecture p3 = new PeriodOrLecture();
+        p3.setIsAllocated(true);
+        PeriodOrLecture p4 = new PeriodOrLecture();
+        p4.setIsAllocated(false);
+        PeriodOrLecture p5 = new PeriodOrLecture();
+        p5.setIsAllocated(true);
+        List<PeriodOrLecture> periodOrLectures = new ArrayList<>(Arrays.asList(p1,p2,p3,p4,p5));
+
+        int result = timeTableDefaultPeriodsAllocatorDefault.getIndexToStartSettingPeriodsFrom(periodOrLectures);
+        System.out.println("Posistion of first false ="+result);
+        assertThat(1, equalTo(result));
+        p2.setIsAllocated(true);
+
+        periodOrLectures = new ArrayList<>(Arrays.asList(p1,p2,p3,p4,p5));
+        result = timeTableDefaultPeriodsAllocatorDefault.getIndexToStartSettingPeriodsFrom(periodOrLectures);
+        System.out.println("New Position of first false which is changed ="+result);
+        assertThat(3, equalTo(result));
     }
 
 

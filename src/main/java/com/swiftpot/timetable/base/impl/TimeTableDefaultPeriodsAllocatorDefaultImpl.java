@@ -108,9 +108,8 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
         //now we can actually compare if the totalPeriodsAvailableForDay >= totalPeriodForPracticalCourse
         if (totalPeriodsAvailableForDay >= totalPeriodForPracticalCourse) {
             //now we can set the practical subjectCode and tutorCode to the periods and update dayIsAllocated if the existing day is exhausted
-            //currentProgrammeGroup.getProgrammeDaysList().get(2).getPeriodList().get(2).setSubjectCode(subjectCode);
             int periodToStartSettingSubjectFrom = getIndexToStartSettingPeriodsFrom(periodOrLecturesInProgDay);
-            List<Integer> periodIndexesToSetSubject =
+            //List<Integer> periodIndexesToSetSubject =
         }
 
         return programmeDay;
@@ -126,12 +125,19 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
                 //currentPeriodOrLecture.setSubjectCode();
             }
         }
+
+        return null;
     }
 
+    /**
+     * get the first index of the location where getIsAllocated is equal to false
+     * @param periodOrLecturesList {@link List<PeriodOrLecture>}
+     * @return int
+     */
     public int getIndexToStartSettingPeriodsFrom(List<PeriodOrLecture> periodOrLecturesList) {
         int totalPeriodsToIterateThrough = periodOrLecturesList.size();
         List<Integer> listOfIndexesWhereFalseWasSeen = new ArrayList<>();
-        for (int i = 0; i <= totalPeriodsToIterateThrough; i++) {
+        for (int i = 0; i < totalPeriodsToIterateThrough; i++) {
             if (periodOrLecturesList.get(i).getIsAllocated() == false) {
                 listOfIndexesWhereFalseWasSeen.add(i);
             }
