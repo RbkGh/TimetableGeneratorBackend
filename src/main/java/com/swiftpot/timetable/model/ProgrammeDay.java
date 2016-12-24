@@ -7,15 +7,15 @@ import java.util.List;
  *         <Rodney Kwabena Boachie at [rodney@swiftpot.com,rbk.unlimited@gmail.com]> on
  *         21-Dec-16 @ 2:22 PM
  */
-public class ProgrammeDays {
+public class ProgrammeDay {
     private String dayName;
-    private String isAllocated;
+    private boolean isAllocated;
     private List<PeriodOrLecture> periodList;
 
-    public ProgrammeDays() {
+    public ProgrammeDay() {
     }
 
-    public ProgrammeDays(String dayName, List<PeriodOrLecture> periodList) {
+    public ProgrammeDay(String dayName, List<PeriodOrLecture> periodList) {
         this.dayName = dayName;
         this.periodList = periodList;
     }
@@ -28,11 +28,11 @@ public class ProgrammeDays {
         this.dayName = dayName;
     }
 
-    public String getIsAllocated() {
+    public boolean getIsAllocated() {
         return isAllocated;
     }
 
-    public void setIsAllocated(String isAllocated) {
+    public void setIsAllocated(boolean isAllocated) {
         this.isAllocated = isAllocated;
     }
 

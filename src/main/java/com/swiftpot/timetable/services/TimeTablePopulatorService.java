@@ -51,6 +51,8 @@ public class TimeTablePopulatorService {
             //set each ProgrammeGroup's parameters from ProgramGroupDoc and add to ProgrammeGroup list
             for (ProgrammeGroupDoc x : programmeGroupDocForCurrentYearGroupList) {
                 programmeGroup.setProgrammeCode(x.getProgrammeCode());
+                //set wether the programmeCode Requires a technical Workshop or not
+                programmeGroup.setIsProgrammeRequiringPracticalsClassroom(x.getIsTechnicalWorkshopOrLabRequired());
                 //Now we need to set programmeDaysList ,Initialize it typically from Monday To Friday with the days and the periodsList
                 programmeGroup.setProgrammeDaysList(programmeDaysGenerator.generateAllProgrammeDays(x.getProgrammeCode()));
                 //finally in this loop,finish off by adding the programmeGroup to the programmeGroupList

@@ -1,6 +1,6 @@
 package com.swiftpot.timetable.services;
 
-import com.swiftpot.timetable.model.ProgrammeDays;
+import com.swiftpot.timetable.model.ProgrammeDay;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +17,7 @@ public class ProgrammeDaysGenerator {
     @Autowired
     TimeTableGeneratorService timeTableGeneratorService;
 
-    public List<ProgrammeDays> generateAllProgrammeDays(String programmeCode) throws Exception {
+    public List<ProgrammeDay> generateAllProgrammeDays(String programmeCode) throws Exception {
 
         return timeTableGeneratorService.generateAllProgrammeDaysFirstTime();
     }

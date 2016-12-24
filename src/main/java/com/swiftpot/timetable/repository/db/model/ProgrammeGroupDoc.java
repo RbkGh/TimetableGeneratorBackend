@@ -44,7 +44,7 @@ public class ProgrammeGroupDoc {
      */
     private List<String> yearGroupList;
 
-    private List<String> electiveSubjectsCodeList;
+    List<String> programmeSubjectsCodeList;
 
     private boolean technicalWorkshopOrLabRequired;
 
@@ -99,15 +99,15 @@ public class ProgrammeGroupDoc {
         this.yearGroupList = yearGroupList;
     }
 
-    public List<String> getElectiveSubjectsCodeList() {
-        return electiveSubjectsCodeList;
+    public List<String> getProgrammeSubjectsCodeList() {
+        return programmeSubjectsCodeList;
     }
 
-    public void setElectiveSubjectsCodeList(List<String> electiveSubjectsCodeList) {
-        this.electiveSubjectsCodeList = electiveSubjectsCodeList;
+    public void setProgrammeSubjectsCodeList(List<String> programmeSubjectsCodeList) {
+        this.programmeSubjectsCodeList = programmeSubjectsCodeList;
     }
 
-    public boolean isTechnicalWorkshopOrLabRequired() {
+    public boolean getIsTechnicalWorkshopOrLabRequired() {
         return technicalWorkshopOrLabRequired;
     }
 

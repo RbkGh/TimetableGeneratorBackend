@@ -2,7 +2,7 @@ package com.swiftpot.timetable.services;
 
 import com.swiftpot.timetable.factory.TimeTableInitialPeriodSchedulerFactory;
 import com.swiftpot.timetable.model.PeriodOrLecture;
-import com.swiftpot.timetable.model.ProgrammeDays;
+import com.swiftpot.timetable.model.ProgrammeDay;
 import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,8 +24,8 @@ public class TimeTableGeneratorService {
     BusinessLogicConfigurationProperties businessLogicConfigurationProperties;
 
 
-    public List<ProgrammeDays> generateAllProgrammeDaysFirstTime() throws Exception{
-        List<ProgrammeDays> totalProgDays;
+    public List<ProgrammeDay> generateAllProgrammeDaysFirstTime() throws Exception{
+        List<ProgrammeDay> totalProgDays;
         System.out.println("Timetable total days =====" + businessLogicConfigurationProperties.TIMETABLE_DAY_TOTAL);
         int totalDays = Integer.parseInt(businessLogicConfigurationProperties.TIMETABLE_DAY_TOTAL);
         switch (totalDays) {
@@ -56,42 +56,42 @@ public class TimeTableGeneratorService {
         return totalProgDays;
     }
 
-    private List<ProgrammeDays> generateAllProgrammeDaysAccordingToTotalDays(int totalNumberOfDays) throws Exception {
-        List<ProgrammeDays> totalProgrammeDays = new ArrayList<>();
+    private List<ProgrammeDay> generateAllProgrammeDaysAccordingToTotalDays(int totalNumberOfDays) throws Exception {
+        List<ProgrammeDay> totalProgrammeDays = new ArrayList<>();
         List<PeriodOrLecture> allPeriodsOrLecture = generateAllPeriodsOrLectureFirstTime();
 
         //we start from 1 because days are in range of 1 to 7,0 excluded
         for (int i = 1; i <= totalNumberOfDays; i++) {
-            ProgrammeDays programmeDays = new ProgrammeDays();
-            programmeDays.setPeriodList(allPeriodsOrLecture);
+            ProgrammeDay programmeDay = new ProgrammeDay();
+            programmeDay.setPeriodList(allPeriodsOrLecture);
             switch (i) {
                 case 1:
-                    programmeDays.setDayName(businessLogicConfigurationProperties.TIMETABLE_DAY_1);
-                    totalProgrammeDays.add(programmeDays);
+                    programmeDay.setDayName(businessLogicConfigurationProperties.TIMETABLE_DAY_1);
+                    totalProgrammeDays.add(programmeDay);
                     break;
                 case 2:
-                    programmeDays.setDayName(businessLogicConfigurationProperties.TIMETABLE_DAY_2);
-                    totalProgrammeDays.add(programmeDays);
+                    programmeDay.setDayName(businessLogicConfigurationProperties.TIMETABLE_DAY_2);
+                    totalProgrammeDays.add(programmeDay);
                     break;
                 case 3:
-                    programmeDays.setDayName(businessLogicConfigurationProperties.TIMETABLE_DAY_3);
-                    totalProgrammeDays.add(programmeDays);
+                    programmeDay.setDayName(businessLogicConfigurationProperties.TIMETABLE_DAY_3);
+                    totalProgrammeDays.add(programmeDay);
                     break;
                 case 4:
-                    programmeDays.setDayName(businessLogicConfigurationProperties.TIMETABLE_DAY_4);
-                    totalProgrammeDays.add(programmeDays);
+                    programmeDay.setDayName(businessLogicConfigurationProperties.TIMETABLE_DAY_4);
+                    totalProgrammeDays.add(programmeDay);
                     break;
                 case 5:
-                    programmeDays.setDayName(businessLogicConfigurationProperties.TIMETABLE_DAY_5);
-                    totalProgrammeDays.add(programmeDays);
+                    programmeDay.setDayName(businessLogicConfigurationProperties.TIMETABLE_DAY_5);
+                    totalProgrammeDays.add(programmeDay);
                     break;
                 case 6:
-                    programmeDays.setDayName(businessLogicConfigurationProperties.TIMETABLE_DAY_6);
-                    totalProgrammeDays.add(programmeDays);
+                    programmeDay.setDayName(businessLogicConfigurationProperties.TIMETABLE_DAY_6);
+                    totalProgrammeDays.add(programmeDay);
                     break;
                 case 7:
-                    programmeDays.setDayName(businessLogicConfigurationProperties.TIMETABLE_DAY_7);
-                    totalProgrammeDays.add(programmeDays);
+                    programmeDay.setDayName(businessLogicConfigurationProperties.TIMETABLE_DAY_7);
+                    totalProgrammeDays.add(programmeDay);
                     break;
                 default:
                     throw new Exception("Only 7days available,any value not within 1-7 will fail");

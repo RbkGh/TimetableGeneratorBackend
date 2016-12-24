@@ -16,12 +16,19 @@ public class PeriodOrLecture {
     public PeriodOrLecture() {
     }
 
-    public PeriodOrLecture(String periodStartandEndTime,int periodNumber,String periodName) {
+    /**
+     * This will be used in firstTime initialization when we are generating the initial data only
+     *
+     * @param periodStartandEndTime
+     * @param periodNumber
+     * @param periodName
+     */
+    public PeriodOrLecture(String periodStartandEndTime, int periodNumber, String periodName) {
         this.periodStartandEndTime = periodStartandEndTime;
         this.periodNumber = periodNumber;
         this.periodName = periodName;
     }
-
+    
     public String getPeriodName() {
         return periodName;
     }
@@ -46,7 +53,7 @@ public class PeriodOrLecture {
         this.periodStartandEndTime = periodStartandEndTime;
     }
 
-    public boolean isAllocated() {
+    public boolean getIsAllocated() {
         return isAllocated;
     }
 

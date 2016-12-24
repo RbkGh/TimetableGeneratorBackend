@@ -9,14 +9,17 @@ import java.util.List;
  */
 public class ProgrammeGroup {
     private String programmeCode;
-    private List<ProgrammeDays> programmeDaysList;
+    List<String> programmeSubjectsCodeList;
+    private boolean isProgrammeRequiringPracticalsClassroom;
+    private List<ProgrammeDay> programmeDaysList;
 
     public ProgrammeGroup() {
     }
 
-    public ProgrammeGroup(String programmeCode, List<ProgrammeDays> programmeDaysList) {
+    public ProgrammeGroup(String programmeCode, List<ProgrammeDay> programmeDaysList,boolean isProgrammeRequiringPracticalsClassroom) {
         this.programmeCode = programmeCode;
         this.programmeDaysList = programmeDaysList;
+        this.isProgrammeRequiringPracticalsClassroom = isProgrammeRequiringPracticalsClassroom;
     }
 
     public String getProgrammeCode() {
@@ -27,11 +30,27 @@ public class ProgrammeGroup {
         this.programmeCode = programmeCode;
     }
 
-    public List<ProgrammeDays> getProgrammeDaysList() {
+    public boolean getIsProgrammeRequiringPracticalsClassroom() {
+        return isProgrammeRequiringPracticalsClassroom;
+    }
+
+    public void setIsProgrammeRequiringPracticalsClassroom(boolean isProgrammeRequiringPracticalsClassroom) {
+        this.isProgrammeRequiringPracticalsClassroom = isProgrammeRequiringPracticalsClassroom;
+    }
+
+    public List<String> getProgrammeSubjectsCodeList() {
+        return programmeSubjectsCodeList;
+    }
+
+    public void setProgrammeSubjectsCodeList(List<String> programmeSubjectsCodeList) {
+        this.programmeSubjectsCodeList = programmeSubjectsCodeList;
+    }
+
+    public List<ProgrammeDay> getProgrammeDaysList() {
         return programmeDaysList;
     }
 
-    public void setProgrammeDaysList(List<ProgrammeDays> programmeDaysList) {
+    public void setProgrammeDaysList(List<ProgrammeDay> programmeDaysList) {
         this.programmeDaysList = programmeDaysList;
     }
 }
