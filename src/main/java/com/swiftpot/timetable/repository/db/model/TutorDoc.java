@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
  *         <Rodney Kwabena Boachie at [rodney@swiftpot.com,rbk.unlimited@gmail.com]> on
  *         16-Dec-16 @ 2:11 PM
  */
-@Document
+@Document(collection = "TutorDoc")
 public class TutorDoc extends Person {
 
     @Id
@@ -17,7 +17,7 @@ public class TutorDoc extends Person {
 
     private String tutorCode;
 
-    private int currentPeriodLoad;
+    private int currentPeriodLoadLeft;
 
     private int minPeriodLoad;
 
@@ -41,6 +41,8 @@ public class TutorDoc extends Person {
     }
 
 
+
+
     public String getTutorCode() {
         return tutorCode;
     }
@@ -50,17 +52,18 @@ public class TutorDoc extends Person {
         return this;
     }
 
-    public int getCurrentPeriodLoad() {
-        return currentPeriodLoad;
-    }
 
-    public TutorDoc setCurrentPeriodLoad(int currentPeriodLoad) {
-        this.currentPeriodLoad = currentPeriodLoad;
-        return this;
-    }
 
     public int getMinPeriodLoad() {
         return minPeriodLoad;
+    }
+
+    public int getCurrentPeriodLoadLeft() {
+        return currentPeriodLoadLeft;
+    }
+
+    public void setCurrentPeriodLoadLeft(int currentPeriodLoadLeft) {
+        this.currentPeriodLoadLeft = currentPeriodLoadLeft;
     }
 
     public TutorDoc setMinPeriodLoad(int minPeriodLoad) {

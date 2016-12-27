@@ -15,6 +15,10 @@ public class ProgrammeDay {
     public ProgrammeDay() {
     }
 
+    public ProgrammeDay(String dayName) {
+        this.dayName = dayName;
+    }
+
     public ProgrammeDay(String dayName, List<PeriodOrLecture> periodList) {
         this.dayName = dayName;
         this.periodList = periodList;
