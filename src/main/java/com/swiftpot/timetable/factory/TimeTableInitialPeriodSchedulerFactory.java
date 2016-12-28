@@ -20,20 +20,12 @@ public class TimeTableInitialPeriodSchedulerFactory {
     String timeTablePeriodSchedulerType;
 
     /**
-     *
-     * @return  TimeTableInitialPeriodsScheduler
+     * @return TimeTableInitialPeriodsScheduler
      */
-    public TimeTableInitialPeriodsScheduler getTimeTablePeriodScheduler(){
-        if(this.timeTablePeriodSchedulerType =="FROM_FILE") {
+    public TimeTableInitialPeriodsScheduler getTimeTablePeriodScheduler() {
+        if (this.timeTablePeriodSchedulerType == "FROM_FILE") {
             return timeTablePeriodSchedulerFromFile;
-        }
-        else return timeTablePeriodSchedulerFromFile;
-    }
-
-
-
-    public String getTimeTablePeriodSchedulerType() {
-        return timeTablePeriodSchedulerType;
+        } else return timeTablePeriodSchedulerFromFile;
     }
 
     public TimeTableInitialPeriodSchedulerFactory setTimeTablePeriodSchedulerType(String timeTablePeriodSchedulerType) {

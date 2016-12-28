@@ -19,4 +19,31 @@ public class SubjectAllocationDoc {
     private int totalSubjectAllocation;
 
     private int yearGroup;
+
+    public SubjectAllocationDoc() {
+    }
+
+    public String getSubjectCode() {
+        return subjectCode;
+    }
+
+    public void setSubjectCode(String subjectCode) {
+        this.subjectCode = subjectCode;
+    }
+
+    public int getTotalSubjectAllocation() {
+        return totalSubjectAllocation;
+    }
+
+    public void setTotalSubjectAllocation(int totalSubjectAllocation) {
+        this.totalSubjectAllocation = totalSubjectAllocation;
+    }
+
+    public int getYearGroup() {
+        return yearGroup;
+    }
+
+    public void setYearGroup(int yearGroup) {
+        this.yearGroup = yearGroup;
+    }
 }

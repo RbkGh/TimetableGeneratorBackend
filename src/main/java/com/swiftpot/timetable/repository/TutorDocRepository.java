@@ -12,4 +12,6 @@ import java.util.List;
  */
 public interface TutorDocRepository extends MongoRepository<TutorDoc,String> {
     List<TutorDoc> findAll();
+
+    TutorDoc findByTutorCode(String tutorCode);
 }

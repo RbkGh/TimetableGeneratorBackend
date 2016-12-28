@@ -9,4 +9,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
  *         23-Dec-16 @ 2:19 PM
  */
 public interface SubjectAllocationDocRepository extends MongoRepository<SubjectAllocationDoc, String> {
+    SubjectAllocationDoc findBySubjectCodeAndYearGroup(String subjectCode,int yearGroup);
 }

@@ -10,7 +10,7 @@ import java.util.List;
  *         <Rodney Kwabena Boachie at [rodney@swiftpot.com,rbk.unlimited@gmail.com]> on
  *         16-Dec-16 @ 3:28 PM
  */
-@Document
+@Document(collection = "SubjectDoc")
 public class SubjectDoc {
 
     @Id
