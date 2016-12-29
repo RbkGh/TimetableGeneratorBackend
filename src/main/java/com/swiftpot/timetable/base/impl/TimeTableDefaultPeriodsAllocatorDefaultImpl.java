@@ -1,5 +1,6 @@
 package com.swiftpot.timetable.base.impl;
 
+import com.swiftpot.timetable.base.IProgrammeDayHelper;
 import com.swiftpot.timetable.base.TimeTableDefaultPeriodsAllocator;
 import com.swiftpot.timetable.factory.TutorResponsibleForSubjectRetrieverFactory;
 import com.swiftpot.timetable.model.PeriodOrLecture;
@@ -15,6 +16,7 @@ import com.swiftpot.timetable.repository.db.model.SubjectPeriodLoadLeftForProgra
 import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
 import com.swiftpot.timetable.repository.db.model.TutorDoc;
 import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
+import com.swiftpot.timetable.util.ProgrammeDayHelperUtilDefaultImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,6 +43,10 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
     SubjectPeriodLoadLeftForProgrammeGroupDocRepository subjectPeriodLoadLeftForProgrammeGroupDocRepository;
     @Autowired
     SubjectAllocationDocRepository subjectAllocationDocRepository;
+    @Autowired
+    IProgrammeDayHelper iProgrammeDayHelper;
+    @Autowired
+    ProgrammeDayHelperUtilDefaultImpl programmeDayHelperUtilDefault;
 
     @Override
     public TimeTableSuperDoc allocateDefaultPeriodsOnTimeTable(TimeTableSuperDoc timeTableSuperDocWithInitialDefaultDataSet) {
@@ -80,7 +86,8 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
             //now for each currentProgrammeDay,we check if it's allocated already,if its allocated,we do not touch it ,else
             //we setPracticalsPeriodsByCheckingIfRemainingPeriodsForDayCanSuffice by passing that to another method to handle that ,then it returns a
             //new programmeDay with all periods set with the subjects,then we set it to the current list at same index
-            if (currentProgrammeDay.getIsAllocated() == false) {
+            iProgrammeDayHelper = programmeDayHelperUtilDefault; //instantiate interface with implementation
+            if (iProgrammeDayHelper.isProgrammeDayAlloted(currentProgrammeDay) == false) {
                 ProgrammeDay newCurrentProgrammeDay = setPracticalsPeriodsByCheckingIfRemainingPeriodsForDayCanSuffice(currentProgrammeDay, currentProgrammeGroup,programmeYearNo);
                 //we set the newlycreatedprogrammeDay with all periods subject set to the programmeDaysList
                 programmeDaysList.set(currentProgrammeDayNumber, newCurrentProgrammeDay);

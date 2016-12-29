@@ -28,7 +28,11 @@ public class PeriodOrLecture {
         this.periodNumber = periodNumber;
         this.periodName = periodName;
     }
-    
+
+    public PeriodOrLecture(boolean isAllocated) {
+        this.isAllocated = isAllocated;
+    }
+
     public String getPeriodName() {
         return periodName;
     }
