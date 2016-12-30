@@ -6,6 +6,7 @@ import com.swiftpot.timetable.model.YearGroup;
 import com.swiftpot.timetable.repository.ProgrammeGroupDocRepository;
 import com.swiftpot.timetable.repository.db.model.ProgrammeGroupDoc;
 import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
+import com.swiftpot.timetable.util.YearGroupNumberAndNames;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,9 +38,8 @@ public class TimeTablePopulatorService {
         int numberOfProgrammeGroupDocs = allProgrammeGroupDocsListInDb.size();
         //go through ProgrammeGroupDoc list and set new YearGroup for each instance and add to yearGroupsList
         for (int currentNo = 0; currentNo < numberOfProgrammeGroupDocs; currentNo++) {
-            //todo set currentYearName properly,as getProgrammeFullName is being used currently
-            String currentYearName = allProgrammeGroupDocsListInDb.get(currentNo).getProgrammeFullName();
             int currentYearGroup = allProgrammeGroupDocsListInDb.get(currentNo).getYearGroup();
+            String currentYearName = YearGroupNumberAndNames.getYearGroupName(currentYearGroup);
 
             YearGroup yearGroup = new YearGroup();
             yearGroup.setYearName(currentYearName);

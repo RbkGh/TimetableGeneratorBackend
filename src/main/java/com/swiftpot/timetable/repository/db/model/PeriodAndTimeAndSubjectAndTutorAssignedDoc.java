@@ -2,7 +2,7 @@ package com.swiftpot.timetable.repository.db.model;
 
 
 import com.swiftpot.timetable.model.PeriodOrLecture;
-import com.swiftpot.timetable.util.YearGroupNamesAndNumber;
+import com.swiftpot.timetable.util.YearGroupNumberAndNames;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -44,15 +44,15 @@ public class PeriodAndTimeAndSubjectAndTutorAssignedDoc {
      */
     public class YearGroup {
 
-        private YearGroupNamesAndNumber yearName;
+        private YearGroupNumberAndNames yearName;
         private int yearNumber;
         private List<Programme> programme = null;
 
-        public YearGroupNamesAndNumber getYearName() {
+        public YearGroupNumberAndNames getYearName() {
             return yearName;
         }
 
-        public void setYearName(YearGroupNamesAndNumber yearName) {
+        public void setYearName(YearGroupNumberAndNames yearName) {
             this.yearName = yearName;
         }
 
