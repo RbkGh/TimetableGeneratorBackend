@@ -21,7 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ace Programmer Rbk
@@ -47,6 +49,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
     IProgrammeDayHelper iProgrammeDayHelper;
     @Autowired
     ProgrammeDayHelperUtilDefaultImpl programmeDayHelperUtilDefault;
+
 
     @Override
     public TimeTableSuperDoc allocateDefaultPeriodsOnTimeTable(TimeTableSuperDoc timeTableSuperDocWithInitialDefaultDataSet) {
@@ -76,6 +79,60 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
         return timeTableSuperDocWithInitialDefaultDataSet;
     }
 
+    /**
+     * TODO find a way to inject subjectCodeForWorship,
+     * TODO DECIDE WETHER TO POPULATE WORKSHOP WITH SUBJECTS FIRST OR ALLOCATE WORSHIP PERIODS FIRST
+     *
+     * @param timeTableSuperDoc
+     * @param subjectCodeForWorship
+     * @return
+     */
+    private TimeTableSuperDoc allocateWorshipPeriodForAllProgrammeGroups(TimeTableSuperDoc timeTableSuperDoc, String subjectCodeForWorship) {
+        List<YearGroup> yearGroupsList = timeTableSuperDoc.getYearGroupsList();
+        int totalNumberOfYearGroupsList = yearGroupsList.size();
+        for (int currentYearGroupNo = 0; currentYearGroupNo < totalNumberOfYearGroupsList; currentYearGroupNo++) {
+            List<ProgrammeGroup> programmeGroupsListInYearGroup = yearGroupsList.get(currentYearGroupNo).getProgrammeGroupList();
+            int totalNumberOfProgrammeGroupsListInYearGroup = programmeGroupsListInYearGroup.size();
+            for (int currentProgrammeGroupNo = 0; currentProgrammeGroupNo < totalNumberOfProgrammeGroupsListInYearGroup; currentProgrammeGroupNo++) {
+                ProgrammeGroup currentProgrammeGroup = programmeGroupsListInYearGroup.get(currentProgrammeGroupNo);
+                List<ProgrammeDay> programmeDaysList = currentProgrammeGroup.getProgrammeDaysList();
+                int totalNumberOfProgrammeDays = programmeDaysList.size();
+                int worshipDayNumber = getWorshipPeriodDayNumberAndPeriodNumber().get("worshipDayNumber");
+                int worshipPeriodNumber = getWorshipPeriodDayNumberAndPeriodNumber().get("worshipPeriodNumber");
+                for (int currentProgrammeDayNumber = 0; currentProgrammeDayNumber < totalNumberOfProgrammeDays; currentProgrammeDayNumber++) {
+                    if (currentProgrammeDayNumber == worshipDayNumber) {
+                        List<PeriodOrLecture> periodOrLecturesList = programmeDaysList.get(currentProgrammeDayNumber).getPeriodList();
+                        int totalPeriodOrLecturesList = periodOrLecturesList.size();
+                        for (int currentPeriodOrLectureNumber = 0; currentPeriodOrLectureNumber < totalPeriodOrLecturesList; currentPeriodOrLectureNumber++) {
+                            if (currentPeriodOrLectureNumber == worshipPeriodNumber) {
+                                PeriodOrLecture currentPeriodOrLecture = periodOrLecturesList.get(currentPeriodOrLectureNumber);
+                                currentPeriodOrLecture.setSubjectCode(subjectCodeForWorship);
+                                currentPeriodOrLecture.setIsAllocated(true);
+                                timeTableSuperDoc.getYearGroupsList().
+                                        get(currentYearGroupNo).
+                                        getProgrammeGroupList().
+                                        get(currentProgrammeGroupNo).
+                                        getProgrammeDaysList().
+                                        get(currentProgrammeDayNumber).
+                                        getPeriodList().set(currentPeriodOrLectureNumber, currentPeriodOrLecture);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return timeTableSuperDoc;
+    }
+
+    private Map<String, Integer> getWorshipPeriodDayNumberAndPeriodNumber() {
+        int worshipDayNumber = businessLogicConfigurationProperties.TIMETABLE_DAY_WORSHIP - 1;
+        int worshipPeriodNumber = businessLogicConfigurationProperties.TIMETABLE_PERIOD_WORSHIP - 1;
+        Map<String, Integer> worshipDayAndPeriodMap = new HashMap<>();
+        worshipDayAndPeriodMap.put("worshipDayNumber", worshipDayNumber);
+        worshipDayAndPeriodMap.put("worshipPeriodNumber", worshipPeriodNumber);
+        return worshipDayAndPeriodMap;
+    }
+
     private List<ProgrammeDay> setPracticalsDaysForAllProgrammeGroupsRequiringIt(ProgrammeGroup currentProgrammeGroup,
                                                                                  List<ProgrammeDay> programmeDaysList, int programmeYearNo) {
 
@@ -88,7 +145,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
             //new programmeDay with all periods set with the subjects,then we set it to the current list at same index
             iProgrammeDayHelper = programmeDayHelperUtilDefault; //instantiate interface with implementation
             if (iProgrammeDayHelper.isProgrammeDayAlloted(currentProgrammeDay) == false) {
-                ProgrammeDay newCurrentProgrammeDay = setPracticalsPeriodsByCheckingIfRemainingPeriodsForDayCanSuffice(currentProgrammeDay, currentProgrammeGroup,programmeYearNo);
+                ProgrammeDay newCurrentProgrammeDay = setPracticalsPeriodsByCheckingIfRemainingPeriodsForDayCanSuffice(currentProgrammeDay, currentProgrammeGroup, programmeYearNo);
                 //we set the newlycreatedprogrammeDay with all periods subject set to the programmeDaysList
                 programmeDaysList.set(currentProgrammeDayNumber, newCurrentProgrammeDay);
             }
@@ -123,7 +180,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
             SubjectDoc currentSubjectDoc = subjectDocRepository.findBySubjectCode(currentSubjectCode);
             if (currentSubjectDoc.getSubjectFullName().contains("PRACTICALS")) {
                 //we get the totalPeriods for the practicals course from subjectAllocationDocRepository and use getTotalSubjectAllocation() to retrieve the int value
-                totalPeriodForPracticalCourse = subjectAllocationDocRepository.findBySubjectCodeAndYearGroup(currentSubjectCode,programmeYearNo).getTotalSubjectAllocation();
+                totalPeriodForPracticalCourse = subjectAllocationDocRepository.findBySubjectCodeAndYearGroup(currentSubjectCode, programmeYearNo).getTotalSubjectAllocation();
                 practicalSubjectCode = currentSubjectDoc.getSubjectCode();
             }
         }
@@ -133,7 +190,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
             int periodToStartSettingSubjectFrom = getIndexToStartSettingPeriodsFrom(periodOrLecturesInProgDay);
             List<PeriodOrLecture> newPeriodOrLectureListToSetToProgrammeDay =
                     setSubjectCodeAndTutorCodeForAllAffectedPeriodsOfferingPracticals(periodToStartSettingSubjectFrom,
-                            periodOrLecturesInProgDay, practicalSubjectCode,programmeCode,totalPeriodForPracticalCourse);
+                            periodOrLecturesInProgDay, practicalSubjectCode, programmeCode, totalPeriodForPracticalCourse);
             //now we set the new periodOrLectureList to the programmeDay and return it
             programmeDay.setPeriodList(newPeriodOrLectureListToSetToProgrammeDay);
         }
@@ -163,17 +220,18 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
                 currentPeriodOrLecture.setTutorCode(tutorCodeResponsibleForSubject);
                 currentPeriodOrLecture.setIsAllocated(true);
                 //now set the new currentPeriodOrLecture to the same position in the list
-                periodOrLecturesList.set(i,currentPeriodOrLecture);
+                periodOrLecturesList.set(i, currentPeriodOrLecture);
             }
         }
         //updateDb Accordingly to reflect totalSubjectsPeriodLeft in db for both tutorDoc and periods left for the subject to be exhausted
-        updateDbWithTotalPeriodsThatHasBeenSet(programmeCode, practicalSubjectCode, totalPeriodForPracticalCourse, totalPeriodsThatHasBeenSet,tutorCodeResponsibleForSubject);
+        updateDbWithTotalPeriodsThatHasBeenSet(programmeCode, practicalSubjectCode, totalPeriodForPracticalCourse, totalPeriodsThatHasBeenSet, tutorCodeResponsibleForSubject);
 
         return periodOrLecturesList;
     }
 
     /**
      * TODO Remember to initialize the {@link SubjectPeriodLoadLeftForProgrammeGroupDoc} immediately during first initialization so that we can search for it and retrieve and set periods left for a particular subject for a particular programmegroup
+     *
      * @param programmeCode
      * @param practicalSubjectCode
      * @param totalPeriodForPracticalCourse
@@ -184,7 +242,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
                                                 String practicalSubjectCode,
                                                 int totalPeriodForPracticalCourse,
                                                 int totalPeriodsThatHasBeenSet,
-                                                String tutorCodeResponsibleForSubject){
+                                                String tutorCodeResponsibleForSubject) {
         //now we decrement the value of the totalSubjectsPeriodLeft in db by the totalPeriodsThatHasBeenSet
         SubjectPeriodLoadLeftForProgrammeGroupDoc subjectPeriodLoadLeftForProgrammeGroupDoc = subjectPeriodLoadLeftForProgrammeGroupDocRepository.
                 findByProgrammeCodeAndSubjectCode(programmeCode, practicalSubjectCode);

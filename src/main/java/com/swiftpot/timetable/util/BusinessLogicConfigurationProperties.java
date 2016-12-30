@@ -113,4 +113,10 @@ public class BusinessLogicConfigurationProperties {
      */
     @Value("${timetable.day.total}")
     public String TIMETABLE_DAY_TOTAL;
+
+    @Value("${timetable.day.worship}")
+    public int TIMETABLE_DAY_WORSHIP;
+
+    @Value("${timetable.period.worship}")
+    public int TIMETABLE_PERIOD_WORSHIP;
 }
