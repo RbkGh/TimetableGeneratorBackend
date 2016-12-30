@@ -170,6 +170,14 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
         return periodOrLecturesList;
     }
 
+    /**
+     * TODO Remember to initialize the {@link SubjectPeriodLoadLeftForProgrammeGroupDoc} immediately during first initialization so that we can search for it and retrieve and set periods left for a particular subject for a particular programmegroup
+     * @param programmeCode
+     * @param practicalSubjectCode
+     * @param totalPeriodForPracticalCourse
+     * @param totalPeriodsThatHasBeenSet
+     * @param tutorCodeResponsibleForSubject
+     */
     void updateDbWithTotalPeriodsThatHasBeenSet(String programmeCode,
                                                 String practicalSubjectCode,
                                                 int totalPeriodForPracticalCourse,

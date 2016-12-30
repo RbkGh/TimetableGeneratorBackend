@@ -70,7 +70,7 @@ public class TimeTablePopulatorService {
         return timeTableSuperDoc;
     }
 
-    public TimeTableSuperDoc partTwoSetDefaultPeriodsWithSubjects(String timeTableDefaultPeriodsAllocatorType, TimeTableSuperDoc timeTableSuperDocWithInitialDefaultDataSet) {
+    public TimeTableSuperDoc partTwoAllocateDefaultPeriods(String timeTableDefaultPeriodsAllocatorType, TimeTableSuperDoc timeTableSuperDocWithInitialDefaultDataSet) {
         return timeTableDefaultPeriodsAllocatorFactory.getTimeTableDefaultPeriodsAllocator(timeTableDefaultPeriodsAllocatorType).
                 allocateDefaultPeriodsOnTimeTable(timeTableSuperDocWithInitialDefaultDataSet);
     }
