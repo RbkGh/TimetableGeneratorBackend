@@ -27,7 +27,7 @@ public class TimeTablePopulatorService {
     @Autowired
     TimeTableDefaultPeriodsAllocatorFactory timeTableDefaultPeriodsAllocatorFactory;
 
-    private TimeTableSuperDoc partOneSetYearGroups() throws Exception {
+    public TimeTableSuperDoc partOneSetYearGroups() throws Exception {
         List<ProgrammeGroupDoc> allProgrammeGroupDocsListInDb = getAllProgrammeGroupDocsListInDb();
 
         TimeTableSuperDoc timeTableSuperDoc = new TimeTableSuperDoc();
