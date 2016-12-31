@@ -1,7 +1,12 @@
 package com.swiftpot.timetable;
 
 import com.google.gson.Gson;
+import com.swiftpot.timetable.base.impl.TimeTableDefaultPeriodsAllocatorDefaultImpl;
 import com.swiftpot.timetable.factory.TimeTableDefaultPeriodsAllocatorFactory;
+import com.swiftpot.timetable.model.PeriodOrLecture;
+import com.swiftpot.timetable.model.ProgrammeDay;
+import com.swiftpot.timetable.model.ProgrammeGroup;
+import com.swiftpot.timetable.model.YearGroup;
 import com.swiftpot.timetable.repository.ProgrammeGroupDocRepository;
 import com.swiftpot.timetable.repository.db.model.ProgrammeGroupDoc;
 import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
@@ -27,6 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertNotNull;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -42,6 +48,8 @@ public class TimeTableGenerationWithMockitoTests {
 
     @Autowired
     TimeTablePopulatorService timeTablePopulatorService;
+    @Autowired
+    TimeTableDefaultPeriodsAllocatorDefaultImpl timeTableDefaultPeriodsAllocatorDefault;
 
     @MockBean
     ProgrammeGroupDocRepository programmeGroupDocRepository;
@@ -113,21 +121,45 @@ public class TimeTableGenerationWithMockitoTests {
         assertThat(5, equalTo(timeTableSuperDoc.getYearGroupsList().get(0).getProgrammeGroupList().get(0).getProgrammeDaysList().size()));
     }
 
-    @Test(expected = Exception.class)
-    public void partTwoSetDefaultPeriodsWhenThereIsWorkshopRequiredForSomeProgrammeGroups() {
-        TimeTableSuperDoc timeTableSuperDocWithPracticalsSet = timeTablePopulatorService.partTwoAllocateDefaultPeriods("DEFAULT", timeTableSuperDoc);
-        String timeTableSuperDocWithPracticalsSetString = new Gson().toJson(timeTableSuperDocWithPracticalsSet);
-        System.out.println("TimeTable with Default Periods,ie Practicals set = "+PrettyJSON.toPrettyFormat(timeTableSuperDocWithPracticalsSetString));
-        assertThat(timeTableSuperDoc, equalTo(timeTableSuperDocWithPracticalsSet));
-    }
+//    @Test(expected = Exception.class)
+//    public void partTwoSetDefaultPeriodsWhenThereIsWorkshopRequiredForSomeProgrammeGroups() {
+//        TimeTableSuperDoc timeTableSuperDocWithPracticalsSet = timeTablePopulatorService.partTwoAllocateDefaultPeriods("DEFAULT", timeTableSuperDoc);
+//        String timeTableSuperDocWithPracticalsSetString = new Gson().toJson(timeTableSuperDocWithPracticalsSet);
+//        System.out.println("TimeTable with Default Periods,ie Practicals set = "+PrettyJSON.toPrettyFormat(timeTableSuperDocWithPracticalsSetString));
+//        assertThat(timeTableSuperDoc, equalTo(timeTableSuperDocWithPracticalsSet));
+//    }
+
+//    @Test
+//    public void partTwoSetDefaultPeriodsWhenThereIsNoWorkshopRequiredForAllProgrammeGroups() {
+//        //set first subject from true to false for this test to pass
+//        timeTableSuperDoc.getYearGroupsList().get(0).getProgrammeGroupList().get(0).setIsProgrammeRequiringPracticalsClassroom(false);
+//        TimeTableSuperDoc timeTableSuperDocWithPracticalsSet = timeTablePopulatorService.partTwoAllocateDefaultPeriods("DEFAULT", timeTableSuperDoc);
+//        String timeTableSuperDocWithPracticalsSetString = new Gson().toJson(timeTableSuperDocWithPracticalsSet);
+//        System.out.println("TimeTable with Default Periods,ie Practicals set = "+PrettyJSON.toPrettyFormat(timeTableSuperDocWithPracticalsSetString));
+//        assertThat(timeTableSuperDoc, equalTo(timeTableSuperDocWithPracticalsSet));
+//    }
 
     @Test
-    public void partTwoSetDefaultPeriodsWhenThereIsNoWorkshopRequiredForAllProgrammeGroups() {
-        //set first subject from true to false for this test to pass
-        timeTableSuperDoc.getYearGroupsList().get(0).getProgrammeGroupList().get(0).setIsProgrammeRequiringPracticalsClassroom(false);
-        TimeTableSuperDoc timeTableSuperDocWithPracticalsSet = timeTablePopulatorService.partTwoAllocateDefaultPeriods("DEFAULT", timeTableSuperDoc);
-        String timeTableSuperDocWithPracticalsSetString = new Gson().toJson(timeTableSuperDocWithPracticalsSet);
-        System.out.println("TimeTable with Default Periods,ie Practicals set = "+PrettyJSON.toPrettyFormat(timeTableSuperDocWithPracticalsSetString));
-        assertThat(timeTableSuperDoc, equalTo(timeTableSuperDocWithPracticalsSet));
+    public void setWorshipPeriods() throws Exception {
+        TimeTableSuperDoc timetableSuperDocWithWorshipPeriodsSet = timeTableDefaultPeriodsAllocatorDefault.allocateWorshipPeriodForAllProgrammeGroups(timeTableSuperDoc, "WORSHIP");
+        String timetableSuperDocWithWorshipPeriodsSetString = new Gson().toJson(timetableSuperDocWithWorshipPeriodsSet);
+        System.out.println("TimeTable with  Worship periods set = " + PrettyJSON.toPrettyFormat(timetableSuperDocWithWorshipPeriodsSetString));
+        int totalWorshipPeriodsExpected =0;
+        int totalWorshipPeriods = 0;
+        for (YearGroup yearGroup : timetableSuperDocWithWorshipPeriodsSet.getYearGroupsList()) {
+            for (ProgrammeGroup programmeGroup : yearGroup.getProgrammeGroupList()) {
+                totalWorshipPeriodsExpected++;
+                for (ProgrammeDay programmeDay : programmeGroup.getProgrammeDaysList()) {
+                    for (PeriodOrLecture periodOrLecture : programmeDay.getPeriodList()) {
+                        if(periodOrLecture.getSubjectCode() != null)
+                        if (periodOrLecture.getSubjectCode()=="WORSHIP") {
+                            totalWorshipPeriods++;
+                        }
+                    }
+                }
+            }
+        }
+
+        assertTrue("Has all periods set? Totalperiods expected="+totalWorshipPeriodsExpected+" .Total periods got="+totalWorshipPeriods,totalWorshipPeriodsExpected == totalWorshipPeriods);
     }
 }

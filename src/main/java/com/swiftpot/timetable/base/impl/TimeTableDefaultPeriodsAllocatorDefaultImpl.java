@@ -87,46 +87,62 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
      * @param subjectCodeForWorship
      * @return
      */
-    private TimeTableSuperDoc allocateWorshipPeriodForAllProgrammeGroups(TimeTableSuperDoc timeTableSuperDoc, String subjectCodeForWorship) {
+    public TimeTableSuperDoc allocateWorshipPeriodForAllProgrammeGroups(TimeTableSuperDoc timeTableSuperDoc, String subjectCodeForWorship) throws Exception {
         List<YearGroup> yearGroupsList = timeTableSuperDoc.getYearGroupsList();
         int totalNumberOfYearGroupsList = yearGroupsList.size();
-        for (int currentYearGroupNo = 0; currentYearGroupNo < totalNumberOfYearGroupsList; currentYearGroupNo++) {
-            List<ProgrammeGroup> programmeGroupsListInYearGroup = yearGroupsList.get(currentYearGroupNo).getProgrammeGroupList();
-            int totalNumberOfProgrammeGroupsListInYearGroup = programmeGroupsListInYearGroup.size();
-            for (int currentProgrammeGroupNo = 0; currentProgrammeGroupNo < totalNumberOfProgrammeGroupsListInYearGroup; currentProgrammeGroupNo++) {
-                ProgrammeGroup currentProgrammeGroup = programmeGroupsListInYearGroup.get(currentProgrammeGroupNo);
-                List<ProgrammeDay> programmeDaysList = currentProgrammeGroup.getProgrammeDaysList();
-                int totalNumberOfProgrammeDays = programmeDaysList.size();
-                int worshipDayNumber = getWorshipPeriodDayNumberAndPeriodNumber().get("worshipDayNumber");
-                int worshipPeriodNumber = getWorshipPeriodDayNumberAndPeriodNumber().get("worshipPeriodNumber");
-                for (int currentProgrammeDayNumber = 0; currentProgrammeDayNumber < totalNumberOfProgrammeDays; currentProgrammeDayNumber++) {
-                    if (currentProgrammeDayNumber == worshipDayNumber) {
-                        List<PeriodOrLecture> periodOrLecturesList = programmeDaysList.get(currentProgrammeDayNumber).getPeriodList();
-                        int totalPeriodOrLecturesList = periodOrLecturesList.size();
-                        for (int currentPeriodOrLectureNumber = 0; currentPeriodOrLectureNumber < totalPeriodOrLecturesList; currentPeriodOrLectureNumber++) {
-                            if (currentPeriodOrLectureNumber == worshipPeriodNumber) {
-                                PeriodOrLecture currentPeriodOrLecture = periodOrLecturesList.get(currentPeriodOrLectureNumber);
-                                currentPeriodOrLecture.setSubjectCode(subjectCodeForWorship);
-                                currentPeriodOrLecture.setIsAllocated(true);
-                                timeTableSuperDoc.getYearGroupsList().
-                                        get(currentYearGroupNo).
-                                        getProgrammeGroupList().
-                                        get(currentProgrammeGroupNo).
-                                        getProgrammeDaysList().
-                                        get(currentProgrammeDayNumber).
-                                        getPeriodList().set(currentPeriodOrLectureNumber, currentPeriodOrLecture);
-                            }
+        int numberOfTimesSet = 0;
+
+        int worshipDayNumberr = getWorshipPeriodDayNumberAndPeriodNumber().get("worshipDayNumber");
+        String worshipDayName = getProgrammeDayName(worshipDayNumberr);
+        System.out.println("WorshipDay Number=" + worshipDayNumberr + "\nWorshipDayName=" + worshipDayName);
+        int worshipPeriodNumber = getWorshipPeriodDayNumberAndPeriodNumber().get("worshipPeriodNumber");
+        System.out.println("WorshipPeriodNumber=" + worshipPeriodNumber);
+        for (YearGroup yearGroup : timeTableSuperDoc.getYearGroupsList()) {
+            for (ProgrammeGroup programmeGroup : yearGroup.getProgrammeGroupList()) {
+                for (ProgrammeDay programmeDay : programmeGroup.getProgrammeDaysList()) {
+                    for (PeriodOrLecture periodOrLecture : programmeDay.getPeriodList()) {
+                        if ((periodOrLecture.getPeriodNumber() == worshipPeriodNumber) && (worshipDayName.equals(programmeDay.getDayName()))) {
+                            periodOrLecture.setSubjectCode(subjectCodeForWorship);
+                            periodOrLecture.setIsAllocated(true);
+                            numberOfTimesSet++;
                         }
                     }
                 }
             }
         }
+//        for (int currentYearGroupNo = 0; currentYearGroupNo < totalNumberOfYearGroupsList; currentYearGroupNo++) {
+//            List<ProgrammeGroup> programmeGroupsListInYearGroup = yearGroupsList.get(currentYearGroupNo).getProgrammeGroupList();
+//            int totalNumberOfProgrammeGroupsListInYearGroup = programmeGroupsListInYearGroup.size();
+//            for (int currentProgrammeGroupNo = 0; currentProgrammeGroupNo < totalNumberOfProgrammeGroupsListInYearGroup; currentProgrammeGroupNo++) {
+//                ProgrammeGroup currentProgrammeGroup = programmeGroupsListInYearGroup.get(currentProgrammeGroupNo);
+//                List<ProgrammeDay> programmeDaysList = currentProgrammeGroup.getProgrammeDaysList();
+//                int totalNumberOfProgrammeDays = programmeDaysList.size();
+//                for (int currentProgrammeDayNumber = 0; currentProgrammeDayNumber < totalNumberOfProgrammeDays; currentProgrammeDayNumber++) {
+//                    ProgrammeDay programmeDay = programmeDaysList.get(currentProgrammeDayNumber);
+//                        List<PeriodOrLecture> periodOrLecturesList = programmeDay.getPeriodList();
+//                        int totalPeriodOrLecturesList = periodOrLecturesList.size();
+//                        for (int currentPeriodOrLectureNumber = 0; currentPeriodOrLectureNumber < totalPeriodOrLecturesList; currentPeriodOrLectureNumber++) {
+//                            PeriodOrLecture currentPeriodOrLecture = periodOrLecturesList.get(currentPeriodOrLectureNumber);
+//                            if ((currentPeriodOrLecture.getPeriodNumber() == worshipPeriodNumber) && (worshipDayName.equals(programmeDay.getDayName()))) {
+//                                System.out.println("THis day we are setting as worship ==" + programmeDay.getDayName());
+//                                System.out.println("This period we are setting as worship=" + currentPeriodOrLecture.getPeriodStartandEndTime());
+//                                currentPeriodOrLecture.setSubjectCode(subjectCodeForWorship);
+//                                currentPeriodOrLecture.setIsAllocated(true);
+//                                numberOfTimesSet++;
+//
+//                            }
+//                        }
+//
+//                }
+//            }
+//        }
+        System.out.println("numberOfTimesSet%%%%%%%%%%%======" + numberOfTimesSet);
         return timeTableSuperDoc;
     }
 
     private Map<String, Integer> getWorshipPeriodDayNumberAndPeriodNumber() {
-        int worshipDayNumber = businessLogicConfigurationProperties.TIMETABLE_DAY_WORSHIP - 1;
-        int worshipPeriodNumber = businessLogicConfigurationProperties.TIMETABLE_PERIOD_WORSHIP - 1;
+        int worshipDayNumber = businessLogicConfigurationProperties.TIMETABLE_DAY_WORSHIP;
+        int worshipPeriodNumber = businessLogicConfigurationProperties.TIMETABLE_PERIOD_WORSHIP;
         Map<String, Integer> worshipDayAndPeriodMap = new HashMap<>();
         worshipDayAndPeriodMap.put("worshipDayNumber", worshipDayNumber);
         worshipDayAndPeriodMap.put("worshipPeriodNumber", worshipPeriodNumber);
@@ -275,12 +291,34 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
         return indexWhereFalseWasFirstSeen;
     }
 
-    private PeriodOrLecture setPeriodOrLectureWithSubjectAndTutor(PeriodOrLecture periodOrLecture) {
-        //set subjectCode,tutorCode and isAllocated to ensure it has the flag of true set to avoid future editing of object
-        return periodOrLecture;
-    }
+    public String getProgrammeDayName(int programmeDayNumber) throws Exception {
+        String programmeDayName;
+        switch (programmeDayNumber) {
+            case 1:
+                programmeDayName = businessLogicConfigurationProperties.TIMETABLE_DAY_1;
+                break;
+            case 2:
+                programmeDayName = businessLogicConfigurationProperties.TIMETABLE_DAY_2;
+                break;
+            case 3:
+                programmeDayName = businessLogicConfigurationProperties.TIMETABLE_DAY_3;
+                break;
+            case 4:
+                programmeDayName = businessLogicConfigurationProperties.TIMETABLE_DAY_4;
+                break;
+            case 5:
+                programmeDayName = businessLogicConfigurationProperties.TIMETABLE_DAY_5;
+                break;
+            case 6:
+                programmeDayName = businessLogicConfigurationProperties.TIMETABLE_DAY_6;
+                break;
+            case 7:
+                programmeDayName = businessLogicConfigurationProperties.TIMETABLE_DAY_7;
+                break;
+            default:
+                throw new Exception("Only 7days available,any value not within 1-7 will fail");
+        }
 
-    private List<TutorDoc> getAllTutorDocsListInDb() {
-        return tutorDocRepository.findAll();
+        return programmeDayName;
     }
 }
