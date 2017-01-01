@@ -88,54 +88,47 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
      * @return
      */
     public TimeTableSuperDoc allocateWorshipPeriodForAllProgrammeGroups(TimeTableSuperDoc timeTableSuperDoc, String subjectCodeForWorship) throws Exception {
-        List<YearGroup> yearGroupsList = timeTableSuperDoc.getYearGroupsList();
-        int totalNumberOfYearGroupsList = yearGroupsList.size();
         int numberOfTimesSet = 0;
-
         int worshipDayNumberr = getWorshipPeriodDayNumberAndPeriodNumber().get("worshipDayNumber");
         String worshipDayName = getProgrammeDayName(worshipDayNumberr);
         System.out.println("WorshipDay Number=" + worshipDayNumberr + "\nWorshipDayName=" + worshipDayName);
         int worshipPeriodNumber = getWorshipPeriodDayNumberAndPeriodNumber().get("worshipPeriodNumber");
-        System.out.println("WorshipPeriodNumber=" + worshipPeriodNumber);
+        System.out.println("WorshipPeriodNumber=" + worshipPeriodNumber + "\n\n");
         for (YearGroup yearGroup : timeTableSuperDoc.getYearGroupsList()) {
             for (ProgrammeGroup programmeGroup : yearGroup.getProgrammeGroupList()) {
-                for (ProgrammeDay programmeDay : programmeGroup.getProgrammeDaysList()) {
-                    for (PeriodOrLecture periodOrLecture : programmeDay.getPeriodList()) {
-                        if ((periodOrLecture.getPeriodNumber() == worshipPeriodNumber) && (worshipDayName.equals(programmeDay.getDayName()))) {
-                            periodOrLecture.setSubjectCode(subjectCodeForWorship);
-                            periodOrLecture.setIsAllocated(true);
-                            numberOfTimesSet++;
-                        }
+                int indexOfProgrammeDayToSet = 0;
+                int indexOfPeriodOrLectureToSet = 0;
+                PeriodOrLecture periodOrLectureNew = null;
+
+                int programmeDaysTotalNo = programmeGroup.getProgrammeDaysList().size();
+                for (int programmeDayCurrentNo = 0; programmeDayCurrentNo < programmeDaysTotalNo;programmeDayCurrentNo++ ) {
+                    ProgrammeDay programmeDay = programmeGroup.getProgrammeDaysList().get(programmeDayCurrentNo);
+                    String programmeDayName = programmeDay.getDayName();
+
+                    int periodOrLecturesTotalNo = programmeDay.getPeriodList().size();
+                    for (int periodOrLectureCurrentNo = 0;periodOrLectureCurrentNo < periodOrLecturesTotalNo; periodOrLectureCurrentNo++) {
+                        PeriodOrLecture periodOrLecture =  programmeDay.getPeriodList().get(periodOrLectureCurrentNo);
+                        if ((programmeDayName.equals(worshipDayName)))
+                            if ((periodOrLecture.getPeriodNumber() == worshipPeriodNumber)) {
+                                indexOfProgrammeDayToSet = programmeDayCurrentNo;
+                                indexOfPeriodOrLectureToSet = periodOrLectureCurrentNo;
+                                //allocate periodOrLecture we got here to new periodOrLecture and set it as new\
+                                periodOrLectureNew = periodOrLecture;
+
+
+
+                            }
+                    }
+                    if (periodOrLectureNew != null && (programmeDayName.equals(worshipDayName))) {
+                        periodOrLectureNew.setSubjectCode(subjectCodeForWorship);
+                        periodOrLectureNew.setIsAllocated(true);
+                        programmeDay.getPeriodList().set(indexOfPeriodOrLectureToSet, periodOrLectureNew);
+                        numberOfTimesSet++;
+                        System.out.println(timeTableSuperDoc.toString());
                     }
                 }
             }
         }
-//        for (int currentYearGroupNo = 0; currentYearGroupNo < totalNumberOfYearGroupsList; currentYearGroupNo++) {
-//            List<ProgrammeGroup> programmeGroupsListInYearGroup = yearGroupsList.get(currentYearGroupNo).getProgrammeGroupList();
-//            int totalNumberOfProgrammeGroupsListInYearGroup = programmeGroupsListInYearGroup.size();
-//            for (int currentProgrammeGroupNo = 0; currentProgrammeGroupNo < totalNumberOfProgrammeGroupsListInYearGroup; currentProgrammeGroupNo++) {
-//                ProgrammeGroup currentProgrammeGroup = programmeGroupsListInYearGroup.get(currentProgrammeGroupNo);
-//                List<ProgrammeDay> programmeDaysList = currentProgrammeGroup.getProgrammeDaysList();
-//                int totalNumberOfProgrammeDays = programmeDaysList.size();
-//                for (int currentProgrammeDayNumber = 0; currentProgrammeDayNumber < totalNumberOfProgrammeDays; currentProgrammeDayNumber++) {
-//                    ProgrammeDay programmeDay = programmeDaysList.get(currentProgrammeDayNumber);
-//                        List<PeriodOrLecture> periodOrLecturesList = programmeDay.getPeriodList();
-//                        int totalPeriodOrLecturesList = periodOrLecturesList.size();
-//                        for (int currentPeriodOrLectureNumber = 0; currentPeriodOrLectureNumber < totalPeriodOrLecturesList; currentPeriodOrLectureNumber++) {
-//                            PeriodOrLecture currentPeriodOrLecture = periodOrLecturesList.get(currentPeriodOrLectureNumber);
-//                            if ((currentPeriodOrLecture.getPeriodNumber() == worshipPeriodNumber) && (worshipDayName.equals(programmeDay.getDayName()))) {
-//                                System.out.println("THis day we are setting as worship ==" + programmeDay.getDayName());
-//                                System.out.println("This period we are setting as worship=" + currentPeriodOrLecture.getPeriodStartandEndTime());
-//                                currentPeriodOrLecture.setSubjectCode(subjectCodeForWorship);
-//                                currentPeriodOrLecture.setIsAllocated(true);
-//                                numberOfTimesSet++;
-//
-//                            }
-//                        }
-//
-//                }
-//            }
-//        }
         System.out.println("numberOfTimesSet%%%%%%%%%%%======" + numberOfTimesSet);
         return timeTableSuperDoc;
     }

@@ -1,5 +1,6 @@
 package com.swiftpot.timetable.repository.db.model;
 
+import com.swiftpot.timetable.base.TimeTableSuperDocBase;
 import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.model.YearGroup;
 import org.springframework.data.annotation.Id;
@@ -13,7 +14,7 @@ import java.util.List;
  *         20-Dec-16 @ 7:41 PM
  */
 @Document(collection = "TimeTableSuperDoc")
-public class TimeTableSuperDoc {
+public class TimeTableSuperDoc extends TimeTableSuperDocBase{
 
     @Id
     private String id;
@@ -21,7 +22,11 @@ public class TimeTableSuperDoc {
     private List<YearGroup> yearGroupsList;
 
     public TimeTableSuperDoc() {
+        super();
+    }
 
+    public TimeTableSuperDoc(List<YearGroup> yearGroupsList) {
+        this.yearGroupsList = yearGroupsList;
     }
 
     public List<YearGroup> getYearGroupsList() {
@@ -32,4 +37,8 @@ public class TimeTableSuperDoc {
         this.yearGroupsList = yearGroupsList;
     }
 
+    @Override
+    public void setYearGroupsListBase(List<YearGroup> yearGroupsListBase) {
+        super.setYearGroupsListBase(this.yearGroupsList);
+    }
 }
