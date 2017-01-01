@@ -14,7 +14,7 @@ import java.util.List;
  *         20-Dec-16 @ 7:41 PM
  */
 @Document(collection = "TimeTableSuperDoc")
-public class TimeTableSuperDoc extends TimeTableSuperDocBase{
+public class TimeTableSuperDoc {
 
     @Id
     private String id;
@@ -37,8 +37,4 @@ public class TimeTableSuperDoc extends TimeTableSuperDocBase{
         this.yearGroupsList = yearGroupsList;
     }
 
-    @Override
-    public void setYearGroupsListBase(List<YearGroup> yearGroupsListBase) {
-        super.setYearGroupsListBase(this.yearGroupsList);
-    }
 }
