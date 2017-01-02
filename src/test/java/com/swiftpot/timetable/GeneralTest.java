@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.swiftpot.timetable.util.PrettyJSON;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,13 +26,7 @@ public class GeneralTest {
 
     @Before
     public void setupData() {
-        List<LecturePeriod> lecturePeriods = new ArrayList<>();
-        for (int i = 1; i <= 10; i++) {
-            String periodName = "Period " + i;
-            int periodNo = i;
-            boolean isPeriodAllocated = false;
-            lecturePeriods.add(new LecturePeriod(periodName, periodNo, isPeriodAllocated));
-        }
+
 
         List<Day> days = new ArrayList<>();
         for (int i = 1; i <= 5; i++) {
@@ -59,7 +52,12 @@ public class GeneralTest {
             }
 
             int dayNo = i;
+            List<LecturePeriod> lecturePeriods = new ArrayList<>();
+            for (int j = 1; j <= 10; j++) {
+                lecturePeriods.add(new LecturePeriod("Period " + j, j, false));
+            }
             days.add(new Day(dayName, dayNo, lecturePeriods));
+
         }
 
         List<YearGroup> yearGroups = new ArrayList<>();
@@ -77,7 +75,7 @@ public class GeneralTest {
 
         schoolObject = new SchoolObject();
         schoolObject.setYearGroups(yearGroups);
-        System.out.println("School Object Before Changing Periods="+ PrettyJSON.toPrettyFormat(new Gson().toJson(schoolObject)));
+        System.out.println("School Object Before Changing Periods="+ toPrettyFormat(new Gson().toJson(schoolObject)));
     }
 
     @Test
@@ -105,8 +103,8 @@ public class GeneralTest {
             yearGroup.getCourseGroups().forEach(courseGroup -> {
                 courseGroup.getDays().forEach(day -> {
                     day.getLecturePeriods().forEach(lecturePeriod -> {
-                        int lecturePeriodNumber = lecturePeriod.getPeriodNumber();
-                        if (Objects.equals(lecturePeriodNumber, 1)) {
+
+                        if (Objects.equals(lecturePeriod.isPeriodAllocated(), true)) {
                             numberOfAllocatedPeriodsExpected[0]++;
                         }
                     });
@@ -114,7 +112,7 @@ public class GeneralTest {
             });
         });
 
-        assertThat(numberOfAllocatedPeriodsExpected, equalTo(3));
+        assertThat(numberOfAllocatedPeriodsExpected[0], equalTo(3));
     }
 
     /**

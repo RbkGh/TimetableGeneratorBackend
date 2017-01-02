@@ -1,5 +1,6 @@
 package com.swiftpot.timetable.base.impl;
 
+import com.google.gson.Gson;
 import com.swiftpot.timetable.base.IProgrammeDayHelper;
 import com.swiftpot.timetable.base.TimeTableDefaultPeriodsAllocator;
 import com.swiftpot.timetable.factory.TutorResponsibleForSubjectRetrieverFactory;
@@ -85,6 +86,8 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
      * @return
      */
     public TimeTableSuperDoc allocateWorshipPeriodForAllProgrammeGroups(TimeTableSuperDoc timeTableSuperDoc, String subjectCodeForWorship) throws Exception {
+        String timeTableSuperDocString = new Gson().toJson(timeTableSuperDoc);
+        timeTableSuperDoc = new Gson().fromJson(timeTableSuperDocString,TimeTableSuperDoc.class);
         final int[] numberOfTimesSet = {0};
         int worshipDayNumberr = getWorshipPeriodDayNumberAndPeriodNumber().get("worshipDayNumber");
         String worshipDayName = getProgrammeDayName(worshipDayNumberr);
