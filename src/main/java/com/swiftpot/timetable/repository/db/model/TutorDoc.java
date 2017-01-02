@@ -25,16 +25,12 @@ public class TutorDoc extends Person {
 
     private String assignedYearGroup;
 
-    private TutorSubjectSpeciality tutorSubjectSpeciality;
+    /**
+     * either "CORE" or "ELECTIVE"
+     */
+    private String tutorSubjectSpeciality;
 
-    public enum TutorSubjectSpeciality {
-        CORE_TUTOR("Core Tutor"), ELECTIVE_TUTOR("Elective Tutor");
-        String tutorSubjectSpecialityFullName;
 
-        private TutorSubjectSpeciality(String tutorSubjectSpecialityFullName) {
-            this.tutorSubjectSpecialityFullName = tutorSubjectSpecialityFullName;
-        }
-    }
 
     public TutorDoc() {
         super();
@@ -89,11 +85,11 @@ public class TutorDoc extends Person {
         return this;
     }
 
-    public TutorSubjectSpeciality getTutorSubjectSpeciality() {
+    public String getTutorSubjectSpeciality() {
         return tutorSubjectSpeciality;
     }
 
-    public TutorDoc setTutorSubjectSpeciality(TutorSubjectSpeciality tutorSubjectSpeciality) {
+    public TutorDoc setTutorSubjectSpeciality(String tutorSubjectSpeciality) {
         this.tutorSubjectSpeciality = tutorSubjectSpeciality;
         return this;
     }
