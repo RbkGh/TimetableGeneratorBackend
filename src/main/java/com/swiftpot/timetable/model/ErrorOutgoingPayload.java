@@ -14,4 +14,8 @@ public class ErrorOutgoingPayload extends OutgoingPayload {
     public ErrorOutgoingPayload() {
         super("Error", 11, null);
     }
+
+    public ErrorOutgoingPayload(String message) {
+        super(message, 11, null);
+    }
 }
