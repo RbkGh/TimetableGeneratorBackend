@@ -7,10 +7,7 @@ import com.swiftpot.timetable.repository.SubjectDocRepository;
 import com.swiftpot.timetable.repository.db.model.SubjectDoc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
@@ -21,6 +18,7 @@ import java.util.Objects;
  *         02-Jan-17 @ 1:48 PM
  *         TODO ADD Initialization and crud of SubjectAllocationDoc upon every CRUD of SubjectDoc
  */
+@RestController
 @RequestMapping(path = "/subject")
 public class SubjectsController {
 

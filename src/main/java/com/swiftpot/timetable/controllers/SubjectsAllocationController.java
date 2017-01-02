@@ -7,16 +7,14 @@ import com.swiftpot.timetable.repository.SubjectAllocationDocRepository;
 import com.swiftpot.timetable.repository.db.model.SubjectAllocationDoc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author Ace Programmer Rbk
  *         <Rodney Kwabena Boachie at [rodney@swiftpot.com,rbk.unlimited@gmail.com]> on
  *         02-Jan-17 @ 6:55 PM
  */
+@RestController
 @RequestMapping(path = "/subject/allocation")
 public class SubjectsAllocationController {
 

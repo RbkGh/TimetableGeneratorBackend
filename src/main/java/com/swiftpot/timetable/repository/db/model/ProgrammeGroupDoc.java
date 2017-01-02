@@ -42,13 +42,21 @@ public class ProgrammeGroupDoc {
      * eg. Electronic Engineering may be a new course,hence
      * only Year 1 Students may be part initially not year 2 or 3 students
      */
-    private List<String> yearGroupList;
+    private List<Integer> yearGroupList;
 
     List<String> programmeSubjectsCodeList;
 
     private boolean technicalWorkshopOrLabRequired;
 
     public ProgrammeGroupDoc() {
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getProgrammeFullName() {
@@ -91,11 +99,11 @@ public class ProgrammeGroupDoc {
         this.defaultClassRoomId = defaultClassRoomId;
     }
 
-    public List<String> getYearGroupList() {
+    public List<Integer> getYearGroupList() {
         return yearGroupList;
     }
 
-    public void setYearGroupList(List<String> yearGroupList) {
+    public void setYearGroupList(List<Integer> yearGroupList) {
         this.yearGroupList = yearGroupList;
     }
 
