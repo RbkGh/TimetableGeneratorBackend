@@ -23,6 +23,14 @@ public class SubjectAllocationDoc {
     public SubjectAllocationDoc() {
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getSubjectCode() {
         return subjectCode;
     }

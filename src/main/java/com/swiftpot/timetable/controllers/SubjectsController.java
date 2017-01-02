@@ -56,7 +56,7 @@ public class SubjectsController {
         }
     }
 
-    @RequestMapping(path = "{/id}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(path = "/{id}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public OutgoingPayload updateSubjectDoc(@PathVariable String id,
                                             @RequestBody SubjectDoc subjectDoc) {
         if (subjectDocRepository.exists(id)) {
@@ -69,7 +69,7 @@ public class SubjectsController {
 
     }
 
-    @RequestMapping(path = "{/id}",method = RequestMethod.DELETE)
+    @RequestMapping(path = "/{id}",method = RequestMethod.DELETE)
     public OutgoingPayload deleteSubjectDoc(@PathVariable String id) {
         if (subjectDocRepository.exists(id)) {
             subjectDocRepository.delete(id);
@@ -79,5 +79,5 @@ public class SubjectsController {
         }
     }
 
-    
+
 }

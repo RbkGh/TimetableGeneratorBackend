@@ -29,18 +29,11 @@ public class SubjectDoc {
      */
     private List<Integer> subjectYearGroupList;
 
-    private SubjectType subjectType;
+    /**
+     * "CORE" OR "ELECTIVE" only
+     */
+    private String subjectType;
 
-    public enum SubjectType {
-        CORE_SUBJECT("Core Subject"),
-        ELECTIVE_SUBJECT("Elective Subject");
-        String subjectTypeFullName;
-
-        SubjectType(String subjectTypeFullName) {
-            this.subjectTypeFullName = subjectTypeFullName;
-        }
-
-    }
 
     public SubjectDoc() {
     }
@@ -90,11 +83,11 @@ public class SubjectDoc {
         return this;
     }
 
-    public SubjectType getSubjectType() {
+    public String getSubjectType() {
         return subjectType;
     }
 
-    public SubjectDoc setSubjectType(SubjectType subjectType) {
+    public SubjectDoc setSubjectType(String subjectType) {
         this.subjectType = subjectType;
         return this;
     }
