@@ -20,10 +20,7 @@ import com.swiftpot.timetable.util.ProgrammeDayHelperUtilDefaultImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Ace Programmer Rbk
@@ -88,48 +85,29 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
      * @return
      */
     public TimeTableSuperDoc allocateWorshipPeriodForAllProgrammeGroups(TimeTableSuperDoc timeTableSuperDoc, String subjectCodeForWorship) throws Exception {
-        int numberOfTimesSet = 0;
+        final int[] numberOfTimesSet = {0};
         int worshipDayNumberr = getWorshipPeriodDayNumberAndPeriodNumber().get("worshipDayNumber");
         String worshipDayName = getProgrammeDayName(worshipDayNumberr);
         System.out.println("WorshipDay Number=" + worshipDayNumberr + "\nWorshipDayName=" + worshipDayName);
         int worshipPeriodNumber = getWorshipPeriodDayNumberAndPeriodNumber().get("worshipPeriodNumber");
         System.out.println("WorshipPeriodNumber=" + worshipPeriodNumber + "\n\n");
-        for (YearGroup yearGroup : timeTableSuperDoc.getYearGroupsList()) {
-            for (ProgrammeGroup programmeGroup : yearGroup.getProgrammeGroupList()) {
-                int indexOfProgrammeDayToSet = 0;
-                int indexOfPeriodOrLectureToSet = 0;
-                PeriodOrLecture periodOrLectureNew = null;
+        timeTableSuperDoc.getYearGroupsList().stream().parallel().forEach(yearGroup -> {
+            yearGroup.getProgrammeGroupList().forEach(programmeGroup -> {
+                programmeGroup.getProgrammeDaysList().forEach(programmeDay -> {
+                    String programmeDayName = programmeDay.getDayName().toUpperCase().trim();
+                    programmeDay.getPeriodList().forEach(periodOrLecture -> {
+                        if (Objects.equals(periodOrLecture.getPeriodNumber(), worshipPeriodNumber) &&
+                                Objects.equals(programmeDayName, (worshipDayName.toUpperCase().trim()))) {
+                            periodOrLecture.setIsAllocated(true);
+                            periodOrLecture.setSubjectCode(subjectCodeForWorship);
+                            numberOfTimesSet[0]++;
+                        }
+                    });
+                });
+            });
+        });
 
-                int programmeDaysTotalNo = programmeGroup.getProgrammeDaysList().size();
-                for (int programmeDayCurrentNo = 0; programmeDayCurrentNo < programmeDaysTotalNo;programmeDayCurrentNo++ ) {
-                    ProgrammeDay programmeDay = programmeGroup.getProgrammeDaysList().get(programmeDayCurrentNo);
-                    String programmeDayName = programmeDay.getDayName();
-
-                    int periodOrLecturesTotalNo = programmeDay.getPeriodList().size();
-                    for (int periodOrLectureCurrentNo = 0;periodOrLectureCurrentNo < periodOrLecturesTotalNo; periodOrLectureCurrentNo++) {
-                        PeriodOrLecture periodOrLecture =  programmeDay.getPeriodList().get(periodOrLectureCurrentNo);
-                        if ((programmeDayName.equals(worshipDayName)))
-                            if ((periodOrLecture.getPeriodNumber() == worshipPeriodNumber)) {
-                                indexOfProgrammeDayToSet = programmeDayCurrentNo;
-                                indexOfPeriodOrLectureToSet = periodOrLectureCurrentNo;
-                                //allocate periodOrLecture we got here to new periodOrLecture and set it as new\
-                                periodOrLectureNew = periodOrLecture;
-
-
-
-                            }
-                    }
-                    if (periodOrLectureNew != null && (programmeDayName.equals(worshipDayName))) {
-                        periodOrLectureNew.setSubjectCode(subjectCodeForWorship);
-                        periodOrLectureNew.setIsAllocated(true);
-                        programmeDay.getPeriodList().set(indexOfPeriodOrLectureToSet, periodOrLectureNew);
-                        numberOfTimesSet++;
-                        System.out.println(timeTableSuperDoc.toString());
-                    }
-                }
-            }
-        }
-        System.out.println("numberOfTimesSet%%%%%%%%%%%======" + numberOfTimesSet);
+        System.out.println("numberOfTimesSet%%%%%%%%%%%======" + numberOfTimesSet[0]);
         return timeTableSuperDoc;
     }
 
