@@ -44,7 +44,7 @@ public class TutorController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.GET)
     private OutgoingPayload getAllTutors() {
         List<TutorDoc> tutorDocs = tutorDocRepository.findAll();
         if (Objects.nonNull(tutorDocs)) {
