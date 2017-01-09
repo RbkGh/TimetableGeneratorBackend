@@ -75,4 +75,14 @@ public class TutorController {
             return new ErrorOutgoingPayload("Id does not exist");
         }
     }
+
+    @RequestMapping(method = RequestMethod.DELETE)
+    private OutgoingPayload deleteAllTutors() {
+        if (tutorDocRepository.count() > 1) {
+            tutorDocRepository.deleteAll();
+            return new SuccessfulOutgoingPayload("Deleted Successfully");
+        }else {
+            return new ErrorOutgoingPayload("No Tutors To Delete Currently");
+        }
+    }
 }

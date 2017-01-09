@@ -1,7 +1,5 @@
 package com.swiftpot.timetable.model;
 
-import org.springframework.stereotype.Component;
-
 /**
  * @author Ace Programmer Rbk
  *         <Rodney Kwabena Boachie at [rodney@swiftpot.com,rbk.unlimited@gmail.com]> on
@@ -10,7 +8,7 @@ import org.springframework.stereotype.Component;
 public class SuccessfulOutgoingPayload extends OutgoingPayload {
 
     public SuccessfulOutgoingPayload(Object responseObject) {
-        super("Success", 00, responseObject);
+        super("Success", 0, responseObject);
     }
 
     public SuccessfulOutgoingPayload(String message,Object responseObject) {
