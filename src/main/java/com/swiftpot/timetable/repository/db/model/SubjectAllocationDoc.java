@@ -23,6 +23,16 @@ public class SubjectAllocationDoc {
     public SubjectAllocationDoc() {
     }
 
+    /**
+     * we set only the subjectCode and yearGroup on first creation and totalSubjectAllocation will be updated later
+     * @param subjectCode
+     * @param yearGroup
+     */
+    public SubjectAllocationDoc(String subjectCode, int yearGroup) {
+        this.subjectCode = subjectCode;
+        this.yearGroup = yearGroup;
+    }
+
     public String getId() {
         return id;
     }

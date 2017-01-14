@@ -67,7 +67,7 @@ public class TimeTableGenerationWithMockitoTests {
         programmeGroupDoc1.setYearGroup(1);
         programmeGroupDoc1.setProgrammeCode("BCT-1A");
         programmeGroupDoc1.setDefaultClassRoomId("class1kj");
-        programmeGroupDoc1.setYearGroupList(new ArrayList<>(Arrays.asList("1", "2", "3")));
+        programmeGroupDoc1.setYearGroupList(new ArrayList<>(Arrays.asList(1, 2, 3)));
         programmeGroupDoc1.setProgrammeSubjectsCodeList(new ArrayList<>(Arrays.asList("ENG", "MATH", "INTSCIENCE", "SOCSTUDIES", "FDT", "RET", "RRT", "ECTR", "ICT", "PE")));
         programmeGroupDoc1.setTechnicalWorkshopOrLabRequired(true);
 
@@ -77,7 +77,7 @@ public class TimeTableGenerationWithMockitoTests {
         programmeGroupDoc2.setYearGroup(2);
         programmeGroupDoc2.setProgrammeCode("BUS-ACC2A");
         programmeGroupDoc2.setDefaultClassRoomId("class1kj");
-        programmeGroupDoc2.setYearGroupList(new ArrayList<>(Arrays.asList("1", "2", "3")));
+        programmeGroupDoc2.setYearGroupList(new ArrayList<>(Arrays.asList(1, 2, 3)));
         programmeGroupDoc2.setProgrammeSubjectsCodeList(new ArrayList<>(Arrays.asList("ENG", "MATH", "INTSCIENCE", "SOCSTUDIES", "ECONS", "CETTR", "RRYT", "ECPOTR", "ICT", "PE")));
         programmeGroupDoc2.setTechnicalWorkshopOrLabRequired(false);
 
@@ -87,7 +87,7 @@ public class TimeTableGenerationWithMockitoTests {
         programmeGroupDoc3.setYearGroup(3);
         programmeGroupDoc3.setProgrammeCode("CTECH-IT-HARDWARE3A");
         programmeGroupDoc3.setDefaultClassRoomId("class1kj");
-        programmeGroupDoc3.setYearGroupList(new ArrayList<>(Arrays.asList("1", "2", "3")));
+        programmeGroupDoc3.setYearGroupList(new ArrayList<>(Arrays.asList(1, 2, 3)));
         programmeGroupDoc3.setProgrammeSubjectsCodeList(new ArrayList<>(Arrays.asList("ENG", "MATH", "INTSCIENCE", "SOCSTUDIES", "PHYSICS", "HARDWARE", "PLMP", "ECPOTR", "ICT", "PE")));
         programmeGroupDoc3.setTechnicalWorkshopOrLabRequired(false);
 
