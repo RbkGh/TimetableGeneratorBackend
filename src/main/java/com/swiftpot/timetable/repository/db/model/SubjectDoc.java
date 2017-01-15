@@ -20,11 +20,8 @@ public class SubjectDoc {
 
     private String subjectCode;
 
-    private int totalPeriodsForYearGroup;
-
-
     /**
-     *@param subjectYearGroupList
+     * @param subjectYearGroupList
      * YearGroups offering this Subject =>1,2,3 meaning all 3 year groups offer the subject
      */
     private List<Integer> subjectYearGroupList;
@@ -62,15 +59,6 @@ public class SubjectDoc {
 
     public SubjectDoc setSubjectCode(String subjectCode) {
         this.subjectCode = subjectCode;
-        return this;
-    }
-
-    public int getTotalPeriodsForYearGroup() {
-        return totalPeriodsForYearGroup;
-    }
-
-    public SubjectDoc setTotalPeriodsForYearGroup(int totalPeriodsForYearGroup) {
-        this.totalPeriodsForYearGroup = totalPeriodsForYearGroup;
         return this;
     }
 
