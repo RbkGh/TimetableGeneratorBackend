@@ -42,13 +42,7 @@ public class SubjectsController {
         } else {
             //create subjectAllocationDoc asynchronously for Subject when it's successfully saved without setting totalPeriodsForYearGroup,
             //as that will be updated later
-            new Thread(() -> {
-                List<SubjectAllocationDoc> subjectAllocationDocsToSaveInDb =
-                        subjectDocSaved.getSubjectYearGroupList().stream().map(
-                                yearGroupNo -> new SubjectAllocationDoc(subjectDocSaved.getSubjectCode(),
-                                        yearGroupNo)).collect(Collectors.toList());
-                subjectAllocationDocRepository.save(subjectAllocationDocsToSaveInDb);
-            }).start();
+            deleteAndCreateSubjectAllocationDocs(subjectDocSaved);
 
             return new SuccessfulOutgoingPayload(subjectDocSaved);
         }
@@ -81,6 +75,9 @@ public class SubjectsController {
     public OutgoingPayload updateSubjectDoc(@PathVariable String id,
                                             @RequestBody SubjectDoc subjectDoc) {
         if (subjectDocRepository.exists(id)) {
+
+            //retrieve current subjectDoc and rebuild SubjectAllocationDoc ,invalidating the totalPeriodsForYearGroup
+            deleteAndCreateSubjectAllocationDocs(subjectDoc);
             subjectDoc.setId(id);
             SubjectDoc subjectDocUpdatedInDb = subjectDocRepository.save(subjectDoc);
             return new SuccessfulOutgoingPayload(subjectDocUpdatedInDb);
@@ -107,5 +104,23 @@ public class SubjectsController {
         }
     }
 
+    /**
+     * delete any existing SubjectAllocationDoc for subjectCode and recreate a new one whenever a new
+     * subject is created or updated
+     * @param subjectDoc
+     */
+    private void deleteAndCreateSubjectAllocationDocs(SubjectDoc subjectDoc) {
+        List<SubjectAllocationDoc> allSubjectDocsWithSubjectCodeIfPresent= subjectAllocationDocRepository.findBySubjectCode(subjectDoc.getSubjectCode());
+        if(Objects.nonNull(allSubjectDocsWithSubjectCodeIfPresent)){
+            subjectAllocationDocRepository.delete(allSubjectDocsWithSubjectCodeIfPresent);
+        }
+        new Thread(() -> {
+            List<SubjectAllocationDoc> subjectAllocationDocsToSaveInDb =
+                    subjectDoc.getSubjectYearGroupList().stream().map(
+                            yearGroupNo -> new SubjectAllocationDoc(subjectDoc.getSubjectCode(),
+                                    yearGroupNo)).collect(Collectors.toList());
+            subjectAllocationDocRepository.save(subjectAllocationDocsToSaveInDb);
+        }).start();
+    }
 
 }
