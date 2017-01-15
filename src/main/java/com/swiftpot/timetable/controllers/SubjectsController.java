@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -34,7 +33,11 @@ public class SubjectsController {
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public OutgoingPayload createSubjectDoc(@RequestBody SubjectDoc subjectDoc) {
         SubjectDoc subjectDocSaved = subjectDocRepository.save(subjectDoc);
-        if (Objects.isNull(subjectDocSaved)) {
+        //check if subject code already exists first
+        String subjectCode = subjectDoc.getSubjectCode();
+        if (Objects.nonNull(subjectDocRepository.findBySubjectCode(subjectCode))) {
+            return new ErrorOutgoingPayload("Subject Code Exists Already For "+subjectDocRepository.findBySubjectCode(subjectCode).getSubjectFullName());
+        } else if (Objects.isNull(subjectDocSaved)) {
             return new ErrorOutgoingPayload();
         } else {
             //create subjectAllocationDoc asynchronously for Subject when it's successfully saved without setting totalPeriodsForYearGroup,
@@ -70,7 +73,10 @@ public class SubjectsController {
             return new ErrorOutgoingPayload();
         }
     }
-
+    /*
+    Don't allow user to update the subjectCode as this can cause trouble retrieving the subjectAllocationDoc
+    *
+    * */
     @RequestMapping(path = "/{id}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public OutgoingPayload updateSubjectDoc(@PathVariable String id,
                                             @RequestBody SubjectDoc subjectDoc) {
@@ -84,11 +90,11 @@ public class SubjectsController {
 
     }
 
-    @RequestMapping(path = "/{id}",method = RequestMethod.DELETE)
+    @RequestMapping(path = "/{id}", method = RequestMethod.DELETE)
     public OutgoingPayload deleteSubjectDoc(@PathVariable String id) {
         if (subjectDocRepository.exists(id)) {
             //we need to delete the accompanying SubjectAllocationDoc,hence retrieve the subjectCode before deleting
-            new Thread(()->{
+            new Thread(() -> {
                 String subjectCode = subjectDocRepository.findOne(id).getSubjectCode();
                 List<SubjectAllocationDoc> subjectAllocationDocsToDelete = subjectAllocationDocRepository.findBySubjectCode(subjectCode);
                 subjectAllocationDocRepository.delete(subjectAllocationDocsToDelete);
