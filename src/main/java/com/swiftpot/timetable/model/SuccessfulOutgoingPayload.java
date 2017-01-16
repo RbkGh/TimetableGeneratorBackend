@@ -12,7 +12,7 @@ public class SuccessfulOutgoingPayload extends OutgoingPayload {
     }
 
     public SuccessfulOutgoingPayload(String message,Object responseObject) {
-        super(message, 00, responseObject);
+        super(message, 0, responseObject);
     }
 
 }

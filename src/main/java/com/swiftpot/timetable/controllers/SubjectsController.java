@@ -32,16 +32,15 @@ public class SubjectsController {
 
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public OutgoingPayload createSubjectDoc(@RequestBody SubjectDoc subjectDoc) {
-        SubjectDoc subjectDocSaved = subjectDocRepository.save(subjectDoc);
+
         //check if subject code already exists first
         String subjectCode = subjectDoc.getSubjectCode();
         if (Objects.nonNull(subjectDocRepository.findBySubjectCode(subjectCode))) {
-            return new ErrorOutgoingPayload("Subject Code Exists Already For "+subjectDocRepository.findBySubjectCode(subjectCode).getSubjectFullName());
-        } else if (Objects.isNull(subjectDocSaved)) {
-            return new ErrorOutgoingPayload();
+            return new ErrorOutgoingPayload("Subject Code Exists Already For Subject By Name:\n " + subjectDocRepository.findBySubjectCode(subjectCode).getSubjectFullName());
         } else {
             //create subjectAllocationDoc asynchronously for Subject when it's successfully saved without setting totalPeriodsForYearGroup,
             //as that will be updated later
+            SubjectDoc subjectDocSaved = subjectDocRepository.save(subjectDoc);
             deleteAndCreateSubjectAllocationDocs(subjectDocSaved);
 
             return new SuccessfulOutgoingPayload(subjectDocSaved);
@@ -61,12 +60,13 @@ public class SubjectsController {
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public OutgoingPayload getAllSubjectDocs() {
         List<SubjectDoc> subjectDocs = subjectDocRepository.findAll();
-        if (subjectDocs.isEmpty()) {
-            return new SuccessfulOutgoingPayload("Empty List", subjectDocs);
+        if (Objects.nonNull(subjectDocs)) {
+            return new SuccessfulOutgoingPayload(subjectDocs);
         } else {
             return new ErrorOutgoingPayload();
         }
     }
+
     /*
     Don't allow user to update the subjectCode as this can cause trouble retrieving the subjectAllocationDoc
     *
@@ -104,14 +104,26 @@ public class SubjectsController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.DELETE)
+    private OutgoingPayload deleteAllSubjects() {
+        if (subjectDocRepository.count() > 1) {
+            subjectDocRepository.deleteAll();
+            subjectAllocationDocRepository.deleteAll();
+            return new SuccessfulOutgoingPayload("Deleted Successfully");
+        }else {
+            return new ErrorOutgoingPayload("No Subjects To Delete Currently");
+        }
+    }
+
     /**
      * delete any existing SubjectAllocationDoc for subjectCode and recreate a new one whenever a new
      * subject is created or updated
+     *
      * @param subjectDoc
      */
     private void deleteAndCreateSubjectAllocationDocs(SubjectDoc subjectDoc) {
-        List<SubjectAllocationDoc> allSubjectDocsWithSubjectCodeIfPresent= subjectAllocationDocRepository.findBySubjectCode(subjectDoc.getSubjectCode());
-        if(Objects.nonNull(allSubjectDocsWithSubjectCodeIfPresent)){
+        List<SubjectAllocationDoc> allSubjectDocsWithSubjectCodeIfPresent = subjectAllocationDocRepository.findBySubjectCode(subjectDoc.getSubjectCode());
+        if (Objects.nonNull(allSubjectDocsWithSubjectCodeIfPresent)) {
             subjectAllocationDocRepository.delete(allSubjectDocsWithSubjectCodeIfPresent);
         }
         new Thread(() -> {
