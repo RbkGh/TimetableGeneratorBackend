@@ -35,8 +35,8 @@ public class SubjectsController {
 
         //check if subject code already exists first
         String subjectCode = subjectDoc.getSubjectCode();
-        if (Objects.nonNull(subjectDocRepository.findBySubjectCode(subjectCode))) {
-            return new ErrorOutgoingPayload("Subject Code Exists Already For Subject By Name:\n " + subjectDocRepository.findBySubjectCode(subjectCode).getSubjectFullName());
+        if (Objects.nonNull(subjectDocRepository.findBySubjectCodeAllIgnoreCase(subjectCode))) {
+            return new ErrorOutgoingPayload("Subject Code Exists Already For Subject By Name:\n " + subjectDocRepository.findBySubjectCodeAllIgnoreCase(subjectCode).getSubjectFullName());
         } else {
             //create subjectAllocationDoc asynchronously for Subject when it's successfully saved without setting totalPeriodsForYearGroup,
             //as that will be updated later

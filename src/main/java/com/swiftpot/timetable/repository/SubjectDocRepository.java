@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository;
  *         18-Dec-16 @ 11:11 AM
  */
 public interface SubjectDocRepository extends MongoRepository<SubjectDoc,String> {
-    SubjectDoc findBySubjectCode(String subjectCode);
+    SubjectDoc findBySubjectCodeAllIgnoreCase(String subjectCode);
 }

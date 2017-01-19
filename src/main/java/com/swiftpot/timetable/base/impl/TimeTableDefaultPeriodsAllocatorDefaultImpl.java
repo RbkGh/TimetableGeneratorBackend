@@ -167,7 +167,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
         for (int currentSubjectCodeNo = 0; currentSubjectCodeNo < totalNumberOfProgrammeSubjectsCodeList; currentSubjectCodeNo++) {
             String currentSubjectCode = programmeSubjectsCodeList.get(currentSubjectCodeNo);
             //fetch the subjectDoc from db using the subjectCode
-            SubjectDoc currentSubjectDoc = subjectDocRepository.findBySubjectCode(currentSubjectCode);
+            SubjectDoc currentSubjectDoc = subjectDocRepository.findBySubjectCodeAllIgnoreCase(currentSubjectCode);
             if (currentSubjectDoc.getSubjectFullName().contains("PRACTICALS")) {
                 //we get the totalPeriods for the practicals course from subjectAllocationDocRepository and use getTotalSubjectAllocation() to retrieve the int value
                 totalPeriodForPracticalCourse = subjectAllocationDocRepository.findBySubjectCodeAndYearGroup(currentSubjectCode, programmeYearNo).getTotalSubjectAllocation();
