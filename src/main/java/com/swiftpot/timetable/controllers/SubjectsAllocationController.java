@@ -4,10 +4,16 @@ import com.swiftpot.timetable.model.ErrorOutgoingPayload;
 import com.swiftpot.timetable.model.OutgoingPayload;
 import com.swiftpot.timetable.model.SuccessfulOutgoingPayload;
 import com.swiftpot.timetable.repository.SubjectAllocationDocRepository;
+import com.swiftpot.timetable.repository.SubjectDocRepository;
 import com.swiftpot.timetable.repository.db.model.SubjectAllocationDoc;
+import com.swiftpot.timetable.repository.db.model.SubjectDoc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Ace Programmer Rbk
@@ -20,6 +26,8 @@ public class SubjectsAllocationController {
 
     @Autowired
     SubjectAllocationDocRepository subjectAllocationDocRepository;
+    @Autowired
+    SubjectDocRepository subjectDocRepository;
 
     @RequestMapping(method = RequestMethod.PUT, path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public OutgoingPayload updateSubjectAllocation(@RequestParam String id,
@@ -30,5 +38,42 @@ public class SubjectsAllocationController {
         } else {
             return new ErrorOutgoingPayload("Id does not exist");
         }
+    }
+
+    /**
+     * if one subjectAllocationDoc is not set,then set {SubjectDoc's isAllSubjectYearGroupsAllocated property} to false
+     *
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.GET, path = "/state")
+    public OutgoingPayload getAllSubjectsAllocationState() {
+        //get all subjects
+        List<SubjectDoc> subjectDocs = subjectDocRepository.findAll();
+        if (!(subjectDocs.size() > 0)) {
+            return new SuccessfulOutgoingPayload(subjectDocs);
+        } else {
+            subjectDocs.forEach((subjectDoc -> {
+                //find all subjectAllocationDocs by subjectCode
+                List<SubjectAllocationDoc> subjectAllocationDocs = subjectAllocationDocRepository.findBySubjectCode(subjectDoc.getSubjectCode());
+                ArrayList<Boolean> booleanArrayList = new ArrayList<>();
+                subjectAllocationDocs.forEach((subjectAllocationDoc) -> {
+                    if (Objects.isNull(subjectAllocationDoc.getTotalSubjectAllocation())) {
+                        //totalSubjectAllocation is null so add false
+                        booleanArrayList.add(false);
+                    } else {
+                        //totalSubjectAllocation is not null so add true since it's allocated
+                        booleanArrayList.add(true);
+                    }
+                    //now check if false exists in the list,then render subjectDoc's isAllSubjectYearGroupsAllocated as false
+                    if (booleanArrayList.contains(false)) {
+                        subjectDoc.setIsAllSubjectYearGroupsAllocated(false);
+                    } else {
+                        subjectDoc.setIsAllSubjectYearGroupsAllocated(true);
+                    }
+                });
+            }));
+        }
+
+        return new SuccessfulOutgoingPayload(subjectDocs);
     }
 }

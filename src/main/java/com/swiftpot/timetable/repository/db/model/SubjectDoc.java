@@ -31,6 +31,10 @@ public class SubjectDoc {
      */
     private String subjectType;
 
+    /**
+     * used only during check to find if subject is allocated to frontend,not used in backend operations
+     */
+    private boolean isAllSubjectYearGroupsAllocated;
 
     public SubjectDoc() {
     }
@@ -78,5 +82,13 @@ public class SubjectDoc {
     public SubjectDoc setSubjectType(String subjectType) {
         this.subjectType = subjectType;
         return this;
+    }
+
+    public boolean isAllSubjectYearGroupsAllocated() {
+        return isAllSubjectYearGroupsAllocated;
+    }
+
+    public void setIsAllSubjectYearGroupsAllocated(boolean isAllSubjectYearGroupsAllocated) {
+        this.isAllSubjectYearGroupsAllocated = isAllSubjectYearGroupsAllocated;
     }
 }
