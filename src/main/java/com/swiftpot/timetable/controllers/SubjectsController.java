@@ -75,12 +75,12 @@ public class SubjectsController {
     public OutgoingPayload updateSubjectDoc(@PathVariable String id,
                                             @RequestBody SubjectDoc subjectDoc) {
         if (subjectDocRepository.exists(id)) {
-
-            //retrieve current subjectDoc and rebuild SubjectAllocationDoc ,invalidating the totalPeriodsForYearGroup
-            deleteAndCreateSubjectAllocationDocs(subjectDoc);
             subjectDoc.setId(id);
-            SubjectDoc subjectDocUpdatedInDb = subjectDocRepository.save(subjectDoc);
-            return new SuccessfulOutgoingPayload(subjectDocUpdatedInDb);
+            List<SubjectAllocationDoc> subjectAllocationDocsToDelete = subjectAllocationDocRepository.findBySubjectCode(subjectDoc.getSubjectCode());
+            subjectAllocationDocRepository.delete(subjectAllocationDocsToDelete);
+            SubjectDoc subjectDocSaved = subjectDocRepository.save(subjectDoc);
+            deleteAndCreateSubjectAllocationDocs(subjectDoc);
+            return new SuccessfulOutgoingPayload(subjectDocSaved);
         } else {
             return new ErrorOutgoingPayload("Id does not exist");
         }
@@ -110,7 +110,7 @@ public class SubjectsController {
             subjectDocRepository.deleteAll();
             subjectAllocationDocRepository.deleteAll();
             return new SuccessfulOutgoingPayload("Deleted Successfully");
-        }else {
+        } else {
             return new ErrorOutgoingPayload("No Subjects To Delete Currently");
         }
     }
@@ -134,5 +134,6 @@ public class SubjectsController {
             subjectAllocationDocRepository.save(subjectAllocationDocsToSaveInDb);
         }).start();
     }
+
 
 }
