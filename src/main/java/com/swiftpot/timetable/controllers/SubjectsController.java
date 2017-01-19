@@ -37,6 +37,8 @@ public class SubjectsController {
         String subjectCode = subjectDoc.getSubjectCode();
         if (Objects.nonNull(subjectDocRepository.findBySubjectCodeAllIgnoreCase(subjectCode))) {
             return new ErrorOutgoingPayload("Subject Code Exists Already For Subject By Name:\n " + subjectDocRepository.findBySubjectCodeAllIgnoreCase(subjectCode).getSubjectFullName());
+        } else if (subjectDoc.getSubjectYearGroupList().isEmpty() || Objects.isNull(subjectDoc.getSubjectYearGroupList())) {
+            return new ErrorOutgoingPayload("Subject YearGroups cannot be empty.Please Choose at least one year group");
         } else {
             //create subjectAllocationDoc asynchronously for Subject when it's successfully saved without setting totalPeriodsForYearGroup,
             //as that will be updated later
@@ -74,15 +76,17 @@ public class SubjectsController {
     @RequestMapping(path = "/{id}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public OutgoingPayload updateSubjectDoc(@PathVariable String id,
                                             @RequestBody SubjectDoc subjectDoc) {
-        if (subjectDocRepository.exists(id)) {
+        if (!subjectDocRepository.exists(id)) {
+            return new ErrorOutgoingPayload("Id does not exist");
+        } else if (subjectDoc.getSubjectYearGroupList().isEmpty() || Objects.isNull(subjectDoc.getSubjectYearGroupList())) {
+            return new ErrorOutgoingPayload("Subject YearGroups cannot be empty.Please Choose at least one year group");
+        } else {
             subjectDoc.setId(id);
             List<SubjectAllocationDoc> subjectAllocationDocsToDelete = subjectAllocationDocRepository.findBySubjectCode(subjectDoc.getSubjectCode());
             subjectAllocationDocRepository.delete(subjectAllocationDocsToDelete);
             SubjectDoc subjectDocSaved = subjectDocRepository.save(subjectDoc);
             deleteAndCreateSubjectAllocationDocs(subjectDoc);
             return new SuccessfulOutgoingPayload(subjectDocSaved);
-        } else {
-            return new ErrorOutgoingPayload("Id does not exist");
         }
 
     }
