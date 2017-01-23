@@ -29,14 +29,17 @@ public class SubjectsAllocationController {
     @Autowired
     SubjectDocRepository subjectDocRepository;
 
-    @RequestMapping(method = RequestMethod.PUT, path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public OutgoingPayload updateSubjectAllocation(@RequestParam String id,
-                                                   @RequestBody SubjectAllocationDoc subjectAllocationDoc) {
-        if (subjectAllocationDocRepository.exists(id)) {
-            subjectAllocationDoc.setId(id);
-            return new SuccessfulOutgoingPayload(subjectAllocationDocRepository.save(subjectAllocationDoc));
+    @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public OutgoingPayload updateSubjectAllocation(@RequestBody SubjectAllocationDoc subjectAllocationDoc) {
+        System.out.println("request recieved");
+
+        if (subjectAllocationDocRepository.findBySubjectCodeAndYearGroup(subjectAllocationDoc.getSubjectCode(), subjectAllocationDoc.getYearGroup()) != null) {
+            SubjectAllocationDoc existingSubDoc = subjectAllocationDocRepository.findBySubjectCodeAndYearGroup(subjectAllocationDoc.getSubjectCode(), subjectAllocationDoc.getYearGroup());
+            subjectAllocationDoc.setId(existingSubDoc.getId());
+            SubjectAllocationDoc subjectAllocationDocSaved = subjectAllocationDocRepository.save(subjectAllocationDoc);
+            return new SuccessfulOutgoingPayload(subjectAllocationDocSaved);
         } else {
-            return new ErrorOutgoingPayload("Id does not exist");
+            return new ErrorOutgoingPayload("Subject YearGroup and subject code does not exist");
         }
     }
 
