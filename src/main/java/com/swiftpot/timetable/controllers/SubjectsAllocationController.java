@@ -60,11 +60,14 @@ public class SubjectsAllocationController {
                 List<SubjectAllocationDoc> subjectAllocationDocs = subjectAllocationDocRepository.findBySubjectCode(subjectDoc.getSubjectCode());
                 ArrayList<Boolean> booleanArrayList = new ArrayList<>();
                 subjectAllocationDocs.forEach((subjectAllocationDoc) -> {
-                    if (Objects.isNull(subjectAllocationDoc.getTotalSubjectAllocation())) {
+                    int totalSubjectAllocation = subjectAllocationDoc.getTotalSubjectAllocation();
+                    System.out.println("Total Subject Allocation = " + totalSubjectAllocation);
+                    //uninitialized java int have a default of zero,zero means uninitialized
+                    if (Objects.equals(subjectAllocationDoc.getTotalSubjectAllocation(), 0)) {
                         //totalSubjectAllocation is null so add false
                         booleanArrayList.add(false);
                     } else {
-                        //totalSubjectAllocation is not null so add true since it's allocated
+                        //totalSubjectAllocation is not 0 so add true since it's allocated
                         booleanArrayList.add(true);
                     }
                     //now check if false exists in the list,then render subjectDoc's isAllSubjectYearGroupsAllocated as false
