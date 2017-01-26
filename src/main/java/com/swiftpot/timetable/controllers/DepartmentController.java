@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * @author Ace Programmer Rbk
  *         <Rodney Kwabena Boachie at [rodney@swiftpot.com,rbk.unlimited@gmail.com]> on
@@ -27,7 +29,7 @@ public class DepartmentController {
         return new SuccessfulOutgoingPayload(departmentDocSavedInDb);
     }
 
-    @RequestMapping(path = "/{id}",method = RequestMethod.PUT,consumes = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(path = "/{id}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
     private OutgoingPayload updateDepartment(@PathVariable String id,
                                              @RequestBody DepartmentDoc departmentDoc) {
         if (departmentDocRepository.exists(id)) {
@@ -36,6 +38,36 @@ public class DepartmentController {
             return new SuccessfulOutgoingPayload(departmentDocSavedInDb);
         } else {
             return new ErrorOutgoingPayload();
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET)
+    private OutgoingPayload getAllDepartments() {
+        List<DepartmentDoc> departmentDocs = departmentDocRepository.findAll();
+        if (departmentDocs.size() == 0) {
+            return new SuccessfulOutgoingPayload("Empty List", departmentDocs);
+        } else {
+            return new SuccessfulOutgoingPayload(departmentDocs);
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE, path = "/{id}")
+    private OutgoingPayload deleteDepartment(@PathVariable String id) {
+        if (departmentDocRepository.exists(id)) {
+            departmentDocRepository.delete(id);
+            return new SuccessfulOutgoingPayload(null);
+        } else {
+            return new ErrorOutgoingPayload("Id does not exist");
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE)
+    private OutgoingPayload deleteAllDepartments() {
+        if (departmentDocRepository.findAll().isEmpty()) {
+            return new ErrorOutgoingPayload("No departments to delete currently");
+        } else {
+            departmentDocRepository.deleteAll();
+            return new SuccessfulOutgoingPayload("deleted");
         }
     }
 }
