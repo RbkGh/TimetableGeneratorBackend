@@ -23,5 +23,7 @@ public interface TutorDocRepository extends MongoRepository<TutorDoc,String> {
      */
     List<TutorDoc> findByDepartmentId(String departmentId);
 
+    List<TutorDoc> findById(String id);
+
 
 }

@@ -7,11 +7,14 @@ import com.swiftpot.timetable.repository.DepartmentDocRepository;
 import com.swiftpot.timetable.repository.TutorDocRepository;
 import com.swiftpot.timetable.repository.db.model.DepartmentDoc;
 import com.swiftpot.timetable.repository.db.model.TutorDoc;
+import org.apache.commons.collections.IteratorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * @author Ace Programmer Rbk
@@ -37,7 +40,7 @@ public class DepartmentController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.POST, path = "/{departmentId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.POST, path = "tutor/{departmentId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     private OutgoingPayload addTutorToDepartment(@PathVariable String departmentId, @RequestParam(value = "tutorId", required = true) String tutorId) {
         if (departmentDocRepository.exists(departmentId)) {
             if (tutorDocRepository.exists(tutorId)) {
@@ -47,6 +50,24 @@ public class DepartmentController {
                 return new SuccessfulOutgoingPayload("Tutor Added to Department Successfully", tutorDocUpdatedWithDeptId);
             } else {
                 return new ErrorOutgoingPayload("Tutor Does not exist");
+            }
+        } else {
+            return new ErrorOutgoingPayload("Department does not exist");
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST, path = "tutors/{departmentId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    private OutgoingPayload addTutorsToDepartment(@PathVariable String departmentId, @RequestBody List<String> tutorIds) {
+        if (departmentDocRepository.exists(departmentId)) {
+            //convert list to stream,filter by expression,collect the output and convert streams to a List
+            tutorIds.removeIf((tutorId) -> !(tutorDocRepository.exists(tutorId)));
+            if (tutorIds.size() != 0) {
+                Iterable<TutorDoc> tutorDocsIterable = tutorDocRepository.findAll(tutorIds);
+                List<TutorDoc> tutorDocs = StreamSupport.stream(tutorDocsIterable.spliterator(), false)
+                        .collect(Collectors.toList());
+                return new SuccessfulOutgoingPayload(tutorDocs);
+            } else {
+                return new ErrorOutgoingPayload("None of the Tutors existed");
             }
         } else {
             return new ErrorOutgoingPayload("Department does not exist");
