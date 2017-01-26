@@ -14,4 +14,14 @@ public interface TutorDocRepository extends MongoRepository<TutorDoc,String> {
     List<TutorDoc> findAll();
 
     TutorDoc findByTutorCode(String tutorCode);
+
+    /**
+     * find all tutors belonging to a particular department
+     *
+     * @param departmentId
+     * @return
+     */
+    List<TutorDoc> findByDepartmentId(String departmentId);
+
+
 }

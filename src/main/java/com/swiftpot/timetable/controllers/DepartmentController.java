@@ -4,7 +4,9 @@ import com.swiftpot.timetable.model.ErrorOutgoingPayload;
 import com.swiftpot.timetable.model.OutgoingPayload;
 import com.swiftpot.timetable.model.SuccessfulOutgoingPayload;
 import com.swiftpot.timetable.repository.DepartmentDocRepository;
+import com.swiftpot.timetable.repository.TutorDocRepository;
 import com.swiftpot.timetable.repository.db.model.DepartmentDoc;
+import com.swiftpot.timetable.repository.db.model.TutorDoc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -22,20 +24,46 @@ public class DepartmentController {
 
     @Autowired
     DepartmentDocRepository departmentDocRepository;
+    @Autowired
+    TutorDocRepository tutorDocRepository;
 
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     private OutgoingPayload createDepartment(@RequestBody DepartmentDoc departmentDoc) {
-        DepartmentDoc departmentDocSavedInDb = departmentDocRepository.save(departmentDoc);
-        return new SuccessfulOutgoingPayload(departmentDocSavedInDb);
+        if (departmentDoc.getDeptHODdeputyTutorCode() != "" || departmentDoc.getDeptHODdeputyTutorCode() != null) {
+            DepartmentDoc departmentDocSavedInDb = departmentDocRepository.save(departmentDoc);
+            return new SuccessfulOutgoingPayload(departmentDocSavedInDb);
+        } else {
+            return new ErrorOutgoingPayload("HOD for the Department must be set");
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST, path = "/{departmentId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    private OutgoingPayload addTutorToDepartment(@PathVariable String departmentId, @RequestParam(value = "tutorId", required = true) String tutorId) {
+        if (departmentDocRepository.exists(departmentId)) {
+            if (tutorDocRepository.exists(tutorId)) {
+                TutorDoc tutorDoc = tutorDocRepository.findOne(tutorId);
+                tutorDoc.setDepartmentId(departmentId);
+                TutorDoc tutorDocUpdatedWithDeptId = tutorDocRepository.save(tutorDoc);
+                return new SuccessfulOutgoingPayload("Tutor Added to Department Successfully", tutorDocUpdatedWithDeptId);
+            } else {
+                return new ErrorOutgoingPayload("Tutor Does not exist");
+            }
+        } else {
+            return new ErrorOutgoingPayload("Department does not exist");
+        }
     }
 
     @RequestMapping(path = "/{id}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
     private OutgoingPayload updateDepartment(@PathVariable String id,
                                              @RequestBody DepartmentDoc departmentDoc) {
         if (departmentDocRepository.exists(id)) {
-            departmentDoc.setId(id);
-            DepartmentDoc departmentDocSavedInDb = departmentDocRepository.save(departmentDoc);
-            return new SuccessfulOutgoingPayload(departmentDocSavedInDb);
+            if (departmentDoc.getDeptHODdeputyTutorCode() != "" || departmentDoc.getDeptHODdeputyTutorCode() != null) {
+                departmentDoc.setId(id);
+                DepartmentDoc departmentDocSavedInDb = departmentDocRepository.save(departmentDoc);
+                return new SuccessfulOutgoingPayload(departmentDocSavedInDb);
+            } else {
+                return new ErrorOutgoingPayload("HOD for the Department must be set");
+            }
         } else {
             return new ErrorOutgoingPayload();
         }
@@ -51,11 +79,15 @@ public class DepartmentController {
         }
     }
 
+    /**
+     * @param id
+     * @return
+     */
     @RequestMapping(method = RequestMethod.DELETE, path = "/{id}")
     private OutgoingPayload deleteDepartment(@PathVariable String id) {
         if (departmentDocRepository.exists(id)) {
             departmentDocRepository.delete(id);
-            return new SuccessfulOutgoingPayload(null);
+            return new SuccessfulOutgoingPayload("Deleted Successfully");
         } else {
             return new ErrorOutgoingPayload("Id does not exist");
         }
@@ -70,4 +102,56 @@ public class DepartmentController {
             return new SuccessfulOutgoingPayload("deleted");
         }
     }
+
+    @RequestMapping(path = "/tutors/{departmentId}", method = RequestMethod.GET)
+    private OutgoingPayload getAllTutorsByDepartmentId(@PathVariable String departmentId) {
+        if (departmentDocRepository.exists(departmentId)) {
+            List<TutorDoc> tutorDocs = tutorDocRepository.findByDepartmentId(departmentId);
+            return new SuccessfulOutgoingPayload(tutorDocs);
+        } else {
+            return new ErrorOutgoingPayload("Id does not Exist");
+        }
+    }
+
+    /**
+     * NOTE!!!!!:DO NOT DELETE THE TUTOR ACTUALLY,JUST REMOVE HIM FROM DEPARTMENT BY SETTING departmentId to null or empty string=>"".
+     *
+     * @param departmentId
+     * @param tutorId
+     * @return
+     */
+    @RequestMapping(path = "/tutor/{departmentId}", method = RequestMethod.DELETE)
+    private OutgoingPayload deleteTutorByDepartmentId(@PathVariable String departmentId, @RequestParam(value = "tutorId", required = true) String tutorId) {
+        if (departmentDocRepository.exists(departmentId)) {
+            if (tutorDocRepository.exists(tutorId)) {
+                TutorDoc tutorDoc = tutorDocRepository.findOne(tutorId);
+                tutorDoc.setDepartmentId(null);
+                TutorDoc tutorDocSaved = tutorDocRepository.save(tutorDoc);
+                return new SuccessfulOutgoingPayload("Saved successfully", tutorDocSaved);
+            } else {
+                return new ErrorOutgoingPayload("Tutor does not exist");
+            }
+        } else {
+            return new ErrorOutgoingPayload("Department does not Exist");
+        }
+    }
+
+    @RequestMapping(path = "/tutors/{departmentId}", method = RequestMethod.DELETE)
+    private OutgoingPayload deleteAllTutorsByDepartmentId(@PathVariable String departmentId) {
+        if (departmentDocRepository.exists(departmentId)) {
+            List<TutorDoc> tutorDocs = tutorDocRepository.findByDepartmentId(departmentId);
+            if (tutorDocs.size() == 0) {
+                return new ErrorOutgoingPayload("Nothing to delete");
+            } else {
+                tutorDocs.forEach((tutorDoc) -> {
+                    tutorDoc.setDepartmentId(null);
+                });
+                List<TutorDoc> tutorDocsUpdated = tutorDocRepository.save(tutorDocs);
+                return new SuccessfulOutgoingPayload(tutorDocsUpdated);
+            }
+        } else {
+            return new ErrorOutgoingPayload("Department does not Exist");
+        }
+    }
+
 }

@@ -30,7 +30,12 @@ public class TutorDoc extends Person {
      */
     private String tutorSubjectSpeciality;
 
-
+    /**
+     * the departmentId is the the dept unique Id
+     * that the tutor belongs to,eg AB43R could be the
+     * id of Mechanical Engineering Department
+     */
+    private String departmentId;
 
     public TutorDoc() {
         super();
@@ -97,5 +102,13 @@ public class TutorDoc extends Person {
     public TutorDoc setTutorSubjectSpeciality(String tutorSubjectSpeciality) {
         this.tutorSubjectSpeciality = tutorSubjectSpeciality;
         return this;
+    }
+
+    public String getDepartmentId() {
+        return departmentId;
+    }
+
+    public void setDepartmentId(String departmentId) {
+        this.departmentId = departmentId;
     }
 }

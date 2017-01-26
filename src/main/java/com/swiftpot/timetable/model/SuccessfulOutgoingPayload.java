@@ -11,6 +11,10 @@ public class SuccessfulOutgoingPayload extends OutgoingPayload {
         super("Success", 0, responseObject);
     }
 
+    public SuccessfulOutgoingPayload(String message) {
+        super(message, 0, null);
+    }
+
     public SuccessfulOutgoingPayload(String message,Object responseObject) {
         super(message, 0, responseObject);
     }

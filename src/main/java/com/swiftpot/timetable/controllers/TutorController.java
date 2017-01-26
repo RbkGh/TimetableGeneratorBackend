@@ -3,6 +3,7 @@ package com.swiftpot.timetable.controllers;
 import com.swiftpot.timetable.model.ErrorOutgoingPayload;
 import com.swiftpot.timetable.model.OutgoingPayload;
 import com.swiftpot.timetable.model.SuccessfulOutgoingPayload;
+import com.swiftpot.timetable.repository.DepartmentDocRepository;
 import com.swiftpot.timetable.repository.TutorDocRepository;
 import com.swiftpot.timetable.repository.db.model.TutorDoc;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,8 @@ public class TutorController {
 
     @Autowired
     TutorDocRepository tutorDocRepository;
+    @Autowired
+    DepartmentDocRepository departmentDocRepository;
 
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     private OutgoingPayload createTutor(@RequestBody TutorDoc tutorDoc) {

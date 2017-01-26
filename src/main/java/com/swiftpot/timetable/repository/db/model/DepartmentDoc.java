@@ -18,8 +18,6 @@ public class DepartmentDoc {
 
     private String deptName;
 
-    private List<String> tutorCodeList;
-
     /**
      * HOD tutorCode
      */
@@ -47,14 +45,6 @@ public class DepartmentDoc {
 
     public void setDeptName(String deptName) {
         this.deptName = deptName;
-    }
-
-    public List<String> getTutorCodeList() {
-        return tutorCodeList;
-    }
-
-    public void setTutorCodeList(List<String> tutorCodeList) {
-        this.tutorCodeList = tutorCodeList;
     }
 
     public String getDeptHODtutorCode() {
