@@ -3,8 +3,6 @@ package com.swiftpot.timetable.repository.db.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.List;
-
 /**
  * @author Ace Programmer Rbk
  *         <Rodney Kwabena Boachie at [rodney@swiftpot.com,rbk.unlimited@gmail.com]> on
@@ -19,14 +17,14 @@ public class DepartmentDoc {
     private String deptName;
 
     /**
-     * HOD tutorCode
+     * HOD tutorId,hod tutor id of hod
      */
-    private String deptHODtutorCode;
+    private String deptHODtutorId;
 
     /**
-     * assistant HOD tutorCode
+     * assistant HOD tutor id
      */
-    private String deptHODdeputyTutorCode;
+    private String deptHODdeputyTutorId;
 
     public DepartmentDoc() {
     }
@@ -47,19 +45,19 @@ public class DepartmentDoc {
         this.deptName = deptName;
     }
 
-    public String getDeptHODtutorCode() {
-        return deptHODtutorCode;
+    public String getDeptHODtutorId() {
+        return deptHODtutorId;
     }
 
-    public void setDeptHODtutorCode(String deptHODtutorCode) {
-        this.deptHODtutorCode = deptHODtutorCode;
+    public void setDeptHODtutorId(String deptHODtutorId) {
+        this.deptHODtutorId = deptHODtutorId;
     }
 
-    public String getDeptHODdeputyTutorCode() {
-        return deptHODdeputyTutorCode;
+    public String getDeptHODdeputyTutorId() {
+        return deptHODdeputyTutorId;
     }
 
-    public void setDeptHODdeputyTutorCode(String deptHODdeputyTutorCode) {
-        this.deptHODdeputyTutorCode = deptHODdeputyTutorCode;
+    public void setDeptHODdeputyTutorId(String deptHODdeputyTutorId) {
+        this.deptHODdeputyTutorId = deptHODdeputyTutorId;
     }
 }

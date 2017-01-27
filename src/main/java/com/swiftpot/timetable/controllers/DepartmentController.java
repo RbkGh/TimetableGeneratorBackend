@@ -7,7 +7,6 @@ import com.swiftpot.timetable.repository.DepartmentDocRepository;
 import com.swiftpot.timetable.repository.TutorDocRepository;
 import com.swiftpot.timetable.repository.db.model.DepartmentDoc;
 import com.swiftpot.timetable.repository.db.model.TutorDoc;
-import org.apache.commons.collections.IteratorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -32,9 +31,16 @@ public class DepartmentController {
 
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     private OutgoingPayload createDepartment(@RequestBody DepartmentDoc departmentDoc) {
-        if (departmentDoc.getDeptHODdeputyTutorCode() != "" || departmentDoc.getDeptHODdeputyTutorCode() != null) {
-            DepartmentDoc departmentDocSavedInDb = departmentDocRepository.save(departmentDoc);
-            return new SuccessfulOutgoingPayload(departmentDocSavedInDb);
+        if (departmentDoc.getDeptHODdeputyTutorId() != "" || departmentDoc.getDeptHODdeputyTutorId() != null) {
+            if (tutorDocRepository.exists(departmentDoc.getDeptHODtutorId())) {
+                DepartmentDoc departmentDocSavedInDb = departmentDocRepository.save(departmentDoc);
+                TutorDoc tutorDoc = tutorDocRepository.findOne(departmentDoc.getDeptHODtutorId());
+                tutorDoc.setDepartmentId(departmentDocSavedInDb.getId());//update departmentId field of tutor to the department id
+                TutorDoc tutorDocUpdatedWithDepartmentId = tutorDocRepository.save(tutorDoc);//update in db
+                return new SuccessfulOutgoingPayload(departmentDocSavedInDb);
+            } else {
+                return new ErrorOutgoingPayload("H.O.D does not exist");
+            }
         } else {
             return new ErrorOutgoingPayload("HOD for the Department must be set");
         }
@@ -78,7 +84,7 @@ public class DepartmentController {
     private OutgoingPayload updateDepartment(@PathVariable String id,
                                              @RequestBody DepartmentDoc departmentDoc) {
         if (departmentDocRepository.exists(id)) {
-            if (departmentDoc.getDeptHODdeputyTutorCode() != "" || departmentDoc.getDeptHODdeputyTutorCode() != null) {
+            if (departmentDoc.getDeptHODdeputyTutorId() != "" || departmentDoc.getDeptHODdeputyTutorId() != null) {
                 departmentDoc.setId(id);
                 DepartmentDoc departmentDocSavedInDb = departmentDocRepository.save(departmentDoc);
                 return new SuccessfulOutgoingPayload(departmentDocSavedInDb);
