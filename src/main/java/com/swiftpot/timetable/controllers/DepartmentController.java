@@ -107,6 +107,7 @@ public class DepartmentController {
     }
 
     /**
+     * TODO onDelete and onDeleteAll of department(s),retrieve hod id and set department id of hod tutor to null or empty
      * @param id
      * @return
      */
