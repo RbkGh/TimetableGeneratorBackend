@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -107,13 +108,20 @@ public class DepartmentController {
     }
 
     /**
-     * TODO onDelete and onDeleteAll of department(s),retrieve hod id and set department id of hod tutor to null or empty
+     * TODO DONE! onDelete and onDeleteAll of department(s),retrieve hod id and set department id of hod tutor to null or empty
      * @param id
      * @return
      */
     @RequestMapping(method = RequestMethod.DELETE, path = "/{id}")
     private OutgoingPayload deleteDepartment(@PathVariable String id) {
         if (departmentDocRepository.exists(id)) {
+            List<TutorDoc> tutorDocs = tutorDocRepository.findByDepartmentId(id);
+            tutorDocs.stream().forEach(
+                    (tutorDocToRemoveDepartmentId -> {
+                        tutorDocToRemoveDepartmentId.setDepartmentId("");//set each tutorDoc departmentId to empty
+                    })
+            );
+            tutorDocRepository.save(tutorDocs);//now save back into db and delete department finally
             departmentDocRepository.delete(id);
             return new SuccessfulOutgoingPayload("Deleted Successfully");
         } else {
@@ -126,6 +134,19 @@ public class DepartmentController {
         if (departmentDocRepository.findAll().isEmpty()) {
             return new ErrorOutgoingPayload("No departments to delete currently");
         } else {
+            List<DepartmentDoc> departmentDocs = departmentDocRepository.findAll();
+            List<TutorDoc> tutorDocsToRemoveDepartmentIds = new ArrayList<>();//find all the tutorDocs with this departmentId
+            departmentDocs.forEach(
+                    (departmentDoc) -> {
+                        List<TutorDoc> tutorDocs = tutorDocRepository.findByDepartmentId(departmentDoc.getId());
+                        tutorDocsToRemoveDepartmentIds.addAll(tutorDocs);
+                    });
+            tutorDocsToRemoveDepartmentIds.stream().forEach(
+                    (tutorDocToRemoveDepartmentId -> {
+                        tutorDocToRemoveDepartmentId.setDepartmentId("");//set each tutorDoc departmentId to empty
+                    })
+            );
+            tutorDocRepository.save(tutorDocsToRemoveDepartmentIds);//now save them back into db
             departmentDocRepository.deleteAll();
             return new SuccessfulOutgoingPayload("deleted");
         }
