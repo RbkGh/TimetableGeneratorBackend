@@ -72,9 +72,13 @@ public class DepartmentController {
                 Iterable<TutorDoc> tutorDocsIterable = tutorDocRepository.findAll(tutorIds);
                 List<TutorDoc> tutorDocs = StreamSupport.stream(tutorDocsIterable.spliterator(), false)
                         .collect(Collectors.toList());
-                return new SuccessfulOutgoingPayload(tutorDocs);
+                tutorDocs.forEach(
+                        tutorDoc -> tutorDoc.setDepartmentId(departmentId)
+                ); //set each tutorDoc's departmentId to the departmentId of department.
+                List<TutorDoc> tutorDocsSaved = tutorDocRepository.save(tutorDocs);
+                return new SuccessfulOutgoingPayload(tutorDocsSaved);
             } else {
-                return new ErrorOutgoingPayload("None of the Tutors existed");
+                return new ErrorOutgoingPayload("Empty tutors.Please choose Tutors to add to Department.");
             }
         } else {
             return new ErrorOutgoingPayload("Department does not exist");
@@ -93,7 +97,7 @@ public class DepartmentController {
                 return new ErrorOutgoingPayload("HOD for the Department must be set");
             }
         } else {
-            return new ErrorOutgoingPayload();
+            return new ErrorOutgoingPayload("Department does not exist");
         }
     }
 
