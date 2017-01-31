@@ -47,8 +47,8 @@ public class ProgrammeGroupController {
         }
     }
 
-    @RequestMapping(path = "/", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    private OutgoingPayload getProgrammeGroupByYearGroupNumber(@RequestParam int yearGroupNo) {
+    @RequestMapping(method=RequestMethod.GET,consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    private OutgoingPayload getProgrammeGroupByYearGroupNumber(@RequestParam(value = "yearGroupNo", required = true) int yearGroupNo) {
         List<ProgrammeGroupDoc> programmeGroupDocs = programmeGroupDocRepository.findByYearGroup(yearGroupNo);
         if (Objects.isNull(programmeGroupDocs)) {
             return new ErrorOutgoingPayload("Yeargroup number does not exist");
