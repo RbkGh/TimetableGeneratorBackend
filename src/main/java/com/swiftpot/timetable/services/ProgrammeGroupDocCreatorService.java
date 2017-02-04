@@ -22,6 +22,13 @@ public class ProgrammeGroupDocCreatorService {
     @Autowired
     TimeTableSuperDocRepository timeTableSuperDocRepository;
 
+    /**
+     * TODO URGENT!!!!sort incoming list into various yeargroups list before generating the created programmeCode for each yearGroup
+     *
+     * @param programmeGroupDocs
+     * @return
+     * @throws Exception
+     */
     public List<ProgrammeGroupDoc> createProgramGroupDocWithConstraintsCateredForAndSave(List<ProgrammeGroupDoc> programmeGroupDocs) throws Exception {
 
         List<ProgrammeGroupDoc> finalProgrammeGroupDocs = new ArrayList<>(0);
