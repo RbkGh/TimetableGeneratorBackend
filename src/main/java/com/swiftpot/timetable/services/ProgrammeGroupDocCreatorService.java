@@ -23,7 +23,7 @@ public class ProgrammeGroupDocCreatorService {
     TimeTableSuperDocRepository timeTableSuperDocRepository;
 
     /**
-     * TODO URGENT!!!!sort incoming list into various yeargroups list before generating the created programmeCode for each yearGroup
+     * TODO DONE!!!! URGENT!!!!sort incoming list into various yeargroups list before generating the created programmeCode for each yearGroup
      *
      * @param programmeGroupDocs
      * @return
@@ -31,7 +31,43 @@ public class ProgrammeGroupDocCreatorService {
      */
     public List<ProgrammeGroupDoc> createProgramGroupDocWithConstraintsCateredForAndSave(List<ProgrammeGroupDoc> programmeGroupDocs) throws Exception {
 
-        List<ProgrammeGroupDoc> finalProgrammeGroupDocs = new ArrayList<>(0);
+        List<ProgrammeGroupDoc> finalProgrammeGroupDocsToBeSavedInDb = createAllProgrammeCodesByFilteringYearGroupsAndProcessing(programmeGroupDocs);
+        List<ProgrammeGroupDoc> r3 = programmeGroupDocRepository.save(finalProgrammeGroupDocsToBeSavedInDb);
+        for (ProgrammeGroupDoc x2 : r3) {
+            System.out.println("\n\nEntities after saved in db =" + x2.toString());
+        }
+        return r3;
+    }
+
+    /**
+     * this block of code is stupid,should have been encapsulated in parent method but for unit testing sake,i broke it down here.
+     *
+     * @param programmeGroupDocs
+     * @return
+     * @throws Exception
+     */
+    public List<ProgrammeGroupDoc> createAllProgrammeCodesByFilteringYearGroupsAndProcessing(List<ProgrammeGroupDoc> programmeGroupDocs) throws Exception {
+        List<Integer> yearGroups = programmeGroupDocs.get(0).getYearGroupList();
+
+        List<ProgrammeGroupDoc> finalProgrammeGroupDocsToBeSavedInDb = new ArrayList<>();
+        for (int i = 0; i < yearGroups.size(); i++) {
+            int currentYearGroup = yearGroups.get(i);
+            //find all entities in current yeargroup
+            List<ProgrammeGroupDoc> programmeGroupDocsInYearGroup = new ArrayList<>();
+            programmeGroupDocs.forEach(programmeGroupDoc -> {
+                if (programmeGroupDoc.getYearGroup() == currentYearGroup) {
+                    programmeGroupDocsInYearGroup.add(programmeGroupDoc);
+                }
+            });
+            if (!programmeGroupDocsInYearGroup.isEmpty()) {
+                //create programmeCodes for YearGroup and add to finalList to be saved in db
+                finalProgrammeGroupDocsToBeSavedInDb.addAll(createProgrammeCodesForYearGroup(programmeGroupDocsInYearGroup));
+            }
+        }
+        return finalProgrammeGroupDocsToBeSavedInDb;
+    }
+
+    private List<ProgrammeGroupDoc> createProgrammeCodesForYearGroup(List<ProgrammeGroupDoc> programmeGroupDocs) throws Exception {
         int numberOfProgrammeGroupDocs = programmeGroupDocs.size();
 
         for (int i = 0; i < numberOfProgrammeGroupDocs; i++) {
@@ -65,15 +101,8 @@ public class ProgrammeGroupDocCreatorService {
                     throw new Exception("maximum of 7classes are allowed");
             }
         }
-
-        List<ProgrammeGroupDoc> r3 = programmeGroupDocRepository.save(programmeGroupDocs);
-        for (ProgrammeGroupDoc x2 : r3) {
-            System.out.println("\n\nEntities after saved in db =" + x2.toString());
-        }
-
-        return finalProgrammeGroupDocs;
+        return programmeGroupDocs;
     }
-
 
     private String createProgrammeCode(String programmeInitials, int yearGroup, String alphabetToAppend) {
         String generatedProgrammeCode = programmeInitials + String.valueOf(yearGroup) + alphabetToAppend;
