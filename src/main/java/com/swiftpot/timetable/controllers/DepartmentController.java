@@ -92,7 +92,7 @@ public class DepartmentController {
     }
 
     /**
-     * TODO uRGENT! DO NOT ALLOW USER TO UPDATE THE PROGRAMMEiNITIALS ON fRONTEND.!!
+     * TODO DONE!! URGENT! DO NOT ALLOW USER TO UPDATE THE PROGRAMMEiNITIALS & PROGRAMMEsUBJECTcODEID LIST ON fRONTEND.!!
      *
      * @param id
      * @param departmentDoc
