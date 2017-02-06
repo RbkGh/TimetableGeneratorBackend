@@ -9,4 +9,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
  *         02-Jan-17 @ 9:16 PM
  */
 public interface DepartmentDocRepository extends MongoRepository<DepartmentDoc,String> {
+    DepartmentDoc findByDeptProgrammeInitials(String deptProgrammeInitials);
 }

@@ -14,28 +14,30 @@ import java.util.List;
 @Document(collection = "ProgrammeGroupDoc")
 public class ProgrammeGroupDoc {
 
+    /**
+     * @deprecated use {@linkplain DepartmentDoc.programmeSubjectsDocIdList} instead
+     */
+    @Deprecated
+    List<String> programmeSubjectsCodeList;
     @Id
     private String id;
-
     private String programmeFullName;
-
+    /**
+     * programmeInitials,do not allow it to be editable on frontend,if it must be changed,then ProgrammeGroupDoc must be deleted.
+     */
     private String programmeInitials;
-
     /*
     The current yearGroup of the students offering the course
      */
     private int yearGroup;
-
     /**
      * programmeCode generation algorithm = programmeInitials+yearGroup+A,B,C,D,E in that order
      */
     private String programmeCode;
-
     /**
      * default Classroomid  for programeGroup,ie eg. the classroom for Science 1
      */
     private String defaultClassRoomId;
-
     /**
      * @param yearGroupList
      * <p>The specific years partaking in that course</p>
@@ -43,9 +45,6 @@ public class ProgrammeGroupDoc {
      * only Year 1 Students may be part initially not year 2 or 3 students
      */
     private List<Integer> yearGroupList;
-
-    List<String> programmeSubjectsCodeList;
-
     private boolean technicalWorkshopOrLabRequired;
 
     public ProgrammeGroupDoc() {
@@ -107,10 +106,16 @@ public class ProgrammeGroupDoc {
         this.yearGroupList = yearGroupList;
     }
 
+    /**
+     * @deprecated use {@linkplain DepartmentDoc.programmeSubjectsDocIdList} instead
+     */
     public List<String> getProgrammeSubjectsCodeList() {
         return programmeSubjectsCodeList;
     }
 
+    /**
+     * @deprecated use {@linkplain DepartmentDoc.programmeSubjectsDocIdList} instead
+     */
     public void setProgrammeSubjectsCodeList(List<String> programmeSubjectsCodeList) {
         this.programmeSubjectsCodeList = programmeSubjectsCodeList;
     }

@@ -33,14 +33,20 @@ public class DepartmentController {
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     private OutgoingPayload createDepartment(@RequestBody DepartmentDoc departmentDoc) {
         if (departmentDoc.getDeptHODdeputyTutorId() != "" || departmentDoc.getDeptHODdeputyTutorId() != null) {
-            if (tutorDocRepository.exists(departmentDoc.getDeptHODtutorId())) {
-                DepartmentDoc departmentDocSavedInDb = departmentDocRepository.save(departmentDoc);
-                TutorDoc tutorDoc = tutorDocRepository.findOne(departmentDoc.getDeptHODtutorId());
-                tutorDoc.setDepartmentId(departmentDocSavedInDb.getId());//update departmentId field of tutor to the department id
-                TutorDoc tutorDocUpdatedWithDepartmentId = tutorDocRepository.save(tutorDoc);//update in db
-                return new SuccessfulOutgoingPayload(departmentDocSavedInDb);
+            String deptProgrammeInitials = departmentDoc.getDeptProgrammeInitials();
+            DepartmentDoc departmentDocWithThisProgrammeInitials = departmentDocRepository.findByDeptProgrammeInitials(deptProgrammeInitials);
+            if (departmentDocWithThisProgrammeInitials != null) {
+                return new ErrorOutgoingPayload("ProgrammeGroup Has Been set already to a Different Department");
             } else {
-                return new ErrorOutgoingPayload("H.O.D does not exist");
+                if (tutorDocRepository.exists(departmentDoc.getDeptHODtutorId())) {
+                    DepartmentDoc departmentDocSavedInDb = departmentDocRepository.save(departmentDoc);
+                    TutorDoc tutorDoc = tutorDocRepository.findOne(departmentDoc.getDeptHODtutorId());
+                    tutorDoc.setDepartmentId(departmentDocSavedInDb.getId());//update departmentId field of tutor to the department id
+                    TutorDoc tutorDocUpdatedWithDepartmentId = tutorDocRepository.save(tutorDoc);//update in db
+                    return new SuccessfulOutgoingPayload(departmentDocSavedInDb);
+                } else {
+                    return new ErrorOutgoingPayload("H.O.D does not exist");
+                }
             }
         } else {
             return new ErrorOutgoingPayload("HOD for the Department must be set");
@@ -85,6 +91,13 @@ public class DepartmentController {
         }
     }
 
+    /**
+     * TODO uRGENT! DO NOT ALLOW USER TO UPDATE THE PROGRAMMEiNITIALS ON fRONTEND.!!
+     *
+     * @param id
+     * @param departmentDoc
+     * @return
+     */
     @RequestMapping(path = "/{id}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
     private OutgoingPayload updateDepartment(@PathVariable String id,
                                              @RequestBody DepartmentDoc departmentDoc) {
@@ -113,6 +126,7 @@ public class DepartmentController {
 
     /**
      * TODO DONE! onDelete and onDeleteAll of department(s),retrieve hod id and set department id of hod tutor to null or empty
+     *
      * @param id
      * @return
      */

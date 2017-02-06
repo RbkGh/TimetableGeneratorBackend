@@ -3,6 +3,8 @@ package com.swiftpot.timetable.repository.db.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.List;
+
 /**
  * @author Ace Programmer Rbk
  *         <Rodney Kwabena Boachie at [rodney@swiftpot.com,rbk.unlimited@gmail.com]> on
@@ -11,20 +13,25 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "DepartmentDoc")
 public class DepartmentDoc {
 
+    /**
+     * Disallow Editing of ProgrammeSubjectsDocIdList during updating of doc if possible
+     */
+    public List<String> programmeSubjectsDocIdList;
     @Id
     private String id;
-
     private String deptName;
-
     /**
      * HOD tutorId,hod tutor id of hod
      */
     private String deptHODtutorId;
-
     /**
      * assistant HOD tutor id
      */
     private String deptHODdeputyTutorId;
+    /**
+     * TODO DONE!!! Ensure that programmeInitials is never duplicated during creation and updating of this Doc
+     */
+    private String deptProgrammeInitials;
 
     public DepartmentDoc() {
     }
@@ -59,5 +66,21 @@ public class DepartmentDoc {
 
     public void setDeptHODdeputyTutorId(String deptHODdeputyTutorId) {
         this.deptHODdeputyTutorId = deptHODdeputyTutorId;
+    }
+
+    public String getDeptProgrammeInitials() {
+        return deptProgrammeInitials;
+    }
+
+    public void setDeptProgrammeInitials(String deptProgrammeInitials) {
+        this.deptProgrammeInitials = deptProgrammeInitials;
+    }
+
+    public List<String> getProgrammeSubjectsDocIdList() {
+        return programmeSubjectsDocIdList;
+    }
+
+    public void setProgrammeSubjectsDocIdList(List<String> programmeSubjectsDocIdList) {
+        this.programmeSubjectsDocIdList = programmeSubjectsDocIdList;
     }
 }
