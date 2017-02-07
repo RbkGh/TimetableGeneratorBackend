@@ -3,14 +3,17 @@ package com.swiftpot.timetable.controllers;
 import com.swiftpot.timetable.model.ErrorOutgoingPayload;
 import com.swiftpot.timetable.model.OutgoingPayload;
 import com.swiftpot.timetable.model.SuccessfulOutgoingPayload;
+import com.swiftpot.timetable.repository.DepartmentDocRepository;
 import com.swiftpot.timetable.repository.SubjectAllocationDocRepository;
 import com.swiftpot.timetable.repository.SubjectDocRepository;
+import com.swiftpot.timetable.repository.db.model.DepartmentDoc;
 import com.swiftpot.timetable.repository.db.model.SubjectAllocationDoc;
 import com.swiftpot.timetable.repository.db.model.SubjectDoc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -29,6 +32,8 @@ public class SubjectsController {
     SubjectDocRepository subjectDocRepository;
     @Autowired
     SubjectAllocationDocRepository subjectAllocationDocRepository;
+    @Autowired
+    DepartmentDocRepository departmentDocRepository;
 
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public OutgoingPayload createSubjectDoc(@RequestBody SubjectDoc subjectDoc) {
@@ -94,15 +99,29 @@ public class SubjectsController {
     @RequestMapping(path = "/{id}", method = RequestMethod.DELETE)
     public OutgoingPayload deleteSubjectDoc(@PathVariable String id) {
         if (subjectDocRepository.exists(id)) {
-            //we need to delete the accompanying SubjectAllocationDoc,hence retrieve the subjectCode before deleting
-            new Thread(() -> {
-                String subjectCode = subjectDocRepository.findOne(id).getSubjectCode();
-                List<SubjectAllocationDoc> subjectAllocationDocsToDelete = subjectAllocationDocRepository.findBySubjectCode(subjectCode);
-                subjectAllocationDocRepository.delete(subjectAllocationDocsToDelete);
-                subjectDocRepository.delete(id);
-            }).start();
+            String subjectCode = subjectDocRepository.findOne(id).getSubjectCode();
+            List<DepartmentDoc> allDepartmentDocs = departmentDocRepository.findAll();
 
-            return new SuccessfulOutgoingPayload("Deleted Successfully");
+            if (!allDepartmentDocs.isEmpty()) {
+                List<DepartmentDoc> departmentDocsWithProgrammeSubjectDocId = new ArrayList<>();
+                allDepartmentDocs.forEach(departmentDoc -> {
+                    departmentDoc.getProgrammeSubjectsDocIdList().forEach(programmeSubjectDocId -> {
+                        if (id.equalsIgnoreCase(programmeSubjectDocId)) {
+                            departmentDocsWithProgrammeSubjectDocId.add(departmentDoc);
+                        }
+                    });
+                });
+                if (departmentDocsWithProgrammeSubjectDocId.isEmpty()) {
+                    deleteSubjectAndAccompanyingSubjectAllocation(subjectCode, id);
+                    return new SuccessfulOutgoingPayload("Deleted Successfully");
+                } else {
+                    return new ErrorOutgoingPayload("Can not be deleted because a department holds a reference to this subject.");
+                }
+            } else { //there are no departments hence,continue to delete the subject
+                deleteSubjectAndAccompanyingSubjectAllocation(subjectCode, id);
+                return new SuccessfulOutgoingPayload("Deleted Successfully");
+            }
+
         } else {
             return new ErrorOutgoingPayload("Id does not exist");
         }
@@ -117,6 +136,12 @@ public class SubjectsController {
         } else {
             return new ErrorOutgoingPayload("No Subjects To Delete Currently");
         }
+    }
+
+    private void deleteSubjectAndAccompanyingSubjectAllocation(String subjectCode, String subjectID) {
+        List<SubjectAllocationDoc> subjectAllocationDocsToDelete = subjectAllocationDocRepository.findBySubjectCode(subjectCode);
+        subjectAllocationDocRepository.delete(subjectAllocationDocsToDelete);
+        subjectDocRepository.delete(subjectID);
     }
 
     /**
