@@ -37,6 +37,8 @@ public class TutorDoc extends Person {
      */
     private String departmentId;
 
+    //private List<>
+
     public TutorDoc() {
         super();
     }
