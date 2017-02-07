@@ -30,14 +30,15 @@ public class ProgrammeGroupController {
     @RequestMapping(path = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     private OutgoingPayload createProgrammeGroup(@RequestBody List<ProgrammeGroupDoc> programmeGroupDocs) throws Exception {
         if (!programmeGroupDocs.isEmpty()) {
-            String programmeInitials = programmeGroupDocs.get(0).getProgrammeInitials();//assume all the programmeInitials are the same since that's how we are bringing it from UI
+            List<ProgrammeGroupDoc> programmeGroupDocsWithProgrammeInitialsInCaps = convertAllProgrammeInitialsToUpperCase(programmeGroupDocs);
+            String programmeInitials = programmeGroupDocsWithProgrammeInitialsInCaps.get(0).getProgrammeInitials();//assume all the programmeInitials are the same since that's how we are bringing it from UI
             List<ProgrammeGroupDoc> programmeGroupDocsInDbCurrentlyWithCurrentProgInitials = programmeGroupDocRepository.findByProgrammeInitials(programmeInitials);
             if ((!programmeGroupDocsInDbCurrentlyWithCurrentProgInitials.isEmpty()) ||
                     Objects.isNull(programmeGroupDocsInDbCurrentlyWithCurrentProgInitials)) {
                 return new ErrorOutgoingPayload("Error Occured,A Programme with programmeInitials of " + programmeInitials + " exists already");
             } else {
                 List<ProgrammeGroupDoc> programmeGroupDocsSaved =
-                        programmeGroupDocCreatorService.createProgramGroupDocWithConstraintsCateredForAndSave(programmeGroupDocs);
+                        programmeGroupDocCreatorService.createProgramGroupDocWithConstraintsCateredForAndSave(programmeGroupDocsWithProgrammeInitialsInCaps);
                 if (Objects.isNull(programmeGroupDocsSaved) || (!programmeGroupDocsSaved.isEmpty())) {
                     return new ErrorOutgoingPayload("Error Occured,could not create ProgrammeGroup");
                 } else {
@@ -92,10 +93,19 @@ public class ProgrammeGroupController {
     private OutgoingPayload updateProgrammeGroup(@PathVariable String id,
                                                  @RequestBody ProgrammeGroupDoc programmeGroupDoc) {
         if (programmeGroupDocRepository.exists(id)) {
+            programmeGroupDoc.setProgrammeInitials(programmeGroupDoc.getProgrammeInitials().toUpperCase());
             programmeGroupDoc.setId(id);
             return new SuccessfulOutgoingPayload(programmeGroupDocRepository.save(programmeGroupDoc));
         } else {
             return new ErrorOutgoingPayload("Id does not exist");
         }
+    }
+
+    private List<ProgrammeGroupDoc> convertAllProgrammeInitialsToUpperCase(List<ProgrammeGroupDoc> programmeGroupDocs) {
+        programmeGroupDocs.forEach(programmeGroupDoc -> {
+            programmeGroupDoc.setProgrammeInitials(programmeGroupDoc.getProgrammeInitials().toUpperCase());
+        });
+        programmeGroupDocs.forEach(programmeGroupDoc -> System.out.println("ProgrammeInitials in caps =" + programmeGroupDoc.getProgrammeInitials()));
+        return programmeGroupDocs;
     }
 }
