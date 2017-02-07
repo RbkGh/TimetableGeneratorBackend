@@ -29,12 +29,23 @@ public class ProgrammeGroupController {
 
     @RequestMapping(path = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     private OutgoingPayload createProgrammeGroup(@RequestBody List<ProgrammeGroupDoc> programmeGroupDocs) throws Exception {
-        List<ProgrammeGroupDoc> programmeGroupDocsSaved =
-                programmeGroupDocCreatorService.createProgramGroupDocWithConstraintsCateredForAndSave(programmeGroupDocs);
-        if (programmeGroupDocs.isEmpty() | Objects.isNull(programmeGroupDocsSaved)) {
-            return new ErrorOutgoingPayload("Error Occured,could not create ProgrammeGroup");
+        if (!programmeGroupDocs.isEmpty()) {
+            String programmeInitials = programmeGroupDocs.get(0).getProgrammeInitials();//assume all the programmeInitials are the same since that's how we are bringing it from UI
+            List<ProgrammeGroupDoc> programmeGroupDocsInDbCurrentlyWithCurrentProgInitials = programmeGroupDocRepository.findByProgrammeInitials(programmeInitials);
+            if ((!programmeGroupDocsInDbCurrentlyWithCurrentProgInitials.isEmpty()) ||
+                    Objects.isNull(programmeGroupDocsInDbCurrentlyWithCurrentProgInitials)) {
+                return new ErrorOutgoingPayload("Error Occured,A Programme with programmeInitials of " + programmeInitials + " exists already");
+            } else {
+                List<ProgrammeGroupDoc> programmeGroupDocsSaved =
+                        programmeGroupDocCreatorService.createProgramGroupDocWithConstraintsCateredForAndSave(programmeGroupDocs);
+                if (Objects.isNull(programmeGroupDocsSaved) || (!programmeGroupDocsSaved.isEmpty())) {
+                    return new ErrorOutgoingPayload("Error Occured,could not create ProgrammeGroup");
+                } else {
+                    return new SuccessfulOutgoingPayload(programmeGroupDocsSaved);
+                }
+            }
         } else {
-            return new SuccessfulOutgoingPayload(programmeGroupDocsSaved);
+            return new ErrorOutgoingPayload("Programme List is Empty");
         }
     }
 
@@ -47,7 +58,7 @@ public class ProgrammeGroupController {
         }
     }
 
-    @RequestMapping(method=RequestMethod.GET,consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @RequestMapping(method = RequestMethod.GET, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     private OutgoingPayload getProgrammeGroupByYearGroupNumber(@RequestParam(value = "yearGroupNo", required = true) int yearGroupNo) {
         List<ProgrammeGroupDoc> programmeGroupDocs = programmeGroupDocRepository.findByYearGroup(yearGroupNo);
         if (Objects.isNull(programmeGroupDocs)) {
@@ -67,7 +78,7 @@ public class ProgrammeGroupController {
         }
     }
 
-    @RequestMapping(path = "/{id}",method = RequestMethod.DELETE)
+    @RequestMapping(path = "/{id}", method = RequestMethod.DELETE)
     private OutgoingPayload deleteProgrammeGroup(@PathVariable String id) {
         if (programmeGroupDocRepository.exists(id)) {
             programmeGroupDocRepository.delete(id);
@@ -77,13 +88,13 @@ public class ProgrammeGroupController {
         }
     }
 
-    @RequestMapping(path = "/{id}",method = RequestMethod.PUT)
+    @RequestMapping(path = "/{id}", method = RequestMethod.PUT)
     private OutgoingPayload updateProgrammeGroup(@PathVariable String id,
                                                  @RequestBody ProgrammeGroupDoc programmeGroupDoc) {
         if (programmeGroupDocRepository.exists(id)) {
             programmeGroupDoc.setId(id);
             return new SuccessfulOutgoingPayload(programmeGroupDocRepository.save(programmeGroupDoc));
-        }else{
+        } else {
             return new ErrorOutgoingPayload("Id does not exist");
         }
     }

@@ -2,7 +2,6 @@ package com.swiftpot.timetable.repository;
 
 import com.swiftpot.timetable.repository.db.model.ProgrammeGroupDoc;
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -13,4 +12,6 @@ import java.util.List;
  */
 public interface ProgrammeGroupDocRepository extends MongoRepository<ProgrammeGroupDoc, String> {
     List<ProgrammeGroupDoc> findByYearGroup(int yearGroup);
+
+    List<ProgrammeGroupDoc> findByProgrammeInitials(String programmeInitials);
 }
