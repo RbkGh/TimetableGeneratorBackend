@@ -137,6 +137,7 @@ public class DepartmentController {
             tutorDocs.stream().forEach(
                     (tutorDocToRemoveDepartmentId -> {
                         tutorDocToRemoveDepartmentId.setDepartmentId("");//set each tutorDoc departmentId to empty
+                        tutorDocToRemoveDepartmentId.setTutorSubjectsAndProgrammeCodesList(new ArrayList<>(0)); //set tutorSubjectandProgrammeCodesList to empty
                     })
             );
             tutorDocRepository.save(tutorDocs);//now save back into db and delete department finally
@@ -162,6 +163,7 @@ public class DepartmentController {
             tutorDocsToRemoveDepartmentIds.stream().forEach(
                     (tutorDocToRemoveDepartmentId -> {
                         tutorDocToRemoveDepartmentId.setDepartmentId("");//set each tutorDoc departmentId to empty
+                        tutorDocToRemoveDepartmentId.setTutorSubjectsAndProgrammeCodesList(new ArrayList<>(0)); //set tutorSubjectandProgrammeCodesList to empty
                     })
             );
             tutorDocRepository.save(tutorDocsToRemoveDepartmentIds);//now save them back into db
@@ -192,7 +194,8 @@ public class DepartmentController {
         if (departmentDocRepository.exists(departmentId)) {
             if (tutorDocRepository.exists(tutorId)) {
                 TutorDoc tutorDoc = tutorDocRepository.findOne(tutorId);
-                tutorDoc.setDepartmentId(null);
+                tutorDoc.setDepartmentId("");
+                tutorDoc.setTutorSubjectsAndProgrammeCodesList(new ArrayList<>(0)); //set tutorSubjectandProgrammeCodesList to empty
                 TutorDoc tutorDocSaved = tutorDocRepository.save(tutorDoc);
                 return new SuccessfulOutgoingPayload("Saved successfully", tutorDocSaved);
             } else {
@@ -211,7 +214,8 @@ public class DepartmentController {
                 return new ErrorOutgoingPayload("Nothing to delete");
             } else {
                 tutorDocs.forEach((tutorDoc) -> {
-                    tutorDoc.setDepartmentId(null);
+                    tutorDoc.setDepartmentId("");
+                    tutorDoc.setTutorSubjectsAndProgrammeCodesList(new ArrayList<>(0)); //set tutorSubjectandProgrammeCodesList to empty
                 });
                 List<TutorDoc> tutorDocsUpdated = tutorDocRepository.save(tutorDocs);
                 return new SuccessfulOutgoingPayload(tutorDocsUpdated);
