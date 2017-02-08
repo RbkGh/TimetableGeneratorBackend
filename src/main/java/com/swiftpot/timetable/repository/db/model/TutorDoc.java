@@ -1,8 +1,11 @@
 package com.swiftpot.timetable.repository.db.model;
 
 import com.swiftpot.timetable.base.Person;
+import com.swiftpot.timetable.model.TutorSubjectIdAndProgrammeCodesListObj;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.List;
 
 /**
  * @author Ace Programmer Rbk
@@ -37,7 +40,10 @@ public class TutorDoc extends Person {
      */
     private String departmentId;
 
-    //private List<>
+    /**
+     * 2.Each Entity has the subjectId and a corresponding list of programmeCodes.
+     */
+    private List<TutorSubjectIdAndProgrammeCodesListObj> tutorSubjectsAndProgrammeCodesList;
 
     public TutorDoc() {
         super();
