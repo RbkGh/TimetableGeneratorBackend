@@ -5,6 +5,7 @@ import com.swiftpot.timetable.model.OutgoingPayload;
 import com.swiftpot.timetable.model.SuccessfulOutgoingPayload;
 import com.swiftpot.timetable.repository.ProgrammeGroupDocRepository;
 import com.swiftpot.timetable.repository.db.model.ProgrammeGroupDoc;
+import com.swiftpot.timetable.services.GeneralAbstractServices;
 import com.swiftpot.timetable.services.ProgrammeGroupDocCreatorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -26,6 +27,8 @@ public class ProgrammeGroupController {
     ProgrammeGroupDocCreatorService programmeGroupDocCreatorService;
     @Autowired
     ProgrammeGroupDocRepository programmeGroupDocRepository;
+    @Autowired
+    GeneralAbstractServices generalAbstractServices;
 
     @RequestMapping(path = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     private OutgoingPayload createProgrammeGroup(@RequestBody List<ProgrammeGroupDoc> programmeGroupDocs) throws Exception {
@@ -83,6 +86,7 @@ public class ProgrammeGroupController {
     private OutgoingPayload deleteProgrammeGroup(@PathVariable String id) {
         if (programmeGroupDocRepository.exists(id)) {
             programmeGroupDocRepository.delete(id);
+            generalAbstractServices.resetAllTutorsSubjectIdAndProgrammeCodeListProperty();//reset all tutor references.
             return new SuccessfulOutgoingPayload("Deleted Successfully!");
         } else {
             return new ErrorOutgoingPayload("Programme Group id does not exist");
@@ -95,16 +99,16 @@ public class ProgrammeGroupController {
         if (programmeGroupDocRepository.exists(id)) {
             programmeGroupDoc.setProgrammeInitials(programmeGroupDoc.getProgrammeInitials().toUpperCase());
             programmeGroupDoc.setId(id);
-            return new SuccessfulOutgoingPayload(programmeGroupDocRepository.save(programmeGroupDoc));
+            ProgrammeGroupDoc programmeGroupDocUpdated = programmeGroupDocRepository.save(programmeGroupDoc);
+            generalAbstractServices.resetAllTutorsSubjectIdAndProgrammeCodeListProperty();//reset all tutor references.
+            return new SuccessfulOutgoingPayload(programmeGroupDocUpdated);
         } else {
             return new ErrorOutgoingPayload("Id does not exist");
         }
     }
 
     private List<ProgrammeGroupDoc> convertAllProgrammeInitialsToUpperCase(List<ProgrammeGroupDoc> programmeGroupDocs) {
-        programmeGroupDocs.forEach(programmeGroupDoc -> {
-            programmeGroupDoc.setProgrammeInitials(programmeGroupDoc.getProgrammeInitials().toUpperCase());
-        });
+        programmeGroupDocs.forEach(programmeGroupDoc -> programmeGroupDoc.setProgrammeInitials(programmeGroupDoc.getProgrammeInitials().toUpperCase()));
         programmeGroupDocs.forEach(programmeGroupDoc -> System.out.println("ProgrammeInitials in caps =" + programmeGroupDoc.getProgrammeInitials()));
         return programmeGroupDocs;
     }

@@ -119,4 +119,12 @@ public class TutorDoc extends Person {
     public void setDepartmentId(String departmentId) {
         this.departmentId = departmentId;
     }
+
+    public List<TutorSubjectIdAndProgrammeCodesListObj> getTutorSubjectsAndProgrammeCodesList() {
+        return tutorSubjectsAndProgrammeCodesList;
+    }
+
+    public void setTutorSubjectsAndProgrammeCodesList(List<TutorSubjectIdAndProgrammeCodesListObj> tutorSubjectsAndProgrammeCodesList) {
+        this.tutorSubjectsAndProgrammeCodesList = tutorSubjectsAndProgrammeCodesList;
+    }
 }

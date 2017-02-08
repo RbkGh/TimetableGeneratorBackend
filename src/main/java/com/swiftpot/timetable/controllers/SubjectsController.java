@@ -9,6 +9,7 @@ import com.swiftpot.timetable.repository.SubjectDocRepository;
 import com.swiftpot.timetable.repository.db.model.DepartmentDoc;
 import com.swiftpot.timetable.repository.db.model.SubjectAllocationDoc;
 import com.swiftpot.timetable.repository.db.model.SubjectDoc;
+import com.swiftpot.timetable.services.GeneralAbstractServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +35,8 @@ public class SubjectsController {
     SubjectAllocationDocRepository subjectAllocationDocRepository;
     @Autowired
     DepartmentDocRepository departmentDocRepository;
+    @Autowired
+    GeneralAbstractServices generalAbstractServices;
 
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public OutgoingPayload createSubjectDoc(@RequestBody SubjectDoc subjectDoc) {
@@ -91,6 +94,7 @@ public class SubjectsController {
             subjectAllocationDocRepository.delete(subjectAllocationDocsToDelete);
             SubjectDoc subjectDocSaved = subjectDocRepository.save(subjectDoc);
             deleteAndCreateSubjectAllocationDocs(subjectDoc);
+            generalAbstractServices.resetAllTutorsSubjectIdAndProgrammeCodeListProperty();//reset all tutor references.
             return new SuccessfulOutgoingPayload(subjectDocSaved);
         }
 
@@ -113,15 +117,16 @@ public class SubjectsController {
                 });
                 if (departmentDocsWithProgrammeSubjectDocId.isEmpty()) {
                     deleteSubjectAndAccompanyingSubjectAllocation(subjectCode, id);
+                    generalAbstractServices.resetAllTutorsSubjectIdAndProgrammeCodeListProperty();//reset all tutor references.
                     return new SuccessfulOutgoingPayload("Deleted Successfully");
                 } else {
                     return new ErrorOutgoingPayload("Can not be deleted because a department holds a reference to this subject.");
                 }
             } else { //there are no departments hence,continue to delete the subject
                 deleteSubjectAndAccompanyingSubjectAllocation(subjectCode, id);
+                generalAbstractServices.resetAllTutorsSubjectIdAndProgrammeCodeListProperty();//reset all tutor references.
                 return new SuccessfulOutgoingPayload("Deleted Successfully");
             }
-
         } else {
             return new ErrorOutgoingPayload("Id does not exist");
         }
@@ -132,6 +137,7 @@ public class SubjectsController {
         if (subjectDocRepository.count() > 1) {
             subjectDocRepository.deleteAll();
             subjectAllocationDocRepository.deleteAll();
+            generalAbstractServices.resetAllTutorsSubjectIdAndProgrammeCodeListProperty();//reset all tutor references.
             return new SuccessfulOutgoingPayload("Deleted Successfully");
         } else {
             return new ErrorOutgoingPayload("No Subjects To Delete Currently");
