@@ -32,7 +32,7 @@ public class DepartmentController {
 
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     private OutgoingPayload createDepartment(@RequestBody DepartmentDoc departmentDoc) {
-        if (departmentDoc.getDeptHODdeputyTutorId() != "" || departmentDoc.getDeptHODdeputyTutorId() != null) {
+        if (departmentDoc.getDeptHODtutorId().trim() != "" || departmentDoc.getDeptHODtutorId() != null) {
             String deptProgrammeInitials = departmentDoc.getDeptProgrammeInitials();
             DepartmentDoc departmentDocWithThisProgrammeInitials = departmentDocRepository.findByDeptProgrammeInitials(deptProgrammeInitials);
             if (departmentDocWithThisProgrammeInitials != null) {
@@ -102,7 +102,7 @@ public class DepartmentController {
     private OutgoingPayload updateDepartment(@PathVariable String id,
                                              @RequestBody DepartmentDoc departmentDoc) {
         if (departmentDocRepository.exists(id)) {
-            if (departmentDoc.getDeptHODdeputyTutorId() != "" || departmentDoc.getDeptHODdeputyTutorId() != null) {
+            if (departmentDoc.getDeptHODtutorId().trim() != "" || departmentDoc.getDeptHODtutorId() != null) {
                 departmentDoc.setId(id);
                 DepartmentDoc departmentDocSavedInDb = departmentDocRepository.save(departmentDoc);
                 return new SuccessfulOutgoingPayload(departmentDocSavedInDb);
