@@ -7,11 +7,13 @@ import com.swiftpot.timetable.repository.DepartmentDocRepository;
 import com.swiftpot.timetable.repository.TutorDocRepository;
 import com.swiftpot.timetable.repository.db.model.TutorDoc;
 import com.swiftpot.timetable.services.GeneralAbstractServices;
+import com.swiftpot.timetable.services.TutorServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -29,6 +31,8 @@ public class TutorController {
     DepartmentDocRepository departmentDocRepository;
     @Autowired
     GeneralAbstractServices generalAbstractServices;
+    @Autowired
+    TutorServices tutorServices;
 
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     private OutgoingPayload createTutor(@RequestBody TutorDoc tutorDoc) {
@@ -70,6 +74,23 @@ public class TutorController {
                 tutorDoc.setId(id);
                 TutorDoc tutorDocUpdated = tutorDocRepository.save(tutorDoc);
                 return new SuccessfulOutgoingPayload(tutorDocUpdated);
+            }
+        } else {
+            return new ErrorOutgoingPayload("Id does not exist");
+        }
+    }
+
+    @RequestMapping(path = "department/{id}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
+    private OutgoingPayload updateTutorAssignedSubjectsInDept(@PathVariable String id,
+                                                              @RequestBody TutorDoc tutorDoc) throws Exception {
+        if (tutorDocRepository.exists(id)) {
+            Map<Boolean, String> booleanStringMap = tutorServices.isAllSubjectClassesActuallyOfferingEachSubjectSpecified(tutorDoc);
+            if (booleanStringMap.containsKey(true)) {
+                tutorDoc.setId(id);
+                TutorDoc tutorDocUpdated = tutorDocRepository.save(tutorDoc);
+                return new SuccessfulOutgoingPayload(tutorDocUpdated);
+            } else {
+                return new ErrorOutgoingPayload(booleanStringMap.get(false));
             }
         } else {
             return new ErrorOutgoingPayload("Id does not exist");
@@ -120,4 +141,5 @@ public class TutorController {
         }
         return isAnyTutorAssignedToADepartment;
     }
+
 }

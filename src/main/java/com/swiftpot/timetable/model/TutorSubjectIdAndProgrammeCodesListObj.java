@@ -11,6 +11,9 @@ public class TutorSubjectIdAndProgrammeCodesListObj {
 
     private String tutorSubjectId;
 
+    /**
+     * Equivalent to {@link com.swiftpot.timetable.repository.db.model.ProgrammeGroupDoc#programmeCode} property
+     */
     private List<String> tutorProgrammeCodesList;
 
     public TutorSubjectIdAndProgrammeCodesListObj() {
@@ -24,6 +27,9 @@ public class TutorSubjectIdAndProgrammeCodesListObj {
         this.tutorSubjectId = tutorSubjectId;
     }
 
+    /**
+     * Equivalent to {@link com.swiftpot.timetable.repository.db.model.ProgrammeGroupDoc#programmeCode}'s programmeCode property
+     */
     public List<String> getTutorProgrammeCodesList() {
         return tutorProgrammeCodesList;
     }

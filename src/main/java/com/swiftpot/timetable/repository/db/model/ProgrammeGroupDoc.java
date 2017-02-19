@@ -1,5 +1,7 @@
 package com.swiftpot.timetable.repository.db.model;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -132,4 +134,39 @@ public class ProgrammeGroupDoc {
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
     }
+
+    /**
+     * overriding equals and hashcode because we'll be comparing objects of ProgrammeGroup
+     *
+     * @param o
+     * @return
+     */
+    @Override
+    public boolean equals(Object o) {
+
+        if (o == this) return true;
+        if (!(o instanceof ProgrammeGroupDoc)) {
+            return false;
+        }
+
+        ProgrammeGroupDoc programmeGroupDoc = (ProgrammeGroupDoc) o;
+
+        return new EqualsBuilder()
+                .append(id, programmeGroupDoc.id)
+                .isEquals();
+    }
+
+
+    /**
+     * overriding equals and hashcode because we'll be comparing objects of ProgrammeGroup
+     *
+     * @return
+     */
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(id)
+                .toHashCode();
+    }
+
 }
