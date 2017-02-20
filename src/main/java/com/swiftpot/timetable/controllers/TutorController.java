@@ -90,6 +90,7 @@ public class TutorController {
                 TutorDoc tutorDocUpdated = tutorDocRepository.save(tutorDoc);
                 return new SuccessfulOutgoingPayload(tutorDocUpdated);
             } else {
+                System.out.println("False message =" + booleanStringMap.get(false));
                 return new ErrorOutgoingPayload(booleanStringMap.get(false));
             }
         } else {

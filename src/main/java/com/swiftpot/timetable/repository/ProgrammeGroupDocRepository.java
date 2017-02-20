@@ -11,7 +11,15 @@ import java.util.List;
  *         18-Dec-16 @ 2:17 PM
  */
 public interface ProgrammeGroupDocRepository extends MongoRepository<ProgrammeGroupDoc, String> {
-    List<ProgrammeGroupDoc> findByYearGroup(int yearGroup);
+
 
     List<ProgrammeGroupDoc> findByProgrammeInitials(String programmeInitials);
+
+    /**
+     * find only programmes in this yearGroup only,eg all programmeGroups in year 2 alone
+     *
+     * @param yearGroup
+     * @return
+     */
+    List<ProgrammeGroupDoc> findByYearGroup(int yearGroup);
 }

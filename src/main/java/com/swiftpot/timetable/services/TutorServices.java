@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Ace Programmer Rbk
@@ -57,6 +58,8 @@ public class TutorServices {
                 List<String> currentProgrammeGroupsIdsToBeUpdated = currentTutorSubjectIdAndProgrammeCodesListObj.getTutorProgrammeCodesList();
                 for (int iCurrPgGroupIdIndex = 0; iCurrPgGroupIdIndex < currentProgrammeGroupsIdsToBeUpdated.size(); iCurrPgGroupIdIndex++) {
                     String currentProgrammeCode = currentProgrammeGroupsIdsToBeUpdated.get(iCurrPgGroupIdIndex);
+                    System.out.println("AllProgrammeGrooupDocs programme code to check against =" + String.join(",", allProgrammeGroupDocsProgrammeCodeStringsList));
+                    System.out.println("Current ProgrammeGroupDoc programmeCode=" + currentProgrammeCode);
                     if (!allProgrammeGroupDocsProgrammeCodeStringsList.contains(currentProgrammeCode)) {
                         SubjectDoc subjectDocWithIncorrectProgrammeGroupSet = subjectDocRepository.findOne(currentTutorSubjectIdAndProgrammeCodesListObj.getTutorSubjectId());
                         isAllClassesSpecifiedOfferingSpecifiedSubjectHashMap.put(false, currentProgrammeCode + " is not part of the classes offering " + subjectDocWithIncorrectProgrammeGroupSet.getSubjectFullName());
@@ -76,7 +79,6 @@ public class TutorServices {
             }
 
         } else {
-            isAllClassesSpecifiedOfferingSpecifiedSubjectHashMap = new HashMap<Boolean, String>(); //set new one to ensure there is not more than one boolean
             isAllClassesSpecifiedOfferingSpecifiedSubjectHashMap.put(false, "Subjects cannot be empty");
             return isAllClassesSpecifiedOfferingSpecifiedSubjectHashMap;
         }
@@ -131,19 +133,40 @@ public class TutorServices {
     public List<ProgrammeGroupDoc> getProgrammeGroupsOfferingParticularSubject(String subjectUniqueIdInDB) throws Exception {
         if (subjectDocRepository.exists(subjectUniqueIdInDB)) {
             SubjectDoc subjectDoc = subjectDocRepository.findOne(subjectUniqueIdInDB);
-            List<Integer> yearGroupsOfferingCourse = subjectDoc.getSubjectYearGroupList();
+            //List<Integer> yearGroupsOfferingCourse = subjectDoc.getSubjectYearGroupList();
             DepartmentDoc departmentDoc = this.getDepartmentThatSpecificSubjectBelongsTo(subjectUniqueIdInDB);
             System.out.println("DepartmentDoc ====>" + departmentDoc.toString());
-            //now fetch all the programmeGroups in department that this subject Belong to.
-            String departmentProgrammeInitials = departmentDoc.getDeptProgrammeInitials();
-            System.out.println("Dept Programme Initials =" + departmentProgrammeInitials);
-            //now get all classes according to the programmeInitials of the department
-            List<ProgrammeGroupDoc> programmeGroupDocsInDepartment = programmeGroupDocRepository.findByProgrammeInitials(departmentProgrammeInitials);
+            //now fetch all the programmeGroups in department that this subject Belong to.,if a core subject we will not search ProgrammeeGroups in dept using the programmeInitials of Dept
+            List<ProgrammeGroupDoc> programmeGroupDocsInDepartment = this.getAllProgrammeGroupDocsOfParticularSubject(subjectUniqueIdInDB);
+            System.out.println("ProgrammeGroups For Subject " + subjectUniqueIdInDB + " ==>>>::\n\n");
+            programmeGroupDocsInDepartment.forEach(programmeGroupDoc -> System.out.println(programmeGroupDoc.toString() + "\n"));
+            System.out.println("\n\n");
             return programmeGroupDocsInDepartment;
         } else {
             throw new NoSuchElementException("Subject with id " + subjectUniqueIdInDB + " does not exist");
         }
     }
+
+    /**
+     * use when we need to get all department programme group docs of particular subjectuniqueId passed in
+     *
+     * @param subjectUniqueId
+     * @return
+     */
+    List<ProgrammeGroupDoc> getAllProgrammeGroupDocsOfParticularSubject(String subjectUniqueId) {
+        Set<ProgrammeGroupDoc> finalProgrammeGroupDocsInDeptSet = new HashSet<>();
+        SubjectDoc subjectDoc = subjectDocRepository.findOne(subjectUniqueId);
+        List<Integer> yearGroups = subjectDoc.getSubjectYearGroupList();
+        for (Integer yearGroup : yearGroups) {
+            List<ProgrammeGroupDoc> programmeGroupsForParticularYearGroup = programmeGroupDocRepository.findByYearGroup(yearGroup);
+            //add each programmeGroupDoc ignoring duplicates and overriding toString and hashcode of ProgrammeGroupDoc class
+            programmeGroupsForParticularYearGroup.forEach(finalProgrammeGroupDocsInDeptSet::add);
+        }
+
+        List<ProgrammeGroupDoc> finalProgrammeGroupDocsToReturn = finalProgrammeGroupDocsInDeptSet.stream().collect(Collectors.toList());//convert set to List
+        return finalProgrammeGroupDocsToReturn;
+    }
+
 
     /**
      * get department that subject belongs to,if it does not belong to any department , {@link NoSuchElementException} will be thrown.
@@ -158,6 +181,9 @@ public class TutorServices {
         if (!departmentDocsAllInDb.isEmpty()) {
             int departmentDocsAllInDbLength = departmentDocsAllInDb.size();
             for (int i = 0; i < departmentDocsAllInDbLength; i++) {
+                if (departmentDoc != null) {
+                    break;
+                }
                 DepartmentDoc currentDepartmentDoc = departmentDocsAllInDb.get(i);
                 List<String> subjectsDocIdList = currentDepartmentDoc.getProgrammeSubjectsDocIdList();
                 if (!subjectsDocIdList.isEmpty()) {
@@ -167,9 +193,6 @@ public class TutorServices {
                             break;
                         }
                     }
-                }
-                if (departmentDoc != null) {
-                    break;
                 }
             }
             //since the id is not empty,we can fetch it in db and return it.

@@ -1,5 +1,6 @@
 package com.swiftpot.timetable.repository.db.model;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -99,5 +100,10 @@ public class DepartmentDoc {
 
     public void setProgrammeSubjectsDocIdList(List<String> programmeSubjectsDocIdList) {
         this.programmeSubjectsDocIdList = programmeSubjectsDocIdList;
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 }

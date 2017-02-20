@@ -17,7 +17,7 @@ import java.util.List;
 public class ProgrammeGroupDoc {
 
     /**
-     * @deprecated use {@linkplain DepartmentDoc.programmeSubjectsDocIdList} instead
+     * @deprecated use {@linkplain DepartmentDoc#programmeSubjectsDocIdList} instead
      */
     @Deprecated
     List<String> programmeSubjectsCodeList;
@@ -109,14 +109,14 @@ public class ProgrammeGroupDoc {
     }
 
     /**
-     * @deprecated use {@linkplain DepartmentDoc.programmeSubjectsDocIdList} instead
+     * @deprecated use {@linkplain DepartmentDoc#programmeSubjectsDocIdList} instead
      */
     public List<String> getProgrammeSubjectsCodeList() {
         return programmeSubjectsCodeList;
     }
 
     /**
-     * @deprecated use {@linkplain DepartmentDoc.programmeSubjectsDocIdList} instead
+     * @deprecated use {@linkplain DepartmentDoc#programmeSubjectsDocIdList} instead
      */
     public void setProgrammeSubjectsCodeList(List<String> programmeSubjectsCodeList) {
         this.programmeSubjectsCodeList = programmeSubjectsCodeList;
