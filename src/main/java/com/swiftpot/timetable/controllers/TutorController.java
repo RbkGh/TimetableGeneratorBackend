@@ -86,9 +86,15 @@ public class TutorController {
         if (tutorDocRepository.exists(id)) {
             Map<Boolean, String> booleanStringMap = tutorServices.isAllSubjectClassesActuallyOfferingEachSubjectSpecified(tutorDoc);
             if (booleanStringMap.containsKey(true)) {
-                tutorDoc.setId(id);
-                TutorDoc tutorDocUpdated = tutorDocRepository.save(tutorDoc);
-                return new SuccessfulOutgoingPayload(tutorDocUpdated);
+                Map<Boolean, String> booleanStringMapIsTutorClassesNotAssignedAlready = tutorServices.isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDept(tutorDoc);
+                if (booleanStringMapIsTutorClassesNotAssignedAlready.containsKey(true)) {
+                    tutorDoc.setId(id);
+                    TutorDoc tutorDocUpdated = tutorDocRepository.save(tutorDoc);
+                    return new SuccessfulOutgoingPayload(tutorDocUpdated);
+                } else {
+                    System.out.println("False message = "+booleanStringMapIsTutorClassesNotAssignedAlready.get(false));
+                    return new ErrorOutgoingPayload(booleanStringMapIsTutorClassesNotAssignedAlready.get(false));
+                }
             } else {
                 System.out.println("False message =" + booleanStringMap.get(false));
                 return new ErrorOutgoingPayload(booleanStringMap.get(false));

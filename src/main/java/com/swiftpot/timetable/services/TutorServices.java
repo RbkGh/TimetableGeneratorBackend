@@ -31,10 +31,64 @@ public class TutorServices {
     @Autowired
     Gson gson;
 
-    protected boolean isTutorAssignedSubjectsOK(TutorDoc tutorDocWithAssignedSubjectsToBeUpdated) {
-        boolean isTutorAssignedSubjectsOK = false;
-        tutorDocWithAssignedSubjectsToBeUpdated.getTutorSubjectsAndProgrammeCodesList();
-        return isTutorAssignedSubjectsOK;
+
+
+    public Map<Boolean, String> isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDept(TutorDoc tutorDoc) {
+        Map<Boolean,String> isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDept = new HashMap<>();
+        String tutorDepartmentId = tutorDoc.getDepartmentId();
+        List<TutorSubjectIdAndProgrammeCodesListObj> idAndProgrammeCodesListObjsList = tutorDoc.getTutorSubjectsAndProgrammeCodesList();
+        for (TutorSubjectIdAndProgrammeCodesListObj idAndProgrammeCodesListObj : idAndProgrammeCodesListObjsList) {
+            if (isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDept.containsKey(false)) {
+                break;
+            }
+            for (String programmeCodeToBeCompared : idAndProgrammeCodesListObj.getTutorProgrammeCodesList()) {
+                if (this.isProgrammeCodeAlreadyAssignedInDepartment(tutorDepartmentId, programmeCodeToBeCompared) == true) {
+                    isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDept.put(false, programmeCodeToBeCompared + " is already assigned to a tutor");
+                    break;
+                }
+            }
+        }
+        if (isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDept.containsKey(false)) {
+            return isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDept;
+        }else{//isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDept
+            isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDept.put(true,"Everything ok");
+            return isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDept;
+        }
+    }
+
+    /**
+     * make sure where this is called does not have empty tutors in department
+     *
+     * @param tutorDepartmentId
+     * @param programmeCodeToBeCompared
+     * @return
+     */
+    protected boolean isProgrammeCodeAlreadyAssignedInDepartment(String tutorDepartmentId, String programmeCodeToBeCompared) throws NoSuchElementException {
+
+            boolean isProgrammeGroupAlreadyAssignedInDepartment = false;
+            //get all department tutors
+            List<TutorDoc> tutorDocsWithThisDepartmentIdList = tutorDocRepository.findByDepartmentId(tutorDepartmentId);
+            if (tutorDocsWithThisDepartmentIdList.isEmpty()) {
+                return false; //as the number of tutors is empty,which is highly unlikely,then we can return false
+            } else {
+                for (TutorDoc tutorDocWithThisDepartmentId : tutorDocsWithThisDepartmentIdList) {
+                    if (!tutorDocWithThisDepartmentId.getTutorSubjectsAndProgrammeCodesList().isEmpty()) {
+                        //if its true,breakout of loop and return the value,otherwise,continue scanning through.
+                        if (isProgrammeGroupAlreadyAssignedInDepartment == true) {
+                            break;
+                        }
+                        List<TutorSubjectIdAndProgrammeCodesListObj> tutorSubjectIdAndProgrammeCodesListObjList =
+                                tutorDocWithThisDepartmentId.getTutorSubjectsAndProgrammeCodesList();
+                        for (TutorSubjectIdAndProgrammeCodesListObj tutorSubjectIdAndProgrammeCodesListObj : tutorSubjectIdAndProgrammeCodesListObjList) {
+                            if (tutorSubjectIdAndProgrammeCodesListObj.getTutorProgrammeCodesList().contains(programmeCodeToBeCompared)) {
+                                isProgrammeGroupAlreadyAssignedInDepartment = true; //exists ,therefore return true by setting isProgrammeGroupAlreadyAssignedInDepartment to true and breaking out of loop
+                                break;
+                            }
+                        }
+                    }
+                }
+                return isProgrammeGroupAlreadyAssignedInDepartment;
+            }
     }
 
     public Map<Boolean, String> isAllSubjectClassesActuallyOfferingEachSubjectSpecified(TutorDoc tutorDoc) throws Exception {
