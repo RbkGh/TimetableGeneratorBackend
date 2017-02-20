@@ -11,8 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -34,20 +33,36 @@ public class DepartmentController {
     private OutgoingPayload createDepartment(@RequestBody DepartmentDoc departmentDoc) {
         if (departmentDoc.getDeptHODtutorId().trim() != "" || departmentDoc.getDeptHODtutorId() != null) {
             String deptProgrammeInitials = departmentDoc.getDeptProgrammeInitials();
-            DepartmentDoc departmentDocWithThisProgrammeInitials = departmentDocRepository.findByDeptProgrammeInitials(deptProgrammeInitials);
-            if (departmentDocWithThisProgrammeInitials != null) {
-                return new ErrorOutgoingPayload("ProgrammeGroup Has Been set already to a Different Department");
-            } else {
+            String deptType = departmentDoc.getDeptType();
+            if (Objects.equals(deptType, DepartmentDoc.DEPARTMENT_TYPE_CORE)) {
+                //once it's a core subject,we do not check for existence of programmeInitials
                 if (tutorDocRepository.exists(departmentDoc.getDeptHODtutorId())) {
-                    DepartmentDoc departmentDocSavedInDb = departmentDocRepository.save(departmentDoc);
-                    TutorDoc tutorDoc = tutorDocRepository.findOne(departmentDoc.getDeptHODtutorId());
-                    tutorDoc.setDepartmentId(departmentDocSavedInDb.getId());//update departmentId field of tutor to the department id
-                    TutorDoc tutorDocUpdatedWithDepartmentId = tutorDocRepository.save(tutorDoc);//update in db
-                    return new SuccessfulOutgoingPayload(departmentDocSavedInDb);
+                    if (this.isSaveDepartmentDocInDbSuccessful(departmentDoc).containsKey(true)) {
+                        return new SuccessfulOutgoingPayload(isSaveDepartmentDocInDbSuccessful(departmentDoc).get(true));
+                    } else {
+                        return new ErrorOutgoingPayload("Something went wrong,department was not created.");
+                    }
                 } else {
                     return new ErrorOutgoingPayload("H.O.D does not exist");
                 }
+
+            } else { //else automatically,we treat it as an elective subject,hence we check the progrmmeInitials
+                DepartmentDoc departmentDocWithThisProgrammeInitials = departmentDocRepository.findByDeptProgrammeInitials(deptProgrammeInitials);
+                if (departmentDocWithThisProgrammeInitials != null) {
+                    return new ErrorOutgoingPayload("ProgrammeGroup Has Been set already to a Different Department");
+                } else {
+                    if (tutorDocRepository.exists(departmentDoc.getDeptHODtutorId())) {
+                        if (this.isSaveDepartmentDocInDbSuccessful(departmentDoc).containsKey(true)) {
+                            return new SuccessfulOutgoingPayload(isSaveDepartmentDocInDbSuccessful(departmentDoc).get(true));
+                        } else {
+                            return new ErrorOutgoingPayload("Something went wrong,department was not created.");
+                        }
+                    } else {
+                        return new ErrorOutgoingPayload("H.O.D does not exist");
+                    }
+                }
             }
+
         } else {
             return new ErrorOutgoingPayload("HOD for the Department must be set");
         }
@@ -222,6 +237,21 @@ public class DepartmentController {
             }
         } else {
             return new ErrorOutgoingPayload("Department does not Exist");
+        }
+    }
+
+    private Map<Boolean, DepartmentDoc> isSaveDepartmentDocInDbSuccessful(DepartmentDoc departmentDoc) {
+        Map<Boolean, DepartmentDoc> booleanDepartmentDocMap = new HashMap<>();
+        DepartmentDoc departmentDocSavedInDb = departmentDocRepository.save(departmentDoc);
+        TutorDoc tutorDoc = tutorDocRepository.findOne(departmentDoc.getDeptHODtutorId());
+        tutorDoc.setDepartmentId(departmentDocSavedInDb.getId());//update departmentId field of tutor to the department id
+        TutorDoc tutorDocUpdatedWithDepartmentId = tutorDocRepository.save(tutorDoc);//update in db
+        if (tutorDocUpdatedWithDepartmentId != null) {
+            booleanDepartmentDocMap.put(true, departmentDocSavedInDb);
+            return booleanDepartmentDocMap;
+        } else {
+            booleanDepartmentDocMap.put(false, null);
+            return booleanDepartmentDocMap;
         }
     }
 

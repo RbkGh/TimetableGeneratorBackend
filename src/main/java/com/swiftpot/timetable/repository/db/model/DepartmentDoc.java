@@ -13,10 +13,9 @@ import java.util.List;
 @Document(collection = "DepartmentDoc")
 public class DepartmentDoc {
 
-    /**
-     * Disallow Editing of ProgrammeSubjectsDocIdList during updating of doc if possible
-     */
-    public List<String> programmeSubjectsDocIdList;
+    public static final String DEPARTMENT_TYPE_CORE = "CORE";
+    public static final String DEPARTMENT_TYPE_ELECTIVE = "ELECTIVE";
+
     @Id
     private String id;
     private String deptName;
@@ -32,6 +31,16 @@ public class DepartmentDoc {
      * TODO DONE!!! Ensure that programmeInitials is never duplicated during creation and updating of this Doc
      */
     private String deptProgrammeInitials;
+
+    /**
+     * "CORE" OR "ELECTIVE" only
+     */
+    private String deptType;
+
+    /**
+     * Disallow Editing of ProgrammeSubjectsDocIdList during updating of doc if possible
+     */
+    public List<String> programmeSubjectsDocIdList;
 
     public DepartmentDoc() {
     }
@@ -74,6 +83,14 @@ public class DepartmentDoc {
 
     public void setDeptProgrammeInitials(String deptProgrammeInitials) {
         this.deptProgrammeInitials = deptProgrammeInitials;
+    }
+
+    public String getDeptType() {
+        return deptType;
+    }
+
+    public void setDeptType(String deptType) {
+        this.deptType = deptType;
     }
 
     public List<String> getProgrammeSubjectsDocIdList() {
