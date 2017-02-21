@@ -28,8 +28,8 @@ public class ProgrammeGroupDoc {
      * programmeInitials,do not allow it to be editable on frontend,if it must be changed,then ProgrammeGroupDoc must be deleted.
      */
     private String programmeInitials;
-    /*
-    The current yearGroup of the students offering the course
+    /**
+     * The current yearGroup of the students offering the course
      */
     private int yearGroup;
     /**

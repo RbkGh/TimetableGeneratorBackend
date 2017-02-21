@@ -84,20 +84,14 @@ public class TutorController {
     private OutgoingPayload updateTutorAssignedSubjectsInDept(@PathVariable String id,
                                                               @RequestBody TutorDoc tutorDoc) throws Exception {
         if (tutorDocRepository.exists(id)) {
-            Map<Boolean, String> booleanStringMap = tutorServices.isAllSubjectClassesActuallyOfferingEachSubjectSpecified(tutorDoc);
-            if (booleanStringMap.containsKey(true)) {
-                Map<Boolean, String> booleanStringMapIsTutorClassesNotAssignedAlready = tutorServices.isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDept(tutorDoc);
-                if (booleanStringMapIsTutorClassesNotAssignedAlready.containsKey(true)) {
-                    tutorDoc.setId(id);
-                    TutorDoc tutorDocUpdated = tutorDocRepository.save(tutorDoc);
-                    return new SuccessfulOutgoingPayload(tutorDocUpdated);
-                } else {
-                    System.out.println("False message = "+booleanStringMapIsTutorClassesNotAssignedAlready.get(false));
-                    return new ErrorOutgoingPayload(booleanStringMapIsTutorClassesNotAssignedAlready.get(false));
-                }
+            Map<Boolean, String> booleanStringMapIsEverythingOK = tutorServices.isEverythingOkWithClassesAndSubjectsAssignedToTutor(tutorDoc);
+            if (booleanStringMapIsEverythingOK.containsKey(true)) {
+                tutorDoc.setId(id);
+                TutorDoc tutorDocUpdated = tutorDocRepository.save(tutorDoc);
+                return new SuccessfulOutgoingPayload(tutorDocUpdated);
             } else {
-                System.out.println("False message =" + booleanStringMap.get(false));
-                return new ErrorOutgoingPayload(booleanStringMap.get(false));
+                System.out.println("False message =" + booleanStringMapIsEverythingOK.get(false));
+                return new ErrorOutgoingPayload(booleanStringMapIsEverythingOK.get(false));
             }
         } else {
             return new ErrorOutgoingPayload("Id does not exist");

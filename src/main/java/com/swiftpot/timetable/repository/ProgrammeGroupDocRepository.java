@@ -22,4 +22,12 @@ public interface ProgrammeGroupDocRepository extends MongoRepository<ProgrammeGr
      * @return
      */
     List<ProgrammeGroupDoc> findByYearGroup(int yearGroup);
+
+    /**
+     * find the {@link ProgrammeGroupDoc} by the {@link ProgrammeGroupDoc#programmeCode} property
+     *
+     * @param programmeCode
+     * @return
+     */
+    ProgrammeGroupDoc findByProgrammeCode(String programmeCode);
 }
