@@ -1,10 +1,12 @@
 package com.swiftpot.timetable;
 
+import com.mongodb.WriteConcern;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.mongodb.core.WriteConcernResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -42,6 +44,14 @@ public class TimetableTechnicalApplication extends SpringBootServletInitializer 
                                 "OPTIONS",
                                 "TRACE");
             }
+        };
+    }
+
+    @Bean
+    public WriteConcernResolver writeConcernResolver() {
+        return action -> {
+            System.out.println("**********Using Write Concern of Acknowledged*******");
+            return WriteConcern.ACKNOWLEDGED;
         };
     }
 }
