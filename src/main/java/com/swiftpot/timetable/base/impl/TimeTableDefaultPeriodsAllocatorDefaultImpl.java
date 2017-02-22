@@ -78,7 +78,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
     }
 
     /**
-     * TODO find a way to inject subjectCodeForWorship,
+     * TODO find a way to inject subjectCodeForWorship,=>fix by utilizing optional in java so that a default of "None" or "" .
      * TODO DECIDE WETHER TO POPULATE WORKSHOP WITH SUBJECTS FIRST OR ALLOCATE WORSHIP PERIODS FIRST
      *
      * @param timeTableSuperDoc
