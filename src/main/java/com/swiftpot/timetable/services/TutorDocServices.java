@@ -29,6 +29,8 @@ public class TutorDocServices {
     @Autowired
     DepartmentDocRepository departmentDocRepository;
     @Autowired
+    ProgrammeGroupDocServices programmeGroupDocServices;
+    @Autowired
     Gson gson;
 
 
@@ -133,7 +135,7 @@ public class TutorDocServices {
             for (int i = 0; i < tutorSubjectIdAndProgrammeCodesListObjsSize; i++) {
                 TutorSubjectIdAndProgrammeCodesListObj currentTutorSubjectIdAndProgrammeCodesListObj = tutorSubjectIdAndProgrammeCodesListObjs.get(i);
                 List<ProgrammeGroupDoc> allProgrammeGroupDocsOfSubject =
-                        this.getProgrammeGroupsOfferingParticularSubject(currentTutorSubjectIdAndProgrammeCodesListObj.getTutorSubjectId());
+                        programmeGroupDocServices.getProgrammeGroupsOfferingParticularSubject(currentTutorSubjectIdAndProgrammeCodesListObj.getTutorSubjectId());
                 List<String> allProgrammeGroupDocsProgrammeCodeStringsList = new ArrayList<>();
                 for (int progGroups = 0; progGroups < allProgrammeGroupDocsOfSubject.size(); progGroups++) {
                     allProgrammeGroupDocsProgrammeCodeStringsList.add(allProgrammeGroupDocsOfSubject.get(progGroups).getProgrammeCode());
@@ -166,30 +168,6 @@ public class TutorDocServices {
             isAllClassesSpecifiedOfferingSpecifiedSubjectHashMap.put(false, "Subjects cannot be empty");
             return isAllClassesSpecifiedOfferingSpecifiedSubjectHashMap;
         }
-    }
-
-    /**
-     * get all programmeGroups /classes that partake in all subjects in Department without duplicates
-     *
-     * @param departmentUniqueIdInDB
-     * @return
-     * @throws Exception
-     */
-    public List<ProgrammeGroupDoc> getAllProgrammeGroupDocsThatPartakeInAllSubjectsInDeptWithoutDuplicates(String departmentUniqueIdInDB) throws Exception {
-        DepartmentDoc departmentDoc = departmentDocRepository.findOne(departmentUniqueIdInDB);
-        List<String> subjectDocIdInDeptList = departmentDoc.getProgrammeSubjectsDocIdList();
-        //Iterable<SubjectDoc> subjectDocsIterable = subjectDocRepository.findAll(subjectDocIdInDeptList);
-        //List<SubjectDoc> subjectDocsList = StreamSupport.stream(subjectDocsIterable.spliterator(),false).collect(Collectors.toList());//convert iterable to list
-        List<ProgrammeGroupDoc> listOfAllProgrammeGroupDocsTHatOfferSubjectInDept = new ArrayList<>();
-        for (int i = 0; i < subjectDocIdInDeptList.size(); i++) {
-            List<ProgrammeGroupDoc> programmeGroupDocs = this.getProgrammeGroupsOfferingParticularSubject(subjectDocIdInDeptList.get(i));
-            listOfAllProgrammeGroupDocsTHatOfferSubjectInDept.addAll(programmeGroupDocs);
-        }
-
-        //now we need to filter duplicates because there is a high likelihood of duplicates as one programme may be offered by two or more classes,like english
-        List<ProgrammeGroupDoc> programmeGroupDocsWithoutDuplicates =
-                new ArrayList<>(new LinkedHashSet<>(listOfAllProgrammeGroupDocsTHatOfferSubjectInDept)); //remove duplicates in one line aftr overriding ProgrammeGroupDoc's hashCode and equals methods.
-        return programmeGroupDocsWithoutDuplicates;
     }
 
     /**
@@ -282,22 +260,6 @@ public class TutorDocServices {
         return totalPeriodsForSubjectAccrossAllYearGroups;
     }
 
-    public List<ProgrammeGroupDoc> getProgrammeGroupsOfferingParticularSubject(String subjectUniqueIdInDB) throws Exception {
-        if (subjectDocRepository.exists(subjectUniqueIdInDB)) {
-            SubjectDoc subjectDoc = subjectDocRepository.findOne(subjectUniqueIdInDB);
-            //List<Integer> yearGroupsOfferingCourse = subjectDoc.getSubjectYearGroupList();
-            DepartmentDoc departmentDoc = this.getDepartmentThatSpecificSubjectBelongsTo(subjectUniqueIdInDB);
-            System.out.println("DepartmentDoc ====>" + departmentDoc.toString());
-            //now fetch all the programmeGroups in department that this subject Belong to.,if a core subject we will not search ProgrammeeGroups in dept using the programmeInitials of Dept
-            List<ProgrammeGroupDoc> programmeGroupDocsInDepartment = this.getAllProgrammeGroupDocsOfParticularSubject(subjectUniqueIdInDB);
-            System.out.println("ProgrammeGroups For Subject " + subjectUniqueIdInDB + " ==>>>::\n\n");
-            programmeGroupDocsInDepartment.forEach(programmeGroupDoc -> System.out.println(programmeGroupDoc.toString() + "\n"));
-            System.out.println("\n\n");
-            return programmeGroupDocsInDepartment;
-        } else {
-            throw new NoSuchElementException("Subject with id " + subjectUniqueIdInDB + " does not exist");
-        }
-    }
 
     /**
      * use when we need to get all department programme group docs of particular subjectuniqueId passed in
