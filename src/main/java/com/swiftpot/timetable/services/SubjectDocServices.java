@@ -27,7 +27,7 @@ public class SubjectDocServices {
      * get all total Periods For a {@link SubjectDoc subject} by summing all {@link List<SubjectAllocationDoc> subjectsAllocations} <br>
      * {@link SubjectAllocationDoc#totalSubjectAllocation totalSubjectAllocation} in each yearGroup
      *
-     * @param subjectUniqueIdInDB
+     * @param subjectUniqueIdInDB {@link SubjectDoc#id id} of {@link SubjectDoc SubjectDoc}
      * @return
      */
     int getTotalPeriodsForSubjectConsideringAllYearGroups(String subjectUniqueIdInDB) {
