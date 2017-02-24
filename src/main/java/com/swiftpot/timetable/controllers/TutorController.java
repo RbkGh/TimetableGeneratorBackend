@@ -7,7 +7,7 @@ import com.swiftpot.timetable.repository.DepartmentDocRepository;
 import com.swiftpot.timetable.repository.TutorDocRepository;
 import com.swiftpot.timetable.repository.db.model.TutorDoc;
 import com.swiftpot.timetable.services.GeneralAbstractServices;
-import com.swiftpot.timetable.services.TutorServices;
+import com.swiftpot.timetable.services.TutorDocServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +32,7 @@ public class TutorController {
     @Autowired
     GeneralAbstractServices generalAbstractServices;
     @Autowired
-    TutorServices tutorServices;
+    TutorDocServices tutorDocServices;
 
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     private OutgoingPayload createTutor(@RequestBody TutorDoc tutorDoc) {
@@ -84,7 +84,7 @@ public class TutorController {
     private OutgoingPayload updateTutorAssignedSubjectsInDept(@PathVariable String id,
                                                               @RequestBody TutorDoc tutorDoc) throws Exception {
         if (tutorDocRepository.exists(id)) {
-            Map<Boolean, String> booleanStringMapIsEverythingOK = tutorServices.isEverythingOkWithClassesAndSubjectsAssignedToTutor(tutorDoc);
+            Map<Boolean, String> booleanStringMapIsEverythingOK = tutorDocServices.isEverythingOkWithClassesAndSubjectsAssignedToTutor(tutorDoc);
             if (booleanStringMapIsEverythingOK.containsKey(true)) {
                 tutorDoc.setId(id);
                 TutorDoc tutorDocUpdated = tutorDocRepository.save(tutorDoc);

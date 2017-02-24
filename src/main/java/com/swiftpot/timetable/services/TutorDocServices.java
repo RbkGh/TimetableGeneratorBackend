@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  *         19-Feb-17 @ 8:59 AM
  */
 @Service
-public class TutorServices {
+public class TutorDocServices {
 
     @Autowired
     ProgrammeGroupDocRepository programmeGroupDocRepository;
@@ -34,9 +34,9 @@ public class TutorServices {
 
     /**
      * super Method to ensure that all the validations on the subjects and classes assigned to tutor are passed .<br>
-     * 1st check => {@link TutorServices#isAllSubjectClassesActuallyOfferingEachSubjectSpecified(TutorDoc)}<br>
-     * 2nd check => {@link TutorServices#isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDept(TutorDoc)}<br>
-     * 3rd check => {@link TutorServices#isTotalSubjectsAndClassesAssignedOKAccordingToTutorsMinAndMaxPeriodLoad(TutorDoc)}<br>
+     * 1st check => {@link TutorDocServices#isAllSubjectClassesActuallyOfferingEachSubjectSpecified(TutorDoc)}<br>
+     * 2nd check => {@link TutorDocServices#isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDept(TutorDoc)}<br>
+     * 3rd check => {@link TutorDocServices#isTotalSubjectsAndClassesAssignedOKAccordingToTutorsMinAndMaxPeriodLoad(TutorDoc)}<br>
      *
      * @param tutorDoc
      * @return
