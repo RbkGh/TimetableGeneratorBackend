@@ -249,17 +249,6 @@ public class TutorDocServices {
         return yearGroupAndTotalSubjectAllocation;
     }
 
-    int getTotalPeriodsForSubject(String subjectUniqueIdInDB) {
-        SubjectDoc subjectDoc = subjectDocRepository.findOne(subjectUniqueIdInDB);
-        List<SubjectAllocationDoc> subjectAllocationDocs = subjectAllocationDocRepository.findBySubjectCode(subjectDoc.getSubjectCode());
-        int totalPeriodsForSubjectAccrossAllYearGroups = 0;
-        for (int i = 0; i < subjectAllocationDocs.size(); i++) {
-            totalPeriodsForSubjectAccrossAllYearGroups = totalPeriodsForSubjectAccrossAllYearGroups + subjectAllocationDocs.get(i).getTotalSubjectAllocation();
-        }
-        System.out.println("Total Number of periods for " + subjectDoc.getSubjectFullName() + " =" + totalPeriodsForSubjectAccrossAllYearGroups);
-        return totalPeriodsForSubjectAccrossAllYearGroups;
-    }
-
 
     /**
      * use when we need to get all department programme group docs of particular subjectuniqueId passed in
