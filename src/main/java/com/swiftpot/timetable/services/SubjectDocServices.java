@@ -22,6 +22,9 @@ public class SubjectDocServices {
     @Autowired
     SubjectAllocationDocRepository subjectAllocationDocRepository;
 
+    List<SubjectDoc> getAllCoreSubjectsOfferedByProgrammeGroupInDepartment(String programmeGroupUniqueIdInDB) {
+        return null;
+    }
 
     /**
      * get all total Periods For a {@link SubjectDoc subject} by summing all {@link List<SubjectAllocationDoc> subjectsAllocations} <br>
