@@ -112,7 +112,6 @@ public class TimeTableGenerationWithMockitoTests {
     public void partOneSetYearGroups() throws Exception {
 
         String timetableSuperDocString = new Gson().toJson(timeTableSuperDoc);
-        logger.info("***********TimeTable with years set = {}", timetableSuperDocString);
         logger.info("\n \n ********************Timetable pretty print json = " + PrettyJSON.toPrettyFormat(timetableSuperDocString));
         assertThat(5, equalTo(timeTableSuperDoc.getYearGroupsList().get(0).getProgrammeGroupList().get(0).getProgrammeDaysList().size()));
     }
@@ -139,7 +138,7 @@ public class TimeTableGenerationWithMockitoTests {
     public void setWorshipPeriods() throws Exception {
         TimeTableSuperDoc timetableSuperDocWithWorshipPeriodsSet = timeTableDefaultPeriodsAllocatorDefault.allocateWorshipPeriodForAllProgrammeGroups(timeTableSuperDoc, "WORSHIP");
         String timetableSuperDocWithWorshipPeriodsSetString = new Gson().toJson(timetableSuperDocWithWorshipPeriodsSet);
-        logger.info("TimeTable with  Worship periods set = {}" + PrettyJSON.toPrettyFormat(timetableSuperDocWithWorshipPeriodsSetString));
+        logger.info("TimeTable with  Worship periods set = {}", PrettyJSON.toPrettyFormat(timetableSuperDocWithWorshipPeriodsSetString));
         int totalWorshipPeriodsExpected =0;
         int totalWorshipPeriods = 0;
         for (YearGroup yearGroup : timetableSuperDocWithWorshipPeriodsSet.getYearGroupsList()) {
