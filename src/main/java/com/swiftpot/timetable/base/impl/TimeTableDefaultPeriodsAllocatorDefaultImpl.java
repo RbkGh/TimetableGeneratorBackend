@@ -135,7 +135,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
             //new programmeDay with all periods set with the subjects,then we set it to the current list at same index
             iProgrammeDayHelper = programmeDayHelperUtilDefault; //instantiate interface with implementation
             if (iProgrammeDayHelper.isProgrammeDayAlloted(currentProgrammeDay) == false) {
-                ProgrammeDay newCurrentProgrammeDay = setPracticalsPeriodsByCheckingIfRemainingPeriodsForDayCanSuffice(currentProgrammeDay, currentProgrammeGroup, programmeYearNo);
+                ProgrammeDay newCurrentProgrammeDay = this.setPracticalsPeriodsByCheckingIfRemainingPeriodsForDayCanSuffice(currentProgrammeDay, currentProgrammeGroup, programmeYearNo);
                 //we set the newlycreatedprogrammeDay with all periods subject set to the programmeDaysList
                 programmeDaysList.set(currentProgrammeDayNumber, newCurrentProgrammeDay);
             }
@@ -158,7 +158,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
             }
         }
         //now if totalPeriodsAvailableForDay is >= totalPeriodForPracticalCourse,then we can set it,otherwise do nothing
-        //to get practicalCourseTotalPeriod,scan and check subjectName that contains "PRACTICALS" equalsIgnorCase,very important it contains this word
+        //to get practicalCourseTotalPeriod,scan and check that SubjectDoc property isSubjectAPracticalSubject = true
         List<String> programmeSubjectsCodeList = currentProgrammeGroup.getProgrammeSubjectsCodeList();
         int totalNumberOfProgrammeSubjectsCodeList = programmeSubjectsCodeList.size();
         int totalPeriodForPracticalCourse = 0;
@@ -168,7 +168,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
             String currentSubjectCode = programmeSubjectsCodeList.get(currentSubjectCodeNo);
             //fetch the subjectDoc from db using the subjectCode
             SubjectDoc currentSubjectDoc = subjectDocRepository.findBySubjectCodeAllIgnoreCase(currentSubjectCode);
-            if (currentSubjectDoc.getSubjectFullName().contains("PRACTICALS")) {
+            if (currentSubjectDoc.isSubjectAPracticalSubject() == true) {
                 //we get the totalPeriods for the practicals course from subjectAllocationDocRepository and use getTotalSubjectAllocation() to retrieve the int value
                 totalPeriodForPracticalCourse = subjectAllocationDocRepository.findBySubjectCodeAndYearGroup(currentSubjectCode, programmeYearNo).getTotalSubjectAllocation();
                 practicalSubjectCode = currentSubjectDoc.getSubjectCode();

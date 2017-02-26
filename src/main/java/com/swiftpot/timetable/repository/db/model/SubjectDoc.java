@@ -32,6 +32,11 @@ public class SubjectDoc {
     private String subjectType;
 
     /**
+     * set to true if subject is a practical subject,false if otherwise
+     */
+    private boolean isSubjectAPracticalSubject;
+
+    /**
      * used only during check to find if subject is allocated to frontend,not used in backend operations
      */
     private boolean isAllSubjectYearGroupsAllocated;
@@ -82,6 +87,14 @@ public class SubjectDoc {
     public SubjectDoc setSubjectType(String subjectType) {
         this.subjectType = subjectType;
         return this;
+    }
+
+    public boolean isSubjectAPracticalSubject() {
+        return isSubjectAPracticalSubject;
+    }
+
+    public void setIsSubjectAPracticalSubject(boolean isSubjectAPracticalSubject) {
+        this.isSubjectAPracticalSubject = isSubjectAPracticalSubject;
     }
 
     public boolean isAllSubjectYearGroupsAllocated() {
