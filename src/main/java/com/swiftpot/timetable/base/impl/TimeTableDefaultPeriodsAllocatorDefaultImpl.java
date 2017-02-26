@@ -196,7 +196,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
         /*
         set subjectCode and tutorCode ,make sure tutorCode has enough periods left,and also ensure totalPeriodAllocation left is enough
         get Tutor Responsible by using the practicalSubjectCode to retrieve tutor from db
-        remember todo the implementation of the {@link TutorResponsibleForSubjectRetriever} Interface,as it's not done yet
+        remember todo the implementation of the {@link com.swiftpot.timetable.base.TutorResponsibleForSubjectRetriever} Interface,as it's not done yet
         */
         String tutorCodeResponsibleForSubject = tutorResponsibleForSubjectRetrieverFactory.getTutorResponsibleForSubjectRetrieverImpl().getTutorCodeResponsibleForSubject(practicalSubjectCode);
         int totalPeriodsToIterateThrough = periodOrLecturesList.size();

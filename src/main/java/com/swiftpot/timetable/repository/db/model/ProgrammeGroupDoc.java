@@ -18,6 +18,7 @@ public class ProgrammeGroupDoc {
 
     @Id
     private String id;
+
     private String programmeFullName;
     /**
      * programmeInitials,do not allow it to be editable on frontend,if it must be changed,then ProgrammeGroupDoc must be deleted.

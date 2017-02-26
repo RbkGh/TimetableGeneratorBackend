@@ -2,7 +2,6 @@ package com.swiftpot.timetable;
 
 import com.google.gson.Gson;
 import com.swiftpot.timetable.base.impl.TimeTableDefaultPeriodsAllocatorDefaultImpl;
-import com.swiftpot.timetable.factory.TimeTableDefaultPeriodsAllocatorFactory;
 import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.model.ProgrammeDay;
 import com.swiftpot.timetable.model.ProgrammeGroup;
@@ -10,28 +9,24 @@ import com.swiftpot.timetable.model.YearGroup;
 import com.swiftpot.timetable.repository.ProgrammeGroupDocRepository;
 import com.swiftpot.timetable.repository.db.model.ProgrammeGroupDoc;
 import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
-import com.swiftpot.timetable.services.ProgrammeDaysGenerator;
-import com.swiftpot.timetable.services.TimeTableGeneratorService;
 import com.swiftpot.timetable.services.TimeTablePopulatorService;
 import com.swiftpot.timetable.util.PrettyJSON;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.MockBeans;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertNotNull;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -55,6 +50,7 @@ public class TimeTableGenerationWithMockitoTests {
     ProgrammeGroupDocRepository programmeGroupDocRepository;
 
     TimeTableSuperDoc timeTableSuperDoc;
+    private static final Logger logger = LogManager.getLogger();
 
     @Before
     public void setupMock() throws Exception {
@@ -116,8 +112,8 @@ public class TimeTableGenerationWithMockitoTests {
     public void partOneSetYearGroups() throws Exception {
 
         String timetableSuperDocString = new Gson().toJson(timeTableSuperDoc);
-        System.out.println("***********TimeTable with year set = "+timetableSuperDocString);
-        System.out.println("\n \n ********************Timetable pretty print json = "+ PrettyJSON.toPrettyFormat(timetableSuperDocString));
+        logger.info("***********TimeTable with years set = {}", timetableSuperDocString);
+        logger.info("\n \n ********************Timetable pretty print json = " + PrettyJSON.toPrettyFormat(timetableSuperDocString));
         assertThat(5, equalTo(timeTableSuperDoc.getYearGroupsList().get(0).getProgrammeGroupList().get(0).getProgrammeDaysList().size()));
     }
 
@@ -143,7 +139,7 @@ public class TimeTableGenerationWithMockitoTests {
     public void setWorshipPeriods() throws Exception {
         TimeTableSuperDoc timetableSuperDocWithWorshipPeriodsSet = timeTableDefaultPeriodsAllocatorDefault.allocateWorshipPeriodForAllProgrammeGroups(timeTableSuperDoc, "WORSHIP");
         String timetableSuperDocWithWorshipPeriodsSetString = new Gson().toJson(timetableSuperDocWithWorshipPeriodsSet);
-        System.out.println("TimeTable with  Worship periods set = " + PrettyJSON.toPrettyFormat(timetableSuperDocWithWorshipPeriodsSetString));
+        logger.info("TimeTable with  Worship periods set = {}" + PrettyJSON.toPrettyFormat(timetableSuperDocWithWorshipPeriodsSetString));
         int totalWorshipPeriodsExpected =0;
         int totalWorshipPeriods = 0;
         for (YearGroup yearGroup : timetableSuperDocWithWorshipPeriodsSet.getYearGroupsList()) {
