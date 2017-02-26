@@ -16,11 +16,6 @@ import java.util.List;
 @Document(collection = "ProgrammeGroupDoc")
 public class ProgrammeGroupDoc {
 
-    /**
-     * @deprecated use {@linkplain DepartmentDoc#programmeSubjectsDocIdList} instead
-     */
-    @Deprecated
-    List<String> programmeSubjectsCodeList;
     @Id
     private String id;
     private String programmeFullName;
@@ -47,6 +42,13 @@ public class ProgrammeGroupDoc {
      * only Year 1 Students may be part initially not year 2 or 3 students
      */
     private List<Integer> yearGroupList;
+
+    /**
+     * @deprecated use {@linkplain DepartmentDoc#programmeSubjectsDocIdList} instead
+     */
+    @Deprecated
+    List<String> programmeSubjectsCodeList;
+
     private boolean technicalWorkshopOrLabRequired;
 
     public ProgrammeGroupDoc() {
