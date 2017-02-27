@@ -9,6 +9,9 @@ import java.util.List;
  */
 public class TutorSubjectIdAndProgrammeCodesListObj {
 
+    /**
+     * the subjectId ie {@link com.swiftpot.timetable.repository.db.model.SubjectDoc#id} of the {@link com.swiftpot.timetable.repository.db.model.SubjectDoc}
+     */
     private String tutorSubjectId;
 
     /**
@@ -19,6 +22,10 @@ public class TutorSubjectIdAndProgrammeCodesListObj {
     public TutorSubjectIdAndProgrammeCodesListObj() {
     }
 
+    /**
+     * @return
+     * @see TutorSubjectIdAndProgrammeCodesListObj#tutorSubjectId for documentation
+     */
     public String getTutorSubjectId() {
         return tutorSubjectId;
     }

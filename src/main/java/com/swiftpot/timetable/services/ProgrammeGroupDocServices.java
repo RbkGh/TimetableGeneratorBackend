@@ -1,6 +1,7 @@
 package com.swiftpot.timetable.services;
 
 import com.swiftpot.timetable.repository.DepartmentDocRepository;
+import com.swiftpot.timetable.repository.ProgrammeGroupDocRepository;
 import com.swiftpot.timetable.repository.SubjectDocRepository;
 import com.swiftpot.timetable.repository.db.model.DepartmentDoc;
 import com.swiftpot.timetable.repository.db.model.ProgrammeGroupDoc;
@@ -8,10 +9,8 @@ import com.swiftpot.timetable.repository.db.model.SubjectDoc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Ace Programmer Rbk
@@ -24,9 +23,13 @@ public class ProgrammeGroupDocServices {
     @Autowired
     DepartmentDocRepository departmentDocRepository;
     @Autowired
+    DepartmentDocServices departmentDocServices;
+    @Autowired
     TutorDocServices tutorDocServices;
     @Autowired
     SubjectDocRepository subjectDocRepository;
+    @Autowired
+    ProgrammeGroupDocRepository programmeGroupDocRepository;
 
     /**
      * get all programmeGroups /classes that partake in all subjects in Department without duplicates
@@ -63,10 +66,10 @@ public class ProgrammeGroupDocServices {
         if (subjectDocRepository.exists(subjectUniqueIdInDB)) {
             SubjectDoc subjectDoc = subjectDocRepository.findOne(subjectUniqueIdInDB);
             //List<Integer> yearGroupsOfferingCourse = subjectDoc.getSubjectYearGroupList();
-            DepartmentDoc departmentDoc = tutorDocServices.getDepartmentThatSpecificSubjectBelongsTo(subjectUniqueIdInDB);
+            DepartmentDoc departmentDoc = departmentDocServices.getDepartmentThatSpecificSubjectBelongsTo(subjectUniqueIdInDB);
             System.out.println("DepartmentDoc ====>" + departmentDoc.toString());
             //now fetch all the programmeGroups in department that this subject Belong to.,if a core subject we will not search ProgrammeeGroups in dept using the programmeInitials of Dept
-            List<ProgrammeGroupDoc> programmeGroupDocsInDepartment = tutorDocServices.getAllProgrammeGroupDocsOfParticularSubject(subjectUniqueIdInDB);
+            List<ProgrammeGroupDoc> programmeGroupDocsInDepartment = this.getAllProgrammeGroupDocsOfParticularSubject(subjectUniqueIdInDB);
             System.out.println("ProgrammeGroups For Subject " + subjectUniqueIdInDB + " ==>>>::\n\n");
             programmeGroupDocsInDepartment.forEach(programmeGroupDoc -> System.out.println(programmeGroupDoc.toString() + "\n"));
             System.out.println("\n\n");
@@ -74,5 +77,25 @@ public class ProgrammeGroupDocServices {
         } else {
             throw new NoSuchElementException("Subject with id " + subjectUniqueIdInDB + " does not exist");
         }
+    }
+
+    /**
+     * use when we need to get all department programme group docs of particular subjectuniqueId passed in
+     *
+     * @param subjectUniqueId
+     * @return
+     */
+    List<ProgrammeGroupDoc> getAllProgrammeGroupDocsOfParticularSubject(String subjectUniqueId) {
+        Set<ProgrammeGroupDoc> finalProgrammeGroupDocsInDeptSet = new HashSet<>();
+        SubjectDoc subjectDoc = subjectDocRepository.findOne(subjectUniqueId);
+        List<Integer> yearGroups = subjectDoc.getSubjectYearGroupList();
+        for (Integer yearGroup : yearGroups) {
+            List<ProgrammeGroupDoc> programmeGroupsForParticularYearGroup = programmeGroupDocRepository.findByYearGroup(yearGroup);
+            //add each programmeGroupDoc ignoring duplicates and overriding toString and hashcode of ProgrammeGroupDoc class
+            programmeGroupsForParticularYearGroup.forEach(finalProgrammeGroupDocsInDeptSet::add);
+        }
+
+        List<ProgrammeGroupDoc> finalProgrammeGroupDocsToReturn = finalProgrammeGroupDocsInDeptSet.stream().collect(Collectors.toList());//convert set to List
+        return finalProgrammeGroupDocsToReturn;
     }
 }

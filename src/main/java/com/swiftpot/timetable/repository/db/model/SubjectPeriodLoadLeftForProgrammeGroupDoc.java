@@ -16,7 +16,10 @@ public class SubjectPeriodLoadLeftForProgrammeGroupDoc{
 
     private String programmeCode;
 
-    private String subjectCode;
+    /**
+     * the subject's {@link SubjectDoc#id id} in {@link SubjectDoc }
+     */
+    private String subjectUniqueIdInDb;
 
     private int periodLoadLeft;
 
@@ -31,12 +34,12 @@ public class SubjectPeriodLoadLeftForProgrammeGroupDoc{
         this.programmeCode = programmeCode;
     }
 
-    public String getSubjectCode() {
-        return subjectCode;
+    public String getSubjectUniqueIdInDb() {
+        return subjectUniqueIdInDb;
     }
 
-    public void setSubjectCode(String subjectCode) {
-        this.subjectCode = subjectCode;
+    public void setSubjectUniqueIdInDb(String subjectUniqueIdInDb) {
+        this.subjectUniqueIdInDb = subjectUniqueIdInDb;
     }
 
     public int getPeriodLoadLeft() {

@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class ProgrammeGroup {
     private String programmeCode;
-    List<String> programmeSubjectsCodeList;
+    List<String> programmeSubjectsUniqueIdInDbList;
     private boolean isProgrammeRequiringPracticalsClassroom;
     private List<ProgrammeDay> programmeDaysList;
 
@@ -38,12 +38,12 @@ public class ProgrammeGroup {
         this.isProgrammeRequiringPracticalsClassroom = isProgrammeRequiringPracticalsClassroom;
     }
 
-    public List<String> getProgrammeSubjectsCodeList() {
-        return programmeSubjectsCodeList;
+    public List<String> getProgrammeSubjectsUniqueIdInDbList() {
+        return programmeSubjectsUniqueIdInDbList;
     }
 
-    public void setProgrammeSubjectsCodeList(List<String> programmeSubjectsCodeList) {
-        this.programmeSubjectsCodeList = programmeSubjectsCodeList;
+    public void setProgrammeSubjectsUniqueIdInDbList(List<String> programmeSubjectsUniqueIdInDbList) {
+        this.programmeSubjectsUniqueIdInDbList = programmeSubjectsUniqueIdInDbList;
     }
 
     public List<ProgrammeDay> getProgrammeDaysList() {

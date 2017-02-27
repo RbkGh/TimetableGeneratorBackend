@@ -146,8 +146,8 @@ public class TimeTableGenerationWithMockitoTests {
                 totalWorshipPeriodsExpected++;
                 for (ProgrammeDay programmeDay : programmeGroup.getProgrammeDaysList()) {
                     for (PeriodOrLecture periodOrLecture : programmeDay.getPeriodList()) {
-                        if(periodOrLecture.getSubjectCode() != null)
-                        if (periodOrLecture.getSubjectCode()=="WORSHIP") {
+                        if (periodOrLecture.getSubjectUniqueIdInDb() != null)
+                            if (periodOrLecture.getSubjectUniqueIdInDb() == "WORSHIP") {
                             totalWorshipPeriods++;
                         }
                     }

@@ -10,7 +10,7 @@ import java.util.List;
  *         <Rodney Kwabena Boachie at [rodney@swiftpot.com,rbk.unlimited@gmail.com]> on
  *         22-Dec-16 @ 7:23 PM
  */
-public interface TutorDocRepository extends MongoRepository<TutorDoc,String> {
+public interface TutorDocRepository extends MongoRepository<TutorDoc, String> {
     List<TutorDoc> findAll();
 
     TutorDoc findByTutorCode(String tutorCode);
@@ -22,8 +22,5 @@ public interface TutorDocRepository extends MongoRepository<TutorDoc,String> {
      * @return
      */
     List<TutorDoc> findByDepartmentId(String departmentId);
-
-    List<TutorDoc> findById(String id);
-
 
 }

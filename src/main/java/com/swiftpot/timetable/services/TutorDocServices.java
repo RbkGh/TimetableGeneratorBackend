@@ -3,12 +3,14 @@ package com.swiftpot.timetable.services;
 import com.google.gson.Gson;
 import com.swiftpot.timetable.model.TutorSubjectIdAndProgrammeCodesListObj;
 import com.swiftpot.timetable.repository.*;
-import com.swiftpot.timetable.repository.db.model.*;
+import com.swiftpot.timetable.repository.db.model.ProgrammeGroupDoc;
+import com.swiftpot.timetable.repository.db.model.SubjectAllocationDoc;
+import com.swiftpot.timetable.repository.db.model.SubjectDoc;
+import com.swiftpot.timetable.repository.db.model.TutorDoc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author Ace Programmer Rbk
@@ -249,64 +251,4 @@ public class TutorDocServices {
         return yearGroupAndTotalSubjectAllocation;
     }
 
-
-    /**
-     * use when we need to get all department programme group docs of particular subjectuniqueId passed in
-     *
-     * @param subjectUniqueId
-     * @return
-     */
-    List<ProgrammeGroupDoc> getAllProgrammeGroupDocsOfParticularSubject(String subjectUniqueId) {
-        Set<ProgrammeGroupDoc> finalProgrammeGroupDocsInDeptSet = new HashSet<>();
-        SubjectDoc subjectDoc = subjectDocRepository.findOne(subjectUniqueId);
-        List<Integer> yearGroups = subjectDoc.getSubjectYearGroupList();
-        for (Integer yearGroup : yearGroups) {
-            List<ProgrammeGroupDoc> programmeGroupsForParticularYearGroup = programmeGroupDocRepository.findByYearGroup(yearGroup);
-            //add each programmeGroupDoc ignoring duplicates and overriding toString and hashcode of ProgrammeGroupDoc class
-            programmeGroupsForParticularYearGroup.forEach(finalProgrammeGroupDocsInDeptSet::add);
-        }
-
-        List<ProgrammeGroupDoc> finalProgrammeGroupDocsToReturn = finalProgrammeGroupDocsInDeptSet.stream().collect(Collectors.toList());//convert set to List
-        return finalProgrammeGroupDocsToReturn;
-    }
-
-
-    /**
-     * get department that subject belongs to,if it does not belong to any department , {@link NoSuchElementException} will be thrown.
-     *
-     * @param subjectUniqueIdInDB
-     * @return
-     * @throws NoSuchElementException
-     */
-    public DepartmentDoc getDepartmentThatSpecificSubjectBelongsTo(String subjectUniqueIdInDB) throws NoSuchElementException {
-        List<DepartmentDoc> departmentDocsAllInDb = departmentDocRepository.findAll();
-        DepartmentDoc departmentDoc = null;//set to null,until it is found and it is no more null. then return it,otherwise,throw exception.
-        if (!departmentDocsAllInDb.isEmpty()) {
-            int departmentDocsAllInDbLength = departmentDocsAllInDb.size();
-            for (int i = 0; i < departmentDocsAllInDbLength; i++) {
-                if (departmentDoc != null) {
-                    break;
-                }
-                DepartmentDoc currentDepartmentDoc = departmentDocsAllInDb.get(i);
-                List<String> subjectsDocIdList = currentDepartmentDoc.getProgrammeSubjectsDocIdList();
-                if (!subjectsDocIdList.isEmpty()) {
-                    for (int iCurrentSubjectDocIdIndex = 0; iCurrentSubjectDocIdIndex < subjectsDocIdList.size(); iCurrentSubjectDocIdIndex++) {
-                        if (Objects.equals(subjectUniqueIdInDB, subjectsDocIdList.get(iCurrentSubjectDocIdIndex))) {
-                            departmentDoc = currentDepartmentDoc;
-                            break;
-                        }
-                    }
-                }
-            }
-            //since the id is not empty,we can fetch it in db and return it.
-            if (departmentDoc != null) {
-                System.out.println("Returned departmentDoc ===>" + departmentDoc.toString());
-                return departmentDoc;
-            } else {
-                throw new NoSuchElementException("There is no department found for the subject with id of " + subjectUniqueIdInDB);
-            }
-        } else {
-            throw new NoSuchElementException("There is no department found for the subject with id of " + subjectUniqueIdInDB);
-        }
-    }
 }

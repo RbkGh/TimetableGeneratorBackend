@@ -10,8 +10,16 @@ public class PeriodOrLecture {
     private int periodNumber;
     private String periodStartandEndTime;
     private boolean isAllocated;
-    private String subjectCode;
-    private String tutorCode;
+
+    /**
+     * the unique {@link com.swiftpot.timetable.repository.db.model.SubjectDoc#id id} of {@link com.swiftpot.timetable.repository.db.model.SubjectDoc subjectDoc } object.
+     */
+    private String subjectUniqueIdInDb;
+
+    /**
+     * the unique {@link com.swiftpot.timetable.repository.db.model.TutorDoc#id id} of {@link com.swiftpot.timetable.repository.db.model.TutorDoc tutorDoc } object.
+     */
+    private String tutorUniqueId;
 
     public PeriodOrLecture() {
     }
@@ -65,19 +73,19 @@ public class PeriodOrLecture {
         this.isAllocated = isAllocated;
     }
 
-    public String getSubjectCode() {
-        return subjectCode;
+    public String getSubjectUniqueIdInDb() {
+        return subjectUniqueIdInDb;
     }
 
-    public void setSubjectCode(String subjectCode) {
-        this.subjectCode = subjectCode;
+    public void setSubjectUniqueIdInDb(String subjectUniqueIdInDb) {
+        this.subjectUniqueIdInDb = subjectUniqueIdInDb;
     }
 
-    public String getTutorCode() {
-        return tutorCode;
+    public String getTutorUniqueId() {
+        return tutorUniqueId;
     }
 
-    public void setTutorCode(String tutorCode) {
-        this.tutorCode = tutorCode;
+    public void setTutorUniqueId(String tutorUniqueId) {
+        this.tutorUniqueId = tutorUniqueId;
     }
 }

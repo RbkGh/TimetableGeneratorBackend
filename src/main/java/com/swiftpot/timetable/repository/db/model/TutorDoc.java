@@ -18,6 +18,10 @@ public class TutorDoc extends Person {
     @Id
     private String id;
 
+    /**
+     * @deprecated use {@linkplain TutorDoc#id id} instead to get unique tutor always
+     */
+    @Deprecated
     private String tutorCode;
 
     private int currentPeriodLoadLeft;
@@ -57,6 +61,10 @@ public class TutorDoc extends Person {
         this.id = id;
     }
 
+    /**
+     * @deprecated use {@linkplain TutorDoc#id} instead to get unique tutor always
+     */
+    @Deprecated
     public String getTutorCode() {
         return tutorCode;
     }

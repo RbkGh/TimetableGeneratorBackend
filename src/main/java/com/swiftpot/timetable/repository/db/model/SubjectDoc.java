@@ -18,6 +18,9 @@ public class SubjectDoc {
 
     private String subjectFullName;
 
+    /**
+     * use with {@link SubjectAllocationDoc#yearGroup} to get subject allocation doc only,and nothing else
+     */
     private String subjectCode;
 
     /**
@@ -62,10 +65,17 @@ public class SubjectDoc {
         return this;
     }
 
+    /**
+     *use with {@link SubjectAllocationDoc#yearGroup} to get subject allocation doc only,and nothing else
+     */
     public String getSubjectCode() {
         return subjectCode;
     }
 
+    /**
+     * use with {@link SubjectAllocationDoc#yearGroup} to get subject allocation doc only,and nothing else
+     */
+    @Deprecated
     public SubjectDoc setSubjectCode(String subjectCode) {
         this.subjectCode = subjectCode;
         return this;

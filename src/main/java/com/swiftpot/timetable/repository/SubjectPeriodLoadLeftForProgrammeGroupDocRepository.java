@@ -9,5 +9,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
  *         27-Dec-16 @ 11:01 PM
  */
 public interface SubjectPeriodLoadLeftForProgrammeGroupDocRepository extends MongoRepository<SubjectPeriodLoadLeftForProgrammeGroupDoc,String> {
-    SubjectPeriodLoadLeftForProgrammeGroupDoc findByProgrammeCodeAndSubjectCode(String programmeCode,String subjectCode);
+    SubjectPeriodLoadLeftForProgrammeGroupDoc findByProgrammeCodeAndSubjectUniqueIdInDb(String programmeCode, String subjectUniqueIdInDb);
 }

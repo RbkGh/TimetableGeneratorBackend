@@ -3,6 +3,7 @@ package com.swiftpot.timetable.services;
 import com.swiftpot.timetable.repository.DepartmentDocRepository;
 import com.swiftpot.timetable.repository.db.model.DepartmentDoc;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -13,13 +14,15 @@ import java.util.Objects;
  *         <Rodney Kwabena Boachie at [rodney@swiftpot.com,rbk.unlimited@gmail.com]> on
  *         24-Feb-17 @ 10:01 PM
  */
+@Service
 public class DepartmentDocServices {
 
     @Autowired
     DepartmentDocRepository departmentDocRepository;
 
     /**
-     * get department that subject belongs to,if it does not belong to any department , {@link NoSuchElementException} will be thrown.
+     * get department that subject belongs to,<br>
+     * if it does not belong to any department , {@link NoSuchElementException} will be thrown.
      *
      * @param subjectUniqueIdInDB string of type {@link com.swiftpot.timetable.repository.db.model.SubjectDoc#id SubjectDoc.id}
      * @return
