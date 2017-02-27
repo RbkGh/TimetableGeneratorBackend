@@ -9,7 +9,6 @@ public interface TutorResponsibleForSubjectRetriever {
     /**
      * get uniqueId {@link com.swiftpot.timetable.repository.db.model.TutorDoc#id} of tutor that is responsible <br>
      * or assigned to Subject <br>
-     *
      * @param subjectUniqueIdInDb type {@linkplain com.swiftpot.timetable.repository.db.model.SubjectDoc#id}
      * @return {@link com.swiftpot.timetable.repository.db.model.TutorDoc#id} of tutor that is responsible <br>
      * or assigned to Subject <br>
