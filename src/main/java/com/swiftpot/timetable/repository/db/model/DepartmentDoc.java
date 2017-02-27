@@ -34,7 +34,7 @@ public class DepartmentDoc {
     private String deptProgrammeInitials;
 
     /**
-     * "CORE" OR "ELECTIVE" only
+     * {@link DepartmentDoc#DEPARTMENT_TYPE_CORE} OR {@link DepartmentDoc#DEPARTMENT_TYPE_ELECTIVE} only
      */
     private String deptType;
 
