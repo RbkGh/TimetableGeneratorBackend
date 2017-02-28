@@ -64,7 +64,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
                 ProgrammeGroup currentProgrammeGroup = programmeGroupList.get(currentProgrammeGroupNo);
                 if (currentProgrammeGroup.getIsProgrammeRequiringPracticalsClassroom() == true) {
                     //set Practicals for all programmes that have practicals and set it to the same programme days list
-                    List<ProgrammeDay> newlyCreatedProgrammeDaysList = setPracticalsDaysForAllProgrammeGroupsRequiringIt(currentProgrammeGroup,
+                    List<ProgrammeDay> newlyCreatedProgrammeDaysList = this.setPracticalsDaysForAllProgrammeGroupsRequiringIt(currentProgrammeGroup,
                             programmeDaysList,
                             programmeYearNo);
                     programmeGroupList.get(currentProgrammeGroupNo).setProgrammeDaysList(newlyCreatedProgrammeDaysList);

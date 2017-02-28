@@ -77,8 +77,8 @@ public class SubjectsController {
         }
     }
 
-    /*
-    Don't allow user to update the subjectCode as this can cause trouble retrieving the subjectAllocationDoc
+    /**
+     *  Don't allow user to update the subjectCode as this can cause trouble retrieving the subjectAllocationDoc
     *
     * */
     @RequestMapping(path = "/{id}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
