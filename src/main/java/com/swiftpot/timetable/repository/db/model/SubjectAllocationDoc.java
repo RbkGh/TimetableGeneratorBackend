@@ -14,6 +14,9 @@ public class SubjectAllocationDoc {
     @Id
     private String id;
 
+    /**
+     * use {@link SubjectDoc#subjectCode} for this
+     */
     private String subjectCode;
 
     private int totalSubjectAllocation;
