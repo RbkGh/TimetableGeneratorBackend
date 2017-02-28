@@ -75,7 +75,6 @@ public class SubjectDoc {
     /**
      * use with {@link SubjectAllocationDoc#yearGroup} to get subject allocation doc only,and nothing else
      */
-    @Deprecated
     public SubjectDoc setSubjectCode(String subjectCode) {
         this.subjectCode = subjectCode;
         return this;
