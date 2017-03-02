@@ -16,11 +16,24 @@ import java.util.List;
 public class TutorPersonalTimeTableDoc {
 
     /**
+     * this is a reference of the {@link TutorDoc#id} of {@link TutorDoc}
+     */
+    private String tutorUniqueIdInDb;
+
+    /**
      * Tutor's List of {@link ProgrammeDay} this is equivalent to the <br>
      * same days that are available on the {@link TimeTableSuperDoc}(ie the list of {@link ProgrammeDay} on the <br>
      * {@link com.swiftpot.timetable.model.ProgrammeGroup } object on the timetable object.
      */
     private List<ProgrammeDay> programmeDaysList;
+
+    public String getTutorUniqueIdInDb() {
+        return tutorUniqueIdInDb;
+    }
+
+    public void setTutorUniqueIdInDb(String tutorUniqueIdInDb) {
+        this.tutorUniqueIdInDb = tutorUniqueIdInDb;
+    }
 
     public List<ProgrammeDay> getProgrammeDaysList() {
         return programmeDaysList;
