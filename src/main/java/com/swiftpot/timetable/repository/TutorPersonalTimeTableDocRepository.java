@@ -9,4 +9,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
  *         02-Mar-17 @ 8:44 PM
  */
 public interface TutorPersonalTimeTableDocRepository extends MongoRepository<TutorPersonalTimeTableDoc, String> {
+    TutorPersonalTimeTableDoc findByTutorUniqueIdInDb(String tutorUniqueIdInDb);
 }

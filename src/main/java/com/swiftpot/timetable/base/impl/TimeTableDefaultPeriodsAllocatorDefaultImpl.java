@@ -8,14 +8,12 @@ import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.model.ProgrammeDay;
 import com.swiftpot.timetable.model.ProgrammeGroup;
 import com.swiftpot.timetable.model.YearGroup;
-import com.swiftpot.timetable.repository.SubjectAllocationDocRepository;
-import com.swiftpot.timetable.repository.SubjectDocRepository;
-import com.swiftpot.timetable.repository.SubjectPeriodLoadLeftForProgrammeGroupDocRepository;
-import com.swiftpot.timetable.repository.TutorDocRepository;
+import com.swiftpot.timetable.repository.*;
 import com.swiftpot.timetable.repository.db.model.SubjectDoc;
 import com.swiftpot.timetable.repository.db.model.SubjectPeriodLoadLeftForProgrammeGroupDoc;
 import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
-import com.swiftpot.timetable.repository.db.model.TutorDoc;
+import com.swiftpot.timetable.repository.db.model.TutorPersonalTimeTableDoc;
+import com.swiftpot.timetable.services.TutorPersonalTimeTableDocServices;
 import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
 import com.swiftpot.timetable.util.ProgrammeDayHelperUtilDefaultImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +45,10 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
     IProgrammeDayHelper iProgrammeDayHelper;
     @Autowired
     ProgrammeDayHelperUtilDefaultImpl programmeDayHelperUtilDefault;
+    @Autowired
+    TutorPersonalTimeTableDocRepository tutorPersonalTimeTableDocRepository;
+    @Autowired
+    TutorPersonalTimeTableDocServices tutorPersonalTimeTableDocServices;
 
 
     @Override
@@ -64,7 +66,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
                 ProgrammeGroup currentProgrammeGroup = programmeGroupList.get(currentProgrammeGroupNo);
                 if (currentProgrammeGroup.getIsProgrammeRequiringPracticalsClassroom() == true) {
                     //set Practicals for all programmes that have practicals and set it to the same programme days list
-                    List<ProgrammeDay> newlyCreatedProgrammeDaysList = this.setPracticalsDaysForAllProgrammeGroupsRequiringIt(currentProgrammeGroup,
+                    List<ProgrammeDay> newlyCreatedProgrammeDaysList = this.allocatePracticalsPeriodsForProgrammeGroupRequiringIt(currentProgrammeGroup,
                             programmeDaysList,
                             programmeYearNo);
                     programmeGroupList.get(currentProgrammeGroupNo).setProgrammeDaysList(newlyCreatedProgrammeDaysList);
@@ -87,7 +89,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
      */
     public TimeTableSuperDoc allocateWorshipPeriodForAllProgrammeGroups(TimeTableSuperDoc timeTableSuperDoc, String subjectUniqueIdInDb) throws Exception {
         String timeTableSuperDocString = new Gson().toJson(timeTableSuperDoc);
-        timeTableSuperDoc = new Gson().fromJson(timeTableSuperDocString,TimeTableSuperDoc.class);
+        timeTableSuperDoc = new Gson().fromJson(timeTableSuperDocString, TimeTableSuperDoc.class);
         final int[] numberOfTimesSet = {0};
         int worshipDayNumberr = getWorshipPeriodDayNumberAndPeriodNumber().get("worshipDayNumber");
         String worshipDayName = getProgrammeDayName(worshipDayNumberr);
@@ -123,8 +125,16 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
         return worshipDayAndPeriodMap;
     }
 
-    private List<ProgrammeDay> setPracticalsDaysForAllProgrammeGroupsRequiringIt(ProgrammeGroup currentProgrammeGroup,
-                                                                                 List<ProgrammeDay> programmeDaysList, int programmeYearNo) {
+    /**
+     * allocate practicals period for a specific day in the programmeGroup passed in
+     *
+     * @param currentProgrammeGroup the {@link ProgrammeGroup} object to allocate practicals period for.
+     * @param programmeDaysList     List of {@link ProgrammeDay}s of the programmeGroup
+     * @param programmeYearNo       the {@link com.swiftpot.timetable.repository.db.model.ProgrammeGroupDoc#yearGroup} ie. the yearGroup of the programme group
+     * @return
+     */
+    private List<ProgrammeDay> allocatePracticalsPeriodsForProgrammeGroupRequiringIt(ProgrammeGroup currentProgrammeGroup,
+                                                                                     List<ProgrammeDay> programmeDaysList, int programmeYearNo) {
 
         //we iterate through all programmeDaysList
         int numberOfProgrammeDays = programmeDaysList.size();
@@ -136,10 +146,15 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
             iProgrammeDayHelper = programmeDayHelperUtilDefault; //instantiate interface with implementation
             int practicalsTotalPeriods = this.getTotalPeriodsForPracticalSubjectInProgrammeGroupSubjectsList(currentProgrammeGroup, programmeYearNo);
 
-            if (iProgrammeDayHelper.isProgrammeDayCapableOfAcceptingTheIncomingNumberOfPeriodsAssumingUnallocatedDaysAreSequential(currentProgrammeDay, practicalsTotalPeriods)) {
-                ProgrammeDay newCurrentProgrammeDay = this.setPracticalsPeriodsByCheckingIfRemainingPeriodsForDayCanSuffice(currentProgrammeDay, currentProgrammeGroup, programmeYearNo);
+            if (iProgrammeDayHelper.
+                    isProgrammeDayCapableOfAcceptingTheIncomingNumberOfPeriodsAssumingUnallocatedDaysAreSequential
+                            (currentProgrammeDay, practicalsTotalPeriods)) {
+                //double check ,but double check is better than once.
+                ProgrammeDay newCurrentProgrammeDay = this.
+                        setPracticalsPeriodsByCheckingIfRemainingPeriodsForDayCanSuffice(currentProgrammeDay, currentProgrammeGroup, practicalsTotalPeriods);
                 //we set the newlycreatedprogrammeDay with all periods subject set to the programmeDaysList
                 programmeDaysList.set(currentProgrammeDayNumber, newCurrentProgrammeDay);
+                break;
             }
         }
         return programmeDaysList;
@@ -147,23 +162,12 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
 
     private ProgrammeDay setPracticalsPeriodsByCheckingIfRemainingPeriodsForDayCanSuffice(ProgrammeDay programmeDay,
                                                                                           ProgrammeGroup currentProgrammeGroup,
-                                                                                          int programmeYearNo) {
-        //to calculate if periods for day will be enough,check the practicals total period against the total available
-        //period for the day
+                                                                                          int totalPeriodForPracticalCourse) {
         List<PeriodOrLecture> periodOrLecturesInProgDay = programmeDay.getPeriodList();
-        int totalNumberOfPeriods = periodOrLecturesInProgDay.size();
-        int totalPeriodsAvailableForDay = 0;
-        for (int currentPeriodOrLectureNo = 0; currentPeriodOrLectureNo < totalNumberOfPeriods; currentPeriodOrLectureNo++) {
-            PeriodOrLecture currentPeriodOrLecture = periodOrLecturesInProgDay.get(currentPeriodOrLectureNo);
-            if (currentPeriodOrLecture.getIsAllocated() == false) {
-                totalPeriodsAvailableForDay++;
-            }
-        }
-        //now if totalPeriodsAvailableForDay is >= totalPeriodForPracticalCourse,then we can set it,otherwise do nothing
+
         //to get totalNumberOfProgrammeSubjectsUniqueIdInDbList practicalCourseTotalPeriod,scan and check that SubjectDoc property isSubjectAPracticalSubject = true
         List<String> programmeSubjectsUniqueIdInDbList = currentProgrammeGroup.getProgrammeSubjectsUniqueIdInDbList();
         int totalNumberOfProgrammeSubjectsUniqueIdInDbList = programmeSubjectsUniqueIdInDbList.size();
-        int totalPeriodForPracticalCourse = 0;
         String programmeCode = currentProgrammeGroup.getProgrammeCode();
         String practicalSubjectId = null;
         for (int currentSubjectCodeNo = 0; currentSubjectCodeNo < totalNumberOfProgrammeSubjectsUniqueIdInDbList; currentSubjectCodeNo++) {
@@ -171,22 +175,18 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
             //fetch the subjectDoc from db using the subjectCode
             SubjectDoc currentSubjectDoc = subjectDocRepository.findOne(currentSubjectUniqueIdInDb);
             if (currentSubjectDoc.isSubjectAPracticalSubject() == true) {
-                //we get the totalPeriods for the practicals course from subjectAllocationDocRepository and use getTotalSubjectAllocation() to retrieve the int value
-                String currentSubjectCode = currentSubjectDoc.getSubjectCode();
-                totalPeriodForPracticalCourse = subjectAllocationDocRepository.findBySubjectCodeAndYearGroup(currentSubjectCode, programmeYearNo).getTotalSubjectAllocation();
                 practicalSubjectId = currentSubjectDoc.getId();
+                break;
             }
         }
-        //now we can actually compare if the totalPeriodsAvailableForDay >= totalPeriodForPracticalCourse
-        if (totalPeriodsAvailableForDay >= totalPeriodForPracticalCourse) {
-            //now we can set the practical subjectCode and tutorCode to the periods and update dayIsAllocated if the existing day is exhausted
-            int periodToStartSettingSubjectFrom = this.getIndexToStartSettingPeriodsFrom(periodOrLecturesInProgDay);
-            List<PeriodOrLecture> newPeriodOrLectureListToSetToProgrammeDay =
-                    this.setSubjectCodeAndTutorCodeForAllAffectedPeriodsOfferingPracticals(periodToStartSettingSubjectFrom,
-                            periodOrLecturesInProgDay, practicalSubjectId, programmeCode, totalPeriodForPracticalCourse);
-            //now we set the new periodOrLectureList to the programmeDay and return it
-            programmeDay.setPeriodList(newPeriodOrLectureListToSetToProgrammeDay);
-        }
+        //now we can set the practical subjectId and tutorid to the periods and update dayIsAllocated if the existing day is exhausted
+
+        int periodToStartSettingSubjectFrom = this.getIndexToStartSettingPeriodsFrom(periodOrLecturesInProgDay);
+        List<PeriodOrLecture> newPeriodOrLectureListToSetToProgrammeDay =
+                this.setSubjectUniqueIdInDbAndTutorUniqueIdForAllAffectedPeriodsOfferingPracticals(programmeDay, periodToStartSettingSubjectFrom,
+                        periodOrLecturesInProgDay, practicalSubjectId, programmeCode, totalPeriodForPracticalCourse);
+        //now we set the new periodOrLectureList to the programmeDay and return it
+        programmeDay.setPeriodList(newPeriodOrLectureListToSetToProgrammeDay);
 
         return programmeDay;
     }
@@ -211,21 +211,23 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
                 //we get the totalPeriods for the practicals course from subjectAllocationDocRepository and use getTotalSubjectAllocation() to retrieve the int value
                 String currentSubjectCode = currentSubjectDoc.getSubjectCode();
                 totalPeriodForPracticalCourse = subjectAllocationDocRepository.findBySubjectCodeAndYearGroup(currentSubjectCode, programmeYearNo).getTotalSubjectAllocation();
+                break;
             }
         }
         return totalPeriodForPracticalCourse;
     }
 
-    public List<PeriodOrLecture> setSubjectCodeAndTutorCodeForAllAffectedPeriodsOfferingPracticals(int periodToStartSettingSubjectFrom,
-                                                                                                   List<PeriodOrLecture> periodOrLecturesList,
-                                                                                                   String practicalSubjectId,
-                                                                                                   String programmeCode,
-                                                                                                   int totalPeriodForPracticalCourse) {
+    public List<PeriodOrLecture> setSubjectUniqueIdInDbAndTutorUniqueIdForAllAffectedPeriodsOfferingPracticals(ProgrammeDay programmeDay,
+                                                                                                               int periodToStartSettingSubjectFrom,
+                                                                                                               List<PeriodOrLecture> periodOrLecturesList,
+                                                                                                               String practicalSubjectId,
+                                                                                                               String programmeCode,
+                                                                                                               int totalPeriodForPracticalCourse) {
         /**
-        set subjectCode and tutorCode ,make sure tutorCode has enough periods left,and also ensure totalPeriodAllocation left is enough
+         set subjectCode and tutorCode ,make sure tutorCode has enough periods left,and also ensure totalPeriodAllocation left is enough
          get Tutor Responsible by using the practicalSubjectId to retrieve tutor from db
          remember todo FIXED!!!!!! the implementation of the {@link com.swiftpot.timetable.base.TutorResponsibleForSubjectRetriever} Interface,as it's not done yet
-        */
+         */
         String tutorIdResponsibleForSubject =
                 tutorResponsibleForSubjectRetrieverFactory.getTutorResponsibleForSubjectRetrieverImpl()
                         .getTutorObjectUniqueIdResponsibleForSubject(practicalSubjectId);
@@ -233,7 +235,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
         int totalPeriodsThatHasBeenSet = 0;
         for (int i = 0; i < totalPeriodsToIterateThrough; i++) {
             if (i >= periodToStartSettingSubjectFrom) {
-                //we increment totalPeriodsThatHasBeenSet by 1
+                //we increment totalPeriodsThatHasBeenSet by 1 setSubjectUniqueIdInDbAndTutorUniqueIdForAllAffectedPeriodsOfferingPracticals
                 totalPeriodsThatHasBeenSet++;
                 PeriodOrLecture currentPeriodOrLecture = periodOrLecturesList.get(i);
                 currentPeriodOrLecture.setSubjectUniqueIdInDb(practicalSubjectId);
@@ -244,8 +246,10 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
             }
         }
 
+        int startingPeriod = periodToStartSettingSubjectFrom;
+        int stoppingPeriod = startingPeriod + totalPeriodsThatHasBeenSet - 1; //this should automatically amount to the period number that the allocation ends,-1 because if starting period starts from 2,and the total periods set is 1,without subtracting 1,it will mean that the period will end at period 3 instead of the same period which is 2
         //updateDb Accordingly to reflect totalSubjectsPeriodLeft in db for both tutorDoc and periods left for the subject to be exhausted
-        this.updateDbWithTotalPeriodsThatHasBeenSet(programmeCode, practicalSubjectId, totalPeriodForPracticalCourse, totalPeriodsThatHasBeenSet, tutorIdResponsibleForSubject);
+        this.updateDbWithTotalPeriodsThatHasBeenSet(programmeDay, programmeCode, practicalSubjectId, totalPeriodForPracticalCourse, totalPeriodsThatHasBeenSet, tutorIdResponsibleForSubject, startingPeriod, stoppingPeriod);
 
         return periodOrLecturesList;
     }
@@ -258,12 +262,17 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
      * @param totalPeriodForPracticalCourse
      * @param totalPeriodsThatHasBeenSet
      * @param tutorIdResponsibleForSubject
+     * @param startingPeriod
+     * @param stoppingPeriod
      */
-    void updateDbWithTotalPeriodsThatHasBeenSet(String programmeCode,
+    void updateDbWithTotalPeriodsThatHasBeenSet(ProgrammeDay programmeDay,
+                                                String programmeCode,
                                                 String subjectUniqueIdInDb,
                                                 int totalPeriodForPracticalCourse,
                                                 int totalPeriodsThatHasBeenSet,
-                                                String tutorIdResponsibleForSubject) {
+                                                String tutorIdResponsibleForSubject,
+                                                int startingPeriod,
+                                                int stoppingPeriod) {
         //now we decrement the value of the totalSubjectsPeriodLeft in db by the totalPeriodsThatHasBeenSet
         SubjectPeriodLoadLeftForProgrammeGroupDoc subjectPeriodLoadLeftForProgrammeGroupDoc = subjectPeriodLoadLeftForProgrammeGroupDocRepository.
                 findByProgrammeCodeAndSubjectUniqueIdInDb(programmeCode, subjectUniqueIdInDb);
@@ -271,10 +280,12 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
         subjectPeriodLoadLeftForProgrammeGroupDoc.setPeriodLoadLeft(periodLoadLeft);
         subjectPeriodLoadLeftForProgrammeGroupDocRepository.save(subjectPeriodLoadLeftForProgrammeGroupDoc);
 
-        //now we have to update the tutorDoc too..
-        TutorDoc tutorDoc = tutorDocRepository.findOne(tutorIdResponsibleForSubject);
-        tutorDoc.setCurrentPeriodLoadLeft(periodLoadLeft);
-        tutorDocRepository.save(tutorDoc);
+        String programmeDayName = programmeDay.getDayName();
+        //now we have to update the tutorDoc's personal timetable too..
+        TutorPersonalTimeTableDoc tutorPersonalTimeTableDoc =
+                tutorPersonalTimeTableDocServices.
+                        updateTutorPersonalTimeTableDocWithPeriods(tutorIdResponsibleForSubject, subjectUniqueIdInDb, programmeDayName, startingPeriod, stoppingPeriod);
+
     }
 
     /**
