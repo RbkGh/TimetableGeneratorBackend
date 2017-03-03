@@ -284,7 +284,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
         //now we have to update the tutorDoc's personal timetable too..
         TutorPersonalTimeTableDoc tutorPersonalTimeTableDoc =
                 tutorPersonalTimeTableDocServices.
-                        updateTutorPersonalTimeTableDocWithPeriods(tutorIdResponsibleForSubject, subjectUniqueIdInDb, programmeDayName, startingPeriod, stoppingPeriod);
+                        updateTutorPersonalTimeTableDocWithPeriodsAndSaveInDb(tutorIdResponsibleForSubject, subjectUniqueIdInDb, programmeDayName, startingPeriod, stoppingPeriod);
 
     }
 

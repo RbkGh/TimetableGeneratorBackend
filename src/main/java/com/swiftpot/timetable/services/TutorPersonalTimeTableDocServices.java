@@ -34,11 +34,39 @@ public class TutorPersonalTimeTableDocServices {
      * @param periodNumberToStopSettingSubject
      * @return TutorPersonalTimeTableDoc
      */
-    public synchronized TutorPersonalTimeTableDoc updateTutorPersonalTimeTableDocWithPeriods(String tutorUniqueIdInDb,
-                                                                                             String subjectUniqueIdInDb,
-                                                                                             String programmeDayName,
-                                                                                             int periodNumberToStartSettingSubject,
-                                                                                             int periodNumberToStopSettingSubject) {
+    public synchronized TutorPersonalTimeTableDoc updateTutorPersonalTimeTableDocWithPeriodsAndSaveInDb(String tutorUniqueIdInDb,
+                                                                                                        String subjectUniqueIdInDb,
+                                                                                                        String programmeDayName,
+                                                                                                        int periodNumberToStartSettingSubject,
+                                                                                                        int periodNumberToStopSettingSubject) {
+        TutorPersonalTimeTableDoc tutorPersonalTimeTableDoc =
+                this.getTutorPersonalTimeTableWithIncomingPeriodsSet(tutorUniqueIdInDb,
+                        subjectUniqueIdInDb,
+                        programmeDayName,
+                        periodNumberToStartSettingSubject,
+                        periodNumberToStopSettingSubject);
+        TutorPersonalTimeTableDoc tutorPersonalTimeTableDocSaved = tutorPersonalTimeTableDocRepository.save(tutorPersonalTimeTableDoc);
+        return tutorPersonalTimeTableDocSaved;
+    }
+
+    /**
+     * This will retrieve the {@link com.swiftpot.timetable.repository.db.model.TutorDoc}'s personal <br>
+     * {@link com.swiftpot.timetable.repository.db.model.TutorPersonalTimeTableDoc} and update the incoming <br>
+     * periodDayNumber,where to start setting the subject from,and the tutorUniqueIdInDb itself and other necessary info.
+     * <b>WITHOUT SAVING INTO DATABASE!!!</b>
+     *
+     * @param tutorUniqueIdInDb                 the tutor's uniqueId in database ie. {@link com.swiftpot.timetable.repository.db.model.TutorDoc#id}
+     * @param subjectUniqueIdInDb               the subject to be set 's unique id in database ie. {@link com.swiftpot.timetable.repository.db.model.SubjectDoc#id}
+     * @param programmeDayName                  the programme day name to set ie. {@link com.swiftpot.timetable.model.ProgrammeDay#dayName} .eg Monday could have "Monday" as the programme day name
+     * @param periodNumberToStartSettingSubject the index to start setting the periods from ie. {@link com.swiftpot.timetable.model.PeriodOrLecture#periodNumber} eg. period 3,
+     * @param periodNumberToStopSettingSubject
+     * @return TutorPersonalTimeTableDoc
+     */
+    public synchronized TutorPersonalTimeTableDoc getTutorPersonalTimeTableWithIncomingPeriodsSet(String tutorUniqueIdInDb,
+                                                                                                  String subjectUniqueIdInDb,
+                                                                                                  String programmeDayName,
+                                                                                                  int periodNumberToStartSettingSubject,
+                                                                                                  int periodNumberToStopSettingSubject) {
         TutorPersonalTimeTableDoc tutorPersonalTimeTableDoc =
                 tutorPersonalTimeTableDocRepository.findByTutorUniqueIdInDb(tutorUniqueIdInDb);
         List<ProgrammeDay> tutorProgrammeDaysList = tutorPersonalTimeTableDoc.getProgrammeDaysList();
@@ -54,8 +82,7 @@ public class TutorPersonalTimeTableDocServices {
                         periodNumberToStartSettingSubject,
                         periodNumberToStopSettingSubject);
         tutorPersonalTimeTableDoc.getProgrammeDaysList().set(indexLocationOfProgrammeDayName, programmeDayWithEverythingSet);
-        TutorPersonalTimeTableDoc tutorPersonalTimeTableDocSaved = tutorPersonalTimeTableDocRepository.save(tutorPersonalTimeTableDoc);
-        return tutorPersonalTimeTableDocSaved;
+        return tutorPersonalTimeTableDoc;
     }
 
     ProgrammeDay getProgrammeDayToSetTheIncomingPeriodsAndTutoridTo(List<ProgrammeDay> programmeDaysList, String programmeDayNameToFind) {
