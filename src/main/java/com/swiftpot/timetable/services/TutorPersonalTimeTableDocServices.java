@@ -5,6 +5,7 @@ import com.swiftpot.timetable.model.ProgrammeDay;
 import com.swiftpot.timetable.repository.TutorPersonalTimeTableDocRepository;
 import com.swiftpot.timetable.repository.db.model.TutorPersonalTimeTableDoc;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
@@ -14,6 +15,7 @@ import java.util.Objects;
  *         <Rodney Kwabena Boachie at [rodney@swiftpot.com,rbk.unlimited@gmail.com]> on
  *         03-Mar-17 @ 11:47 AM
  */
+@Service
 public class TutorPersonalTimeTableDocServices {
 
     @Autowired
