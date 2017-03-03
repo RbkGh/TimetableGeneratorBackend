@@ -134,7 +134,9 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
             //we setPracticalsPeriodsByCheckingIfRemainingPeriodsForDayCanSuffice by passing that to another method to handle that ,then it returns a
             //new programmeDay with all periods set with the subjects,then we set it to the current list at same index
             iProgrammeDayHelper = programmeDayHelperUtilDefault; //instantiate interface with implementation
-            if (iProgrammeDayHelper.isProgrammeDayAlloted(currentProgrammeDay) == false) {
+            int practicalsTotalPeriods = this.getTotalPeriodsForPracticalSubjectInProgrammeGroupSubjectsList(currentProgrammeGroup, programmeYearNo);
+
+            if (iProgrammeDayHelper.isProgrammeDayCapableOfAcceptingTheIncomingNumberOfPeriodsAssumingUnallocatedDaysAreSequential(currentProgrammeDay, practicalsTotalPeriods)) {
                 ProgrammeDay newCurrentProgrammeDay = this.setPracticalsPeriodsByCheckingIfRemainingPeriodsForDayCanSuffice(currentProgrammeDay, currentProgrammeGroup, programmeYearNo);
                 //we set the newlycreatedprogrammeDay with all periods subject set to the programmeDaysList
                 programmeDaysList.set(currentProgrammeDayNumber, newCurrentProgrammeDay);
@@ -187,6 +189,31 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
         }
 
         return programmeDay;
+    }
+
+    /**
+     * get total periods for practical subject in programmeGroup Subjects .practical subject is one for each programmeGroup that does practical work requiring a workshop or kitchen
+     *
+     * @param programmeGroup  the programmeGroup
+     * @param programmeYearNo the yearGroup of the programmeGroup
+     * @return int
+     */
+    int getTotalPeriodsForPracticalSubjectInProgrammeGroupSubjectsList(ProgrammeGroup programmeGroup, int programmeYearNo) {
+        //to get totalNumberOfProgrammeSubjectsUniqueIdInDbList practicalCourseTotalPeriod,scan and check that SubjectDoc property isSubjectAPracticalSubject = true
+        List<String> programmeSubjectsUniqueIdInDbList = programmeGroup.getProgrammeSubjectsUniqueIdInDbList();
+        int totalNumberOfProgrammeSubjectsUniqueIdInDbList = programmeSubjectsUniqueIdInDbList.size();
+        int totalPeriodForPracticalCourse = 0;
+        for (int currentSubjectCodeNo = 0; currentSubjectCodeNo < totalNumberOfProgrammeSubjectsUniqueIdInDbList; currentSubjectCodeNo++) {
+            String currentSubjectUniqueIdInDb = programmeSubjectsUniqueIdInDbList.get(currentSubjectCodeNo);
+            //fetch the subjectDoc from db using the subjectCode
+            SubjectDoc currentSubjectDoc = subjectDocRepository.findOne(currentSubjectUniqueIdInDb);
+            if (currentSubjectDoc.isSubjectAPracticalSubject() == true) {
+                //we get the totalPeriods for the practicals course from subjectAllocationDocRepository and use getTotalSubjectAllocation() to retrieve the int value
+                String currentSubjectCode = currentSubjectDoc.getSubjectCode();
+                totalPeriodForPracticalCourse = subjectAllocationDocRepository.findBySubjectCodeAndYearGroup(currentSubjectCode, programmeYearNo).getTotalSubjectAllocation();
+            }
+        }
+        return totalPeriodForPracticalCourse;
     }
 
     public List<PeriodOrLecture> setSubjectCodeAndTutorCodeForAllAffectedPeriodsOfferingPracticals(int periodToStartSettingSubjectFrom,
