@@ -81,6 +81,12 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
         return finalTimeTableSuperDocAfterPracticalsPeriodsSetForEachProgrammeGroupRequiringIt.get();
     }
 
+    /**
+     * TODO FIND A WAY TO RANDOMIZE THE PROGRAMMEdAY FOR PRACTICALS FOR EACH PROGRAMMEgORUP
+     *
+     * @param timeTableSuperDoc
+     * @return
+     */
     public TimeTableSuperDoc allocatePracticalsSubjectPeriodForAllProgrammeGroupsRequiringIt(TimeTableSuperDoc timeTableSuperDoc) {
         String timeTableSuperDocString = new Gson().toJson(timeTableSuperDoc);
         TimeTableSuperDoc timeTableSuperDocGeneratedFromString = new Gson().fromJson(timeTableSuperDocString, TimeTableSuperDoc.class);
