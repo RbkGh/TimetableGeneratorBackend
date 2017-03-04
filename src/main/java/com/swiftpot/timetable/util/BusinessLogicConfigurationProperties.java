@@ -119,4 +119,10 @@ public class BusinessLogicConfigurationProperties {
 
     @Value("${timetable.period.worship}")
     public int TIMETABLE_PERIOD_WORSHIP;
+
+    @Value("${timetable.day.classmeeting}")
+    public int TIMETABLE_DAY_CLASS_MEETING;
+
+    @Value("${timetable.period.classmeeting}")
+    public int TIMETABLE_PERIOD_CLASS_MEETING;
 }

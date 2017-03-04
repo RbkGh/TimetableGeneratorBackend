@@ -3,6 +3,7 @@ package com.swiftpot.timetable.base.impl;
 import com.google.gson.Gson;
 import com.swiftpot.timetable.base.IProgrammeDayHelper;
 import com.swiftpot.timetable.base.TimeTableDefaultPeriodsAllocator;
+import com.swiftpot.timetable.base.TutorPersonalTimeTableInitialGenerator;
 import com.swiftpot.timetable.factory.TutorResponsibleForSubjectRetrieverFactory;
 import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.model.ProgrammeDay;
@@ -10,9 +11,9 @@ import com.swiftpot.timetable.model.ProgrammeGroup;
 import com.swiftpot.timetable.model.YearGroup;
 import com.swiftpot.timetable.repository.*;
 import com.swiftpot.timetable.repository.db.model.SubjectDoc;
-import com.swiftpot.timetable.repository.db.model.SubjectPeriodLoadLeftForProgrammeGroupDoc;
 import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
 import com.swiftpot.timetable.repository.db.model.TutorPersonalTimeTableDoc;
+import com.swiftpot.timetable.repository.db.model.TutorSubjectAndProgrammeGroupCombinationDoc;
 import com.swiftpot.timetable.services.TutorPersonalTimeTableDocServices;
 import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
 import com.swiftpot.timetable.util.ProgrammeDayHelperUtilDefaultImpl;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Ace Programmer Rbk
@@ -38,7 +40,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
     @Autowired
     TutorResponsibleForSubjectRetrieverFactory tutorResponsibleForSubjectRetrieverFactory;
     @Autowired
-    SubjectPeriodLoadLeftForProgrammeGroupDocRepository subjectPeriodLoadLeftForProgrammeGroupDocRepository;
+    TutorSubjectAndProgrammeGroupCombinationDocRepository tutorSubjectAndProgrammeGroupCombinationDocRepository;
     @Autowired
     SubjectAllocationDocRepository subjectAllocationDocRepository;
     @Autowired
@@ -50,10 +52,40 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
     @Autowired
     TutorPersonalTimeTableDocServices tutorPersonalTimeTableDocServices;
 
+    private static final String CLASS_MEETING_DAY_NUMBER_KEY = "CLASS_MEETING_DAYNUMBER";
+    private static final String CLASS_MEETING_PERIOD_NUMBER_KEY = "CLASS_MEETING_PERIODNUMBER";
+
+    private static final String CLASS_WORSHIP_DAY_NUMBER_KEY = "worshipDayNumber";
+    private static final String CLASS_WORSHIP_PERIOD_NUMBER_KEY = "worshipPeriodNumber";
+
+    /**
+     * pass in empty value
+     */
+    private static final String DUMMY_WORSHIP_PERIOD_SUBJECT_UNIQUE_ID = "";
+    /**
+     * pass in empty value
+     */
+    private static final String DUMMY_CLASSMEETING_PERIOD_SUBJECT_UNIQUE_ID = "";
 
     @Override
-    public TimeTableSuperDoc allocateDefaultPeriodsOnTimeTable(TimeTableSuperDoc timeTableSuperDocWithInitialDefaultDataSet) {
-        List<YearGroup> yearGroupList = timeTableSuperDocWithInitialDefaultDataSet.getYearGroupsList();
+    public TimeTableSuperDoc allocateDefaultPeriodsOnTimeTable(TimeTableSuperDoc timeTableSuperDocWithInitialDefaultDataSet) throws Exception {
+
+        //use atomic reference to achieve higher throughput, which means higher application server performance.
+        AtomicReference<TimeTableSuperDoc> timeTableSuperDocAfterWorshipPeriodsSet =
+                new AtomicReference<>(this.allocateWorshipPeriodForAllProgrammeGroups(timeTableSuperDocWithInitialDefaultDataSet, DUMMY_WORSHIP_PERIOD_SUBJECT_UNIQUE_ID));
+        AtomicReference<TimeTableSuperDoc> timeTableSuperDocAfterClassMeetingPeriodsSet =
+                new AtomicReference<>(this.allocateClassMeetingPeriodForAllProgrammeGroups(timeTableSuperDocAfterWorshipPeriodsSet.get(), DUMMY_CLASSMEETING_PERIOD_SUBJECT_UNIQUE_ID));
+        AtomicReference<TimeTableSuperDoc> finalTimeTableSuperDocAfterPracticalsPeriodsSetForEachProgrammeGroupRequiringIt =
+                new AtomicReference<>(this.allocatePracticalsSubjectPeriodForAllProgrammeGroupsRequiringIt(timeTableSuperDocAfterClassMeetingPeriodsSet.get()));
+
+        return finalTimeTableSuperDocAfterPracticalsPeriodsSetForEachProgrammeGroupRequiringIt.get();
+    }
+
+    public TimeTableSuperDoc allocatePracticalsSubjectPeriodForAllProgrammeGroupsRequiringIt(TimeTableSuperDoc timeTableSuperDoc) {
+        String timeTableSuperDocString = new Gson().toJson(timeTableSuperDoc);
+        TimeTableSuperDoc timeTableSuperDocGeneratedFromString = new Gson().fromJson(timeTableSuperDocString, TimeTableSuperDoc.class);
+
+        List<YearGroup> yearGroupList = timeTableSuperDocGeneratedFromString.getYearGroupsList();
         int numberOfYearGroups = yearGroupList.size();
         for (int currentNo = 0; currentNo < numberOfYearGroups; currentNo++) {
             //now we need to get all ProgrammeGroups in yearGroupList
@@ -71,12 +103,13 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
                             programmeYearNo);
                     programmeGroupList.get(currentProgrammeGroupNo).setProgrammeDaysList(newlyCreatedProgrammeDaysList);
                     yearGroupList.get(currentNo).setProgrammeGroupList(programmeGroupList);
-                    timeTableSuperDocWithInitialDefaultDataSet.setYearGroupsList(yearGroupList);
+                    timeTableSuperDocGeneratedFromString.setYearGroupsList(yearGroupList);
                 }
             }
         }
 
-        return timeTableSuperDocWithInitialDefaultDataSet;
+        return timeTableSuperDocGeneratedFromString;
+
     }
 
     /**
@@ -84,19 +117,19 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
      * TODO DECIDE WETHER TO POPULATE WORKSHOP WITH SUBJECTS FIRST OR ALLOCATE WORSHIP PERIODS FIRST
      *
      * @param timeTableSuperDoc
-     * @param subjectUniqueIdInDb
-     * @return
+     * @param subjectUnniqueIdInDbDummyValue Pass in a dummy value,same value is used for tutorUniqueId,just a dummy value pass in Empty "" for short
+     * @return TimeTableSuperDoc
      */
-    public TimeTableSuperDoc allocateWorshipPeriodForAllProgrammeGroups(TimeTableSuperDoc timeTableSuperDoc, String subjectUniqueIdInDb) throws Exception {
+    public TimeTableSuperDoc allocateWorshipPeriodForAllProgrammeGroups(TimeTableSuperDoc timeTableSuperDoc, String subjectUnniqueIdInDbDummyValue) throws Exception {
         String timeTableSuperDocString = new Gson().toJson(timeTableSuperDoc);
-        timeTableSuperDoc = new Gson().fromJson(timeTableSuperDocString, TimeTableSuperDoc.class);
+        TimeTableSuperDoc timeTableSuperDocGeneratedFromString = new Gson().fromJson(timeTableSuperDocString, TimeTableSuperDoc.class);
         final int[] numberOfTimesSet = {0};
-        int worshipDayNumberr = getWorshipPeriodDayNumberAndPeriodNumber().get("worshipDayNumber");
+        int worshipDayNumberr = this.getWorshipPeriodDayNumberAndPeriodNumber().get(CLASS_WORSHIP_DAY_NUMBER_KEY);
         String worshipDayName = getProgrammeDayName(worshipDayNumberr);
         System.out.println("WorshipDay Number=" + worshipDayNumberr + "\nWorshipDayName=" + worshipDayName);
-        int worshipPeriodNumber = getWorshipPeriodDayNumberAndPeriodNumber().get("worshipPeriodNumber");
+        int worshipPeriodNumber = this.getWorshipPeriodDayNumberAndPeriodNumber().get(CLASS_WORSHIP_PERIOD_NUMBER_KEY);
         System.out.println("WorshipPeriodNumber=" + worshipPeriodNumber + "\n\n");
-        timeTableSuperDoc.getYearGroupsList().stream().parallel().forEach(yearGroup -> {
+        timeTableSuperDocGeneratedFromString.getYearGroupsList().stream().parallel().forEach(yearGroup -> {
             yearGroup.getProgrammeGroupList().forEach(programmeGroup -> {
                 programmeGroup.getProgrammeDaysList().forEach(programmeDay -> {
                     String programmeDayName = programmeDay.getDayName().toUpperCase().trim();
@@ -104,8 +137,9 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
                         if (Objects.equals(periodOrLecture.getPeriodNumber(), worshipPeriodNumber) &&
                                 Objects.equals(programmeDayName, (worshipDayName.toUpperCase().trim()))) {
                             periodOrLecture.setIsAllocated(true);
-                            periodOrLecture.setSubjectUniqueIdInDb(subjectUniqueIdInDb);
-                            numberOfTimesSet[0]++;
+                            periodOrLecture.setSubjectUniqueIdInDb(subjectUnniqueIdInDbDummyValue);
+                            periodOrLecture.setTutorUniqueId(subjectUnniqueIdInDbDummyValue);
+                            numberOfTimesSet[0] = numberOfTimesSet[0] + 1;
                         }
                     });
                 });
@@ -113,16 +147,62 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
         });
 
         System.out.println("numberOfTimesSet%%%%%%%%%%%======" + numberOfTimesSet[0]);
-        return timeTableSuperDoc;
+        return timeTableSuperDocGeneratedFromString;
+    }
+
+    /**
+     * allocate class meetings For all ProgrammeGroups
+     *
+     * @param timeTableSuperDoc
+     * @param subjectUniqueIdInDb pass in a dummy value ie EMPTY "" FOR SHORT
+     * @return TimeTableSuperDoc
+     */
+    public TimeTableSuperDoc allocateClassMeetingPeriodForAllProgrammeGroups(TimeTableSuperDoc timeTableSuperDoc, String subjectUniqueIdInDb) throws Exception {
+        String timeTableSuperDocString = new Gson().toJson(timeTableSuperDoc);
+        TimeTableSuperDoc timeTableSuperDocGeneratedFromString = new Gson().fromJson(timeTableSuperDocString, TimeTableSuperDoc.class); //CONVERT BACK TO OBJECT FROM JSON TO PREVENT PROBLEMS OF WRONG WRITES IN UNSOLICITED PLACES
+
+        final int[] numberOfTimesPeriodIsSet = {0};
+        int classMeetingDayNumber = this.getClassMeetingPeriodDayNumberAndPeriodNumber().get(CLASS_MEETING_DAY_NUMBER_KEY);
+        String classMeetingDayName = this.getProgrammeDayName(classMeetingDayNumber);
+        System.out.println("classMeetingDayNumber=" + classMeetingDayNumber + "\nclassMeetingDayName=" + classMeetingDayName);
+        int classMeetingPeriodNumber = this.getClassMeetingPeriodDayNumberAndPeriodNumber().get(CLASS_MEETING_PERIOD_NUMBER_KEY);
+        System.out.println("classMeetingPeriodNumber=" + classMeetingPeriodNumber + "\n\n");
+        timeTableSuperDocGeneratedFromString.getYearGroupsList().stream().parallel().forEach(yearGroup -> {
+            yearGroup.getProgrammeGroupList().forEach(programmeGroup -> {
+                programmeGroup.getProgrammeDaysList().forEach(programmeDay -> {
+                    String programmeDayName = programmeDay.getDayName().toUpperCase().trim();
+                    programmeDay.getPeriodList().forEach(periodOrLecture -> {
+                        if (Objects.equals(periodOrLecture.getPeriodNumber(), classMeetingPeriodNumber) &&
+                                Objects.equals(programmeDayName, (classMeetingDayName.toUpperCase().trim()))) {
+                            periodOrLecture.setIsAllocated(true);
+                            periodOrLecture.setSubjectUniqueIdInDb(subjectUniqueIdInDb);
+                            numberOfTimesPeriodIsSet[0]++;
+                        }
+                    });
+                });
+            });
+        });
+
+        System.out.println("numberOfTimesSet%%%%%%%%%%%======" + numberOfTimesPeriodIsSet[0]);
+        return timeTableSuperDocGeneratedFromString;
     }
 
     private Map<String, Integer> getWorshipPeriodDayNumberAndPeriodNumber() {
         int worshipDayNumber = businessLogicConfigurationProperties.TIMETABLE_DAY_WORSHIP;
         int worshipPeriodNumber = businessLogicConfigurationProperties.TIMETABLE_PERIOD_WORSHIP;
         Map<String, Integer> worshipDayAndPeriodMap = new HashMap<>();
-        worshipDayAndPeriodMap.put("worshipDayNumber", worshipDayNumber);
-        worshipDayAndPeriodMap.put("worshipPeriodNumber", worshipPeriodNumber);
+        worshipDayAndPeriodMap.put(CLASS_WORSHIP_DAY_NUMBER_KEY, worshipDayNumber);
+        worshipDayAndPeriodMap.put(CLASS_WORSHIP_PERIOD_NUMBER_KEY, worshipPeriodNumber);
         return worshipDayAndPeriodMap;
+    }
+
+    private Map<String, Integer> getClassMeetingPeriodDayNumberAndPeriodNumber() {
+        int classMeetingDayNumber = businessLogicConfigurationProperties.TIMETABLE_DAY_CLASS_MEETING;
+        int classMeetingPeriodNumber = businessLogicConfigurationProperties.TIMETABLE_PERIOD_CLASS_MEETING;
+        Map<String, Integer> classMeetingDayAndPeriodMap = new HashMap<>();
+        classMeetingDayAndPeriodMap.put(CLASS_MEETING_DAY_NUMBER_KEY, classMeetingDayNumber);
+        classMeetingDayAndPeriodMap.put(CLASS_MEETING_PERIOD_NUMBER_KEY, classMeetingPeriodNumber);
+        return classMeetingDayAndPeriodMap;
     }
 
     /**
@@ -255,7 +335,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
     }
 
     /**
-     * TODO Remember to initialize the {@link SubjectPeriodLoadLeftForProgrammeGroupDoc} immediately during first initialization so that we can search for it and retrieve and set periods left for a particular subject for a particular programmegroup
+     * TODO DONE!!!!! Remember to initialize the {@link TutorSubjectAndProgrammeGroupCombinationDoc} <br> immediately during first initialization so that we can search for it and retrieve and set periods left for a tutor's subject and programmeGroup {@link TutorPersonalTimeTableInitialGenerator#generatePersonalTimeTableForAllTutorsInDbAndSaveIntoDb()} handles that
      *
      * @param programmeCode
      * @param subjectUniqueIdInDb
@@ -274,11 +354,11 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
                                                 int startingPeriod,
                                                 int stoppingPeriod) {
         //now we decrement the value of the totalSubjectsPeriodLeft in db by the totalPeriodsThatHasBeenSet
-        SubjectPeriodLoadLeftForProgrammeGroupDoc subjectPeriodLoadLeftForProgrammeGroupDoc = subjectPeriodLoadLeftForProgrammeGroupDocRepository.
-                findByProgrammeCodeAndSubjectUniqueIdInDb(programmeCode, subjectUniqueIdInDb);
+        TutorSubjectAndProgrammeGroupCombinationDoc tutorSubjectAndProgrammeGroupCombinationDoc = tutorSubjectAndProgrammeGroupCombinationDocRepository.
+                findBySubjectUniqueIdAndProgrammeCode(subjectUniqueIdInDb, programmeCode);
         int periodLoadLeft = totalPeriodForPracticalCourse - totalPeriodsThatHasBeenSet;
-        subjectPeriodLoadLeftForProgrammeGroupDoc.setPeriodLoadLeft(periodLoadLeft);
-        subjectPeriodLoadLeftForProgrammeGroupDocRepository.save(subjectPeriodLoadLeftForProgrammeGroupDoc);
+        tutorSubjectAndProgrammeGroupCombinationDoc.setTotalPeriodLeftToBeAllocated(periodLoadLeft);
+        tutorSubjectAndProgrammeGroupCombinationDocRepository.save(tutorSubjectAndProgrammeGroupCombinationDoc);
 
         String programmeDayName = programmeDay.getDayName();
         //now we have to update the tutorDoc's personal timetable too..

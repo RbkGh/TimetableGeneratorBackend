@@ -15,5 +15,5 @@ public interface TimeTableDefaultPeriodsAllocator {
      * <p>Returns a {@link TimeTableSuperDoc timetableObject} with the default Periods eg 10periods workshop days and worship and class meetings set to returning object
      * for each programmeGroup</p>
      */
-    TimeTableSuperDoc allocateDefaultPeriodsOnTimeTable(TimeTableSuperDoc timeTableSuperDocWithInitialDefaultDataSet);
+    TimeTableSuperDoc allocateDefaultPeriodsOnTimeTable(TimeTableSuperDoc timeTableSuperDocWithInitialDefaultDataSet) throws Exception;
 }
