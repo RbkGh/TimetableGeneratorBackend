@@ -1,19 +1,15 @@
 package com.swiftpot.timetable.base.impl;
 
 import com.google.gson.Gson;
-import com.swiftpot.timetable.base.IProgrammeDayHelper;
-import com.swiftpot.timetable.base.TimeTableDefaultPeriodsAllocator;
-import com.swiftpot.timetable.base.TutorPersonalTimeTableInitialGenerator;
+import com.swiftpot.timetable.base.*;
 import com.swiftpot.timetable.factory.TutorResponsibleForSubjectRetrieverFactory;
 import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.model.ProgrammeDay;
 import com.swiftpot.timetable.model.ProgrammeGroup;
 import com.swiftpot.timetable.model.YearGroup;
 import com.swiftpot.timetable.repository.*;
-import com.swiftpot.timetable.repository.db.model.SubjectDoc;
-import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
-import com.swiftpot.timetable.repository.db.model.TutorPersonalTimeTableDoc;
-import com.swiftpot.timetable.repository.db.model.TutorSubjectAndProgrammeGroupCombinationDoc;
+import com.swiftpot.timetable.repository.db.model.*;
+import com.swiftpot.timetable.services.ProgrammeGroupPersonalTimeTableDocServices;
 import com.swiftpot.timetable.services.TutorPersonalTimeTableDocServices;
 import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
 import com.swiftpot.timetable.util.ProgrammeDayHelperUtilDefaultImpl;
@@ -51,6 +47,10 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
     TutorPersonalTimeTableDocRepository tutorPersonalTimeTableDocRepository;
     @Autowired
     TutorPersonalTimeTableDocServices tutorPersonalTimeTableDocServices;
+    @Autowired
+    ProgrammeGroupPersonalTimeTableDocServices programmeGroupPersonalTimeTableDocServices;
+    @Autowired
+    ProgrammeGroupPersonalTimeTableDocRepository programmeGroupPersonalTimeTableDocRepository;
 
     private static final String CLASS_MEETING_DAY_NUMBER_KEY = "CLASS_MEETING_DAYNUMBER";
     private static final String CLASS_MEETING_PERIOD_NUMBER_KEY = "CLASS_MEETING_PERIODNUMBER";
@@ -341,7 +341,10 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
     }
 
     /**
-     * TODO DONE!!!!! Remember to initialize the {@link TutorSubjectAndProgrammeGroupCombinationDoc} <br> immediately during first initialization so that we can search for it and retrieve and set periods left for a tutor's subject and programmeGroup {@link TutorPersonalTimeTableInitialGenerator#generatePersonalTimeTableForAllTutorsInDbAndSaveIntoDb()} handles that
+     * TODO DONE!!!!! Remember to initialize the {@link TutorSubjectAndProgrammeGroupCombinationDoc} <br> immediately during first initialization so that we can search for it and retrieve and set periods left for a tutor's subject and programmeGroup {@link TutorPersonalTimeTableInitialGenerator#generatePersonalTimeTableForAllTutorsInDbAndSaveIntoDb()} handles that <br><br>
+     * TODO DONE!!!!! Remember to initialize the {@link com.swiftpot.timetable.repository.db.model.ProgrammeGroupPersonalTimeTableDoc} <br> immediately during first initialization so that we can search for it and update the timetable of each programmeGroup upon every write on {@link TimeTableSuperDoc}<br>{@link ProgrammeGroupPersonalTimeTableDocInitialGenerator#generateAllProgrammeGroupPersonalTimetableDocForAllProgrammeGroupDocsInDbAndSaveInDb()} handles that. <br><br>
+     * TODO DONE!!!!! Remember to initialize the {@link com.swiftpot.timetable.repository.db.model.TutorSubjectAndProgrammeGroupCombinationDoc} <br> immediately during first initialization so that we can search for it and update the {@link TutorSubjectAndProgrammeGroupCombinationDoc#totalPeriodLeftToBeAllocated} for that tutor for that subject upon every write on {@link TimeTableSuperDoc} object <br> {@link TutorSubjectAndProgrammeGroupInitialGenerator#generateAllInitialSubjectAndProgrammeGroupCombinationDocsForAllTutorsInDB()} handles that <br><br>
+     * <br><b>THE LOAD OF PARAMETERS ON THIS METHOD IS ABSURD,VERY STUPID,BUT IT HAPPENED BY ACCIDENT,SO ENJOY UNTIL THIS SIDE GETS REFACTORED =D :P</b> <br><br>
      *
      * @param programmeCode
      * @param subjectUniqueIdInDb
@@ -359,6 +362,8 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
                                                 String tutorIdResponsibleForSubject,
                                                 int startingPeriod,
                                                 int stoppingPeriod) {
+        String programmeDayName = programmeDay.getDayName();
+
         //now we decrement the value of the totalSubjectsPeriodLeft in db by the totalPeriodsThatHasBeenSet
         TutorSubjectAndProgrammeGroupCombinationDoc tutorSubjectAndProgrammeGroupCombinationDoc = tutorSubjectAndProgrammeGroupCombinationDocRepository.
                 findBySubjectUniqueIdAndProgrammeCode(subjectUniqueIdInDb, programmeCode);
@@ -366,11 +371,16 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
         tutorSubjectAndProgrammeGroupCombinationDoc.setTotalPeriodLeftToBeAllocated(periodLoadLeft);
         tutorSubjectAndProgrammeGroupCombinationDocRepository.save(tutorSubjectAndProgrammeGroupCombinationDoc);
 
-        String programmeDayName = programmeDay.getDayName();
+        ProgrammeGroupPersonalTimeTableDoc programmeGroupPersonalTimeTableDoc = programmeGroupPersonalTimeTableDocServices.
+                updateProgrammeGroupPersonalTimeTableDocWithPeriodsAndSaveInDb
+                        (tutorIdResponsibleForSubject, programmeCode, subjectUniqueIdInDb, programmeDayName, startingPeriod, stoppingPeriod);
+
+
         //now we have to update the tutorDoc's personal timetable too..
         TutorPersonalTimeTableDoc tutorPersonalTimeTableDoc =
                 tutorPersonalTimeTableDocServices.
-                        updateTutorPersonalTimeTableDocWithPeriodsAndSaveInDb(tutorIdResponsibleForSubject, subjectUniqueIdInDb, programmeDayName, startingPeriod, stoppingPeriod);
+                        updateTutorPersonalTimeTableDocWithPeriodsAndSaveInDb
+                                (tutorIdResponsibleForSubject, subjectUniqueIdInDb, programmeDayName, startingPeriod, stoppingPeriod);
 
     }
 

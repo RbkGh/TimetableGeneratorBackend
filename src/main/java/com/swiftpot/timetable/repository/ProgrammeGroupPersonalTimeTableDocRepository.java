@@ -1,5 +1,6 @@
-package com.swiftpot.timetable.repository.db.model;
+package com.swiftpot.timetable.repository;
 
+import com.swiftpot.timetable.repository.db.model.ProgrammeGroupPersonalTimeTableDoc;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 /**
