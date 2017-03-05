@@ -2,6 +2,7 @@ package com.swiftpot.timetable.services;
 
 import com.google.gson.Gson;
 import com.swiftpot.timetable.model.ProgrammeGroup;
+import com.swiftpot.timetable.repository.TutorSubjectAndProgrammeGroupCombinationDocRepository;
 import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
 import com.swiftpot.timetable.repository.db.model.TutorSubjectAndProgrammeGroupCombinationDoc;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,8 @@ public class TutorPeriodsAssignerService {
 
     @Autowired
     TimeTableSuperDocServices timeTableSuperDocServices;
+    @Autowired
+    TutorSubjectAndProgrammeGroupCombinationDocRepository tutorSubjectAndProgrammeGroupCombinationDocRepository;
 
     /**
      * todo IMPORTANT!!!IMPORTANT!!!! implementation not completed
@@ -35,9 +38,19 @@ public class TutorPeriodsAssignerService {
         String timeTableSuperDocString = new Gson().toJson(incomingTimeTableSuperDoc);
         TimeTableSuperDoc timeTableSuperDocGeneratedFromString = new Gson().fromJson(timeTableSuperDocString, TimeTableSuperDoc.class);
         String programmeCode = tutorSubjectAndProgrammeGroupCombinationDoc.getProgrammeCode();
+
         ProgrammeGroup programmeGroupToUpdate = timeTableSuperDocServices.
                 getProgrammeGroupObjectFromTimeTableSuperDocObject(timeTableSuperDocGeneratedFromString, programmeCode);
 
+        String subjectUniqueId = tutorSubjectAndProgrammeGroupCombinationDoc.getSubjectUniqueId();
+
+        //get the current period left for the tutorSubjectAndProgrammeGroupCombinationDoc,if it's greater than zero,assign again,other wise stop
+        while (tutorSubjectAndProgrammeGroupCombinationDocRepository.
+                findBySubjectUniqueIdAndProgrammeCode(subjectUniqueId, programmeCode).getTotalPeriodLeftToBeAllocated() > 0) {
+            //get the programmeGroup personal timetable and check if the programmeDay is unallocated,if unallocated,
+            //get the breakdown of the subject allocation,eg if 5periods,it will return 3,2 hence retrieve the possible combination
+            //now
+        }
         return null;
     }
 }
