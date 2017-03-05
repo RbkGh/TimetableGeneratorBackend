@@ -18,6 +18,15 @@ public class TutorPeriodsAssignerService {
     @Autowired
     TimeTableSuperDocServices timeTableSuperDocServices;
 
+    /**
+     * todo IMPORTANT!!!IMPORTANT!!!! implementation not completed
+     * assign tutorSubjectAndProgrammeGroupCombination onto timeTableSuperDoc object and update all concerned entities in db
+     *
+     * @param incomingTimeTableSuperDoc                   the incoming timetable object,ie the current state of the timetable ,propably,some periods are already set
+     * @param tutorSubjectAndProgrammeGroupCombinationDoc {@link TutorSubjectAndProgrammeGroupCombinationDoc}
+     * @param tutorUniqueIdInDb                           {@link com.swiftpot.timetable.repository.db.model.TutorDoc#id}
+     * @return {@link TimeTableSuperDoc}
+     */
     TimeTableSuperDoc
     assignTutorSubjectandProgrammeGroupCombinationOntoTimeTableSuperDocObject(TimeTableSuperDoc incomingTimeTableSuperDoc,
                                                                               TutorSubjectAndProgrammeGroupCombinationDoc tutorSubjectAndProgrammeGroupCombinationDoc,
@@ -28,6 +37,7 @@ public class TutorPeriodsAssignerService {
         String programmeCode = tutorSubjectAndProgrammeGroupCombinationDoc.getProgrammeCode();
         ProgrammeGroup programmeGroupToUpdate = timeTableSuperDocServices.
                 getProgrammeGroupObjectFromTimeTableSuperDocObject(timeTableSuperDocGeneratedFromString, programmeCode);
+
         return null;
     }
 }
