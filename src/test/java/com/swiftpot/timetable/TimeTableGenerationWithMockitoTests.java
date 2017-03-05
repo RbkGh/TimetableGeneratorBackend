@@ -10,6 +10,7 @@ import com.swiftpot.timetable.repository.ProgrammeGroupDocRepository;
 import com.swiftpot.timetable.repository.db.model.ProgrammeGroupDoc;
 import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
 import com.swiftpot.timetable.services.TimeTablePopulatorService;
+import com.swiftpot.timetable.services.TimeTableSuperDocServices;
 import com.swiftpot.timetable.util.PrettyJSON;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,23 +46,29 @@ public class TimeTableGenerationWithMockitoTests {
     TimeTablePopulatorService timeTablePopulatorService;
     @Autowired
     TimeTableDefaultPeriodsAllocatorDefaultImpl timeTableDefaultPeriodsAllocatorDefault;
+    @Autowired
+    TimeTableSuperDocServices timeTableSuperDocServices;
 
     @MockBean
     ProgrammeGroupDocRepository programmeGroupDocRepository;
 
     TimeTableSuperDoc timeTableSuperDoc;
     private static final Logger logger = LogManager.getLogger();
+    String programmeFullName1;
+    String programmeCode1;
 
     @Before
     public void setupMock() throws Exception {
         MockitoAnnotations.initMocks(this);
 
 
+        programmeFullName1 = "Building Construction Technology";
+        programmeCode1 = "BCT-1A";
         ProgrammeGroupDoc programmeGroupDoc1 = new ProgrammeGroupDoc();
-        programmeGroupDoc1.setProgrammeFullName("Building Construction Technology");
+        programmeGroupDoc1.setProgrammeFullName(programmeFullName1);
         programmeGroupDoc1.setProgrammeInitials("BCT");
         programmeGroupDoc1.setYearGroup(1);
-        programmeGroupDoc1.setProgrammeCode("BCT-1A");
+        programmeGroupDoc1.setProgrammeCode(programmeCode1);
         programmeGroupDoc1.setDefaultClassRoomId("class1kj");
         programmeGroupDoc1.setYearGroupList(new ArrayList<>(Arrays.asList(1, 2, 3)));
         programmeGroupDoc1.setProgrammeSubjectsCodeList(new ArrayList<>(Arrays.asList("ENG", "MATH", "INTSCIENCE", "SOCSTUDIES", "FDT", "RET", "RRT", "ECTR", "ICT", "PE")));
@@ -156,5 +163,15 @@ public class TimeTableGenerationWithMockitoTests {
         }
 
         assertTrue("Has all periods set? Totalperiods expected="+totalWorshipPeriodsExpected+" .Total periods got="+totalWorshipPeriods,totalWorshipPeriodsExpected == totalWorshipPeriods);
+    }
+
+    @Test
+    public void getProgrammeGroupObjectFromTimeTableSuperDocObjectAssertTrue() {
+        ProgrammeGroup programmeGroup =
+                timeTableSuperDocServices.getProgrammeGroupObjectFromTimeTableSuperDocObject(timeTableSuperDoc, programmeCode1);
+
+        logger.info("ProgrammeGroup Obtained ==>>>\n\n{}",
+                PrettyJSON.toPrettyFormat(new Gson().toJson(programmeGroup)));
+        assertTrue(programmeGroup.getProgrammeCode() == programmeCode1);
     }
 }
