@@ -82,4 +82,35 @@ public class ProgrammeDayServices {
         }
         return programmeDay;
     }
+
+    /**
+     * get the total number of {@link PeriodOrLecture} with {@link PeriodOrLecture#isAllocated} == false in the passed in {@link ProgrammeDay}
+     *
+     * @param programmeDay the {@link ProgrammeDay} to check for the number of unallocated periods
+     * @return the number of {@link PeriodOrLecture} with {@link PeriodOrLecture#isAllocated} == false
+     */
+    public int getNumberOfUnallocatedPeriodsInDay(ProgrammeDay programmeDay) {
+        int numberOfUnallocatedPeriodsInTheDay = 0;
+        List<PeriodOrLecture> periodOrLecturesInDay = programmeDay.getPeriodList();
+        for (PeriodOrLecture periodOrLecture : periodOrLecturesInDay) {
+            if (!periodOrLecture.getIsAllocated()) {
+                numberOfUnallocatedPeriodsInTheDay += 1;
+            }
+        }
+        return numberOfUnallocatedPeriodsInTheDay;
+    }
+
+    /**
+     * check if {@link ProgrammeDay}'s {@link List} of {@link PeriodOrLecture} are all allocated
+     *
+     * @param programmeDay
+     * @return true if {@link ProgrammeDay}'s {@link List} of {@link PeriodOrLecture} are all {@link PeriodOrLecture#isAllocated} ==true,false if otherwise
+     */
+    public boolean isProgrammeDayFullyAllocated(ProgrammeDay programmeDay) {
+        if (this.getNumberOfUnallocatedPeriodsInDay(programmeDay) == 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
