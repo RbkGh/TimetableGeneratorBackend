@@ -4,9 +4,7 @@ import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.model.ProgrammeDay;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * This will be used to retrieve helper methods for retrieving info about a {@link com.swiftpot.timetable.model.ProgrammeDay} or list of {@link com.swiftpot.timetable.model.ProgrammeDay}
@@ -107,7 +105,7 @@ public class ProgrammeDayServices {
      * @param periodOrLecturesList {@link List<PeriodOrLecture>}
      * @return int
      */
-    public int getFirstIndexPositionoFPeriodWhereAllocationIsFalseInListOfPeriods(List<PeriodOrLecture> periodOrLecturesList) {
+    public int getFirstIndexPositionOfPeriodWhereAllocationIsFalseInListOfPeriods(List<PeriodOrLecture> periodOrLecturesList) {
         int totalPeriodsToIterateThrough = periodOrLecturesList.size();
         List<Integer> listOfIndexesWhereFalseWasSeen = new ArrayList<>();
         for (int i = 0; i < totalPeriodsToIterateThrough; i++) {
@@ -137,24 +135,104 @@ public class ProgrammeDayServices {
     public List<UnallocatedPeriodSet> getListOfUnallocatedPeriodSetsInDay(ProgrammeDay programmeDay) {
         List<UnallocatedPeriodSet> finalUnallocatedPeriodSetsList = new ArrayList<>();
         if (this.isProgrammeDayFullyAllocated(programmeDay)) {
-            //nothing to check for ,thus return 0
+            //nothing to check for because all days are allocated,thus return 0
         } else {
-
+            finalUnallocatedPeriodSetsList =
+                    this.getListOfUnallocatedPeriodSetsInDayAfterMakingSureProgrammeDayIsNotFullyAllocated(programmeDay);
         }
         return finalUnallocatedPeriodSetsList;
     }
 
-    protected List<UnallocatedPeriodSet> getListOfUnallocatedPeriodSetsInDayAfterCheckingProgrammeDayIsNotFullyAllocated(ProgrammeDay programmeDay) {
+    protected List<UnallocatedPeriodSet> getListOfUnallocatedPeriodSetsInDayAfterMakingSureProgrammeDayIsNotFullyAllocated(ProgrammeDay programmeDay) {
         List<UnallocatedPeriodSet> finalUnallocatedPeriodSetsList = new ArrayList<>();
 
         return null;
     }
 
+    private List<AllocatedPeriodSet> getListOfAllocatedPeriodSetsInDay(ProgrammeDay programmeDay) {
+        List<AllocatedPeriodSet> allocatedPeriodSetsList = new ArrayList<>();
+
+        Set<String> subjectUniqueIdsAssignedInDay = new HashSet<>();
+        List<PeriodOrLecture> periodOrLectureList = new ArrayList<>();
+        for (PeriodOrLecture periodOrLecture : periodOrLectureList) {
+            subjectUniqueIdsAssignedInDay.add(periodOrLecture.getSubjectUniqueIdInDb());
+        }
+        for (String subjectUniqueId : subjectUniqueIdsAssignedInDay) {
+            AllocatedPeriodSet allocatedPeriodSet = this.getAllocatedPeriodSetEntityForSubjectInDay(subjectUniqueId, periodOrLectureList);
+            allocatedPeriodSetsList.add(allocatedPeriodSet);
+        }
+
+        return allocatedPeriodSetsList;
+    }
+
     /**
-     * this will return a period set that is unallocated,
+     * get {@link AllocatedPeriodSet} for a passed in subject id in the {@link List} of {@link PeriodOrLecture}
+     *
+     * @param subjectUniqueIdInDb
+     * @param periodOrLectureList
+     * @return AllocatedPeriodSet
+     */
+    private AllocatedPeriodSet getAllocatedPeriodSetEntityForSubjectInDay(String subjectUniqueIdInDb, List<PeriodOrLecture> periodOrLectureList) {
+
+        int totalNumberOfPeriodsForSubjectId = 0;
+        //we find the total number of periods that the subject has been assigned in the day by looping and comparing the subjectUniqueId
+        for (PeriodOrLecture periodOrLecture : periodOrLectureList) {
+            if (Objects.equals(periodOrLecture.getSubjectUniqueIdInDb(), subjectUniqueIdInDb)) {
+                totalNumberOfPeriodsForSubjectId += 1;
+            }
+        }
+        int periodStartingNumber = this.getFirstPositionOfSubjectInDay(subjectUniqueIdInDb, periodOrLectureList);
+        int periodEndingNumber = periodStartingNumber + (totalNumberOfPeriodsForSubjectId - 1); //if the starting period = 1,and the totalNumberOfPeriods =1,without subracting 1,the periodEndingNumber will be 2,which will mean 2 periods,and that's not what we want.
+
+        AllocatedPeriodSet allocatedPeriodSet = new AllocatedPeriodSet();
+        allocatedPeriodSet.setPeriodStartingNumber(periodStartingNumber); //set periodStartingNumber
+        allocatedPeriodSet.setPeriodEndingNumber(periodEndingNumber); //set periodEndingNumber
+        allocatedPeriodSet.setTotalNumberOfPeriodsForSet(totalNumberOfPeriodsForSubjectId); //set totalNumberOfPeriodsForSubjectId
+        return allocatedPeriodSet;
+    }
+
+    /**
+     * get the first position where {@link PeriodOrLecture#subjectUniqueIdInDb} == the passed in subjectUniqueIdInDb in the {@link List} of {@link PeriodOrLecture}
+     * this will normally be used to get the {@link PeriodSet#periodStartingNumber} but may be applied in other scenarios in addition.
+     * <br>
+     * Algo :: {@code we iterate through periodOrLectureList,the first time we find a match,we break out of the loop.}
+     *
+     * @param subjectUniqueIdInDb the {@link com.swiftpot.timetable.repository.db.model.SubjectDoc#id}
+     * @param periodOrLectureList the {@link List} of {@link PeriodOrLecture}
+     * @return int
+     */
+    private int getFirstPositionOfSubjectInDay(String subjectUniqueIdInDb, List<PeriodOrLecture> periodOrLectureList) {
+        int periodStartingNumber = 0;
+        for (PeriodOrLecture periodOrLecture : periodOrLectureList) {
+            if (Objects.equals(periodOrLecture.getSubjectUniqueIdInDb(), subjectUniqueIdInDb)) {
+                periodStartingNumber = periodOrLecture.getPeriodNumber();
+                break;
+            }
+        }
+        return periodStartingNumber;
+    }
+
+
+    /**
+     * @see PeriodSet
+     */
+    public class UnallocatedPeriodSet extends PeriodSet {
+
+    }
+
+    /**
+     * @see PeriodSet
+     */
+    public class AllocatedPeriodSet extends PeriodSet {
+
+    }
+
+    /**
+     * this is a base class that will be extended by both {@link AllocatedPeriodSet} and {@link UnallocatedPeriodSet} <br>
+     * thus class will return a period set that is unallocated or allocated depending on the class extending this
      * for eg. period 3&4 may be unallocated whilst all other periods are allocated in a day.
      */
-    public class UnallocatedPeriodSet {
+    public abstract class PeriodSet {
         /**
          * the period where the unallocated period starts ie {@link PeriodOrLecture#periodNumber},not the index of the period!!Nnote that!!
          * the period may start in periodNumber 3 and end in period number 4,meaning that {@link UnallocatedPeriodSet#totalNumberOfPeriodsForSet} will be 2
@@ -209,4 +287,5 @@ public class ProgrammeDayServices {
             this.totalNumberOfPeriodsForSet = totalNumberOfPeriodsForSet;
         }
     }
+
 }

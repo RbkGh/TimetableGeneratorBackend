@@ -397,7 +397,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
      * @return int
      */
     public int getIndexToStartSettingPeriodsFrom(List<PeriodOrLecture> periodOrLecturesList) {
-        return programmeDayServices.getFirstIndexPositionoFPeriodWhereAllocationIsFalseInListOfPeriods(periodOrLecturesList);
+        return programmeDayServices.getFirstIndexPositionOfPeriodWhereAllocationIsFalseInListOfPeriods(periodOrLecturesList);
     }
 
     public String getProgrammeDayName(int programmeDayNumber) throws Exception {
