@@ -145,24 +145,49 @@ public class ProgrammeDayServices {
 
     protected List<UnallocatedPeriodSet> getListOfUnallocatedPeriodSetsInDayAfterMakingSureProgrammeDayIsNotFullyAllocated(ProgrammeDay programmeDay) {
         List<UnallocatedPeriodSet> finalUnallocatedPeriodSetsList = new ArrayList<>();
+        if (this.doesProgrammeDayHaveAtLeastOnePeriodAssignedAlready(programmeDay)) {
+            List<AllocatedPeriodSet> allocatedPeriodSets =
+                    this.getListOfAllocatedPeriodSetsInDayAfterMakingSureSomePeriodsAreAllocatedInDay(programmeDay);
+
+        }
 
         return null;
     }
 
-    private List<AllocatedPeriodSet> getListOfAllocatedPeriodSetsInDay(ProgrammeDay programmeDay) {
-        List<AllocatedPeriodSet> allocatedPeriodSetsList = new ArrayList<>();
+    /**
+     * check to see whether {@link ProgrammeDay} has at least one {@link PeriodOrLecture} assigned to a subject and tutor,<br>
+     * ie at least one {@link PeriodOrLecture} in the {@link List} of {@link PeriodOrLecture} is equal to true => {@link PeriodOrLecture#isAllocated}==true
+     *
+     * @param programmeDay
+     * @return true if at least one of the list of periodOrLecture has a property of {@link PeriodOrLecture#isAllocated} == true,false if otherwise
+     */
+    public boolean doesProgrammeDayHaveAtLeastOnePeriodAssignedAlready(ProgrammeDay programmeDay) {
+        List<PeriodOrLecture> periodOrLectureListInDay = programmeDay.getPeriodList();
+        boolean doesProgrammeDayHaveAtLeastOnePeriodAssignedAlready = false;
+        for (PeriodOrLecture periodOrLecture : periodOrLectureListInDay) {
+            if (periodOrLecture.getIsAllocated()) {
+                doesProgrammeDayHaveAtLeastOnePeriodAssignedAlready = true;
+                break;
+            }
+        }
+        return doesProgrammeDayHaveAtLeastOnePeriodAssignedAlready;
+    }
+
+    private List<AllocatedPeriodSet> getListOfAllocatedPeriodSetsInDayAfterMakingSureSomePeriodsAreAllocatedInDay(ProgrammeDay programmeDay) {
+        List<AllocatedPeriodSet> finalAllocatedPeriodSetsList = new ArrayList<>();
 
         Set<String> subjectUniqueIdsAssignedInDay = new HashSet<>();
-        List<PeriodOrLecture> periodOrLectureList = new ArrayList<>();
-        for (PeriodOrLecture periodOrLecture : periodOrLectureList) {
+        List<PeriodOrLecture> periodOrLectureListInDay = programmeDay.getPeriodList();
+        for (PeriodOrLecture periodOrLecture : periodOrLectureListInDay) {
+            //adding to set will ensure that no duplicate of the subjectUniqueIdInDb is added
             subjectUniqueIdsAssignedInDay.add(periodOrLecture.getSubjectUniqueIdInDb());
         }
         for (String subjectUniqueId : subjectUniqueIdsAssignedInDay) {
-            AllocatedPeriodSet allocatedPeriodSet = this.getAllocatedPeriodSetEntityForSubjectInDay(subjectUniqueId, periodOrLectureList);
-            allocatedPeriodSetsList.add(allocatedPeriodSet);
+            AllocatedPeriodSet allocatedPeriodSet = this.getAllocatedPeriodSetEntityForSubjectInDay(subjectUniqueId, periodOrLectureListInDay);
+            finalAllocatedPeriodSetsList.add(allocatedPeriodSet);
         }
 
-        return allocatedPeriodSetsList;
+        return finalAllocatedPeriodSetsList;
     }
 
     /**
