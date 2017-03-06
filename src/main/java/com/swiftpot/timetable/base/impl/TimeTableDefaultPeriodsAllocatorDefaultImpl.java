@@ -9,6 +9,7 @@ import com.swiftpot.timetable.model.ProgrammeGroup;
 import com.swiftpot.timetable.model.YearGroup;
 import com.swiftpot.timetable.repository.*;
 import com.swiftpot.timetable.repository.db.model.*;
+import com.swiftpot.timetable.services.ProgrammeDayServices;
 import com.swiftpot.timetable.services.ProgrammeGroupPersonalTimeTableDocServices;
 import com.swiftpot.timetable.services.TutorPersonalTimeTableDocServices;
 import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
@@ -16,7 +17,10 @@ import com.swiftpot.timetable.util.ProgrammeDayHelperUtilDefaultImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -51,6 +55,8 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
     ProgrammeGroupPersonalTimeTableDocServices programmeGroupPersonalTimeTableDocServices;
     @Autowired
     ProgrammeGroupPersonalTimeTableDocRepository programmeGroupPersonalTimeTableDocRepository;
+    @Autowired
+    ProgrammeDayServices programmeDayServices;
 
     private static final String CLASS_MEETING_DAY_NUMBER_KEY = "CLASS_MEETING_DAYNUMBER";
     private static final String CLASS_MEETING_PERIOD_NUMBER_KEY = "CLASS_MEETING_PERIODNUMBER";
@@ -391,16 +397,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
      * @return int
      */
     public int getIndexToStartSettingPeriodsFrom(List<PeriodOrLecture> periodOrLecturesList) {
-        int totalPeriodsToIterateThrough = periodOrLecturesList.size();
-        List<Integer> listOfIndexesWhereFalseWasSeen = new ArrayList<>();
-        for (int i = 0; i < totalPeriodsToIterateThrough; i++) {
-            if (periodOrLecturesList.get(i).getIsAllocated() == false) {
-                listOfIndexesWhereFalseWasSeen.add(i);
-            }
-        }
-        //first will be first element in list
-        int indexWhereFalseWasFirstSeen = listOfIndexesWhereFalseWasSeen.get(0);
-        return indexWhereFalseWasFirstSeen;
+        return programmeDayServices.getFirstIndexPositionoFPeriodWhereAllocationIsFalseInListOfPeriods(periodOrLecturesList);
     }
 
     public String getProgrammeDayName(int programmeDayNumber) throws Exception {
