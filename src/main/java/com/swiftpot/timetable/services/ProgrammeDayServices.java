@@ -2,6 +2,12 @@ package com.swiftpot.timetable.services;
 
 import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.model.ProgrammeDay;
+import com.swiftpot.timetable.services.servicemodels.AllocatedPeriodSet;
+import com.swiftpot.timetable.services.servicemodels.PeriodSet;
+import com.swiftpot.timetable.services.servicemodels.UnallocatedPeriodSet;
+import com.swiftpot.timetable.util.PrettyJSON;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -15,6 +21,8 @@ import java.util.*;
  */
 @Service
 public class ProgrammeDayServices {
+
+    private static final Logger logger = LogManager.getLogger();
 
     /**
      * get the indexlocation of a {@link ProgrammeDay} in a {@link List} of {@link ProgrammeDay} list based on the @param programmeDayNameToFind passed in
@@ -148,10 +156,91 @@ public class ProgrammeDayServices {
         if (this.doesProgrammeDayHaveAtLeastOnePeriodAssignedAlready(programmeDay)) {
             List<AllocatedPeriodSet> allocatedPeriodSets =
                     this.getListOfAllocatedPeriodSetsInDayAfterMakingSureSomePeriodsAreAllocatedInDay(programmeDay);
-
+            for (AllocatedPeriodSet allocatedPeriodSet : allocatedPeriodSets) {
+                int periodEndingNumberOfAllocatedPeriodSet = allocatedPeriodSet.getPeriodEndingNumber();
+                List<PeriodOrLecture> periodOrLecturesListInProgDay = programmeDay.getPeriodList();
+                List<UnallocatedPeriodSet> postUnallocatedPeriodSetList =
+                        this.getPostUnallocatedPeriodSetListInAllocatedPeriodSet(allocatedPeriodSet, programmeDay);
+                //todo URGENT!!! CONTINUE HERE TOMORROW FOR PRE-UNALLOCATED PERIODS sET
+            }
         }
 
-        return null;
+        return finalUnallocatedPeriodSetsList;
+    }
+
+    /**
+     * this will get all the {@link List} of {@link UnallocatedPeriodSet} that come after the <br>
+     * {@link UnallocatedPeriodSet#periodEndingNumber},this will return 0 or empty list if none is found
+     *
+     * @param programmeDay
+     * @return {@link List} of {@link UnallocatedPeriodSet}
+     */
+    public List<UnallocatedPeriodSet> getPostUnallocatedPeriodSetListInAllocatedPeriodSet(AllocatedPeriodSet allocatedPeriodSet, ProgrammeDay programmeDay) {
+        Set<UnallocatedPeriodSet> finalUnallocatedPeriodSetsListPostAllocationPeriodSet = new HashSet<>(0);
+
+        List<PeriodOrLecture> periodOrLecturesListInProgDay = programmeDay.getPeriodList();
+        int periodEndingNumberOfAllocatedPeriodSet = allocatedPeriodSet.getPeriodEndingNumber();
+        int totalNumberOfFalseAfterAllocatedPeriodSetsPeriodEndingNumber = 0;
+        for (PeriodOrLecture periodOrLecture : periodOrLecturesListInProgDay) {
+            if ((!periodOrLecture.getIsAllocated()) && (periodOrLecture.getPeriodNumber() > periodEndingNumberOfAllocatedPeriodSet)) {
+                totalNumberOfFalseAfterAllocatedPeriodSetsPeriodEndingNumber++;//add 1
+            }
+        }
+        logger.info("totalNumberOfFalseAfterAllocatedPeriodSetsPeriodEndingNumber => {}", totalNumberOfFalseAfterAllocatedPeriodSetsPeriodEndingNumber);
+        if (totalNumberOfFalseAfterAllocatedPeriodSetsPeriodEndingNumber == 0) {
+            return new ArrayList<>(0);//return empty List
+        } else {
+            while (totalNumberOfFalseAfterAllocatedPeriodSetsPeriodEndingNumber > 0) {
+                totalNumberOfFalseAfterAllocatedPeriodSetsPeriodEndingNumber = totalNumberOfFalseAfterAllocatedPeriodSetsPeriodEndingNumber - 1;//decrement by 1
+
+                int totalPeriodAllocationForUnallocatedPeriodSet = 0;
+                for (PeriodOrLecture periodOrLecture : periodOrLecturesListInProgDay) {
+                    int currentPeriodNumber = periodOrLecture.getPeriodNumber();
+                    if ((currentPeriodNumber > periodEndingNumberOfAllocatedPeriodSet) && (!periodOrLecture.getIsAllocated())) {
+                        totalPeriodAllocationForUnallocatedPeriodSet += 1;
+                    }
+                    if ((currentPeriodNumber > periodEndingNumberOfAllocatedPeriodSet) && periodOrLecture.getIsAllocated()) {
+                        break;
+                    }
+                }
+                if (totalPeriodAllocationForUnallocatedPeriodSet > 0) {
+                    int startingPeriodNumber = (periodEndingNumberOfAllocatedPeriodSet) + 1;
+                    int endingPeriodNumber = (startingPeriodNumber) + (totalPeriodAllocationForUnallocatedPeriodSet - 1);
+                    // we subtract 1 from totalPeriodAllocationForUnallocatedPeriodSet because if startingPeriodNumber is 3,
+                    // and totalPeriodAllocation of subject is 2,it means that the subject will end at period 4,not 5!
+                    // So that's why we subtract 1 otherwise the subject will end at 5 instead,which is not what we want.
+                    int totalNumberOfPeriodsForSet = totalPeriodAllocationForUnallocatedPeriodSet;
+
+                    UnallocatedPeriodSet unallocatedPeriodSet = new UnallocatedPeriodSet();
+                    unallocatedPeriodSet.setTotalNumberOfPeriodsForSet(totalNumberOfPeriodsForSet); //set total number of PeriodsForSet
+                    unallocatedPeriodSet.setPeriodStartingNumber(startingPeriodNumber); //set period starting number
+                    unallocatedPeriodSet.setPeriodEndingNumber(endingPeriodNumber); //set period ending number
+
+                    finalUnallocatedPeriodSetsListPostAllocationPeriodSet.add(unallocatedPeriodSet);
+                } else {
+                    //do not add anything to final list
+                }
+            }
+            logger.info("finalUnallocatedPeriodSetsListPostAllocationPeriodSet ==>{}", PrettyJSON.toListPrettyFormat(new ArrayList<>(finalUnallocatedPeriodSetsListPostAllocationPeriodSet)));
+            return new ArrayList<>(finalUnallocatedPeriodSetsListPostAllocationPeriodSet);
+        }
+    }
+
+    /**
+     * get the number of false after a specific Period or lecture number ie {@link PeriodOrLecture#periodNumber} in day ,not the index,<b>NOTE THAT!!,not the index position in the list!!</b>
+     *
+     * @param periodOrLectureNumberThatItShouldBeGreaterThan
+     * @param periodOrLecturesList
+     * @return
+     */
+    int getNumberOfFalseAfterSpecificPeriodOrLectureNumberInDay(int periodOrLectureNumberThatItShouldBeGreaterThan, List<PeriodOrLecture> periodOrLecturesList) {
+        int getNumberOfFalseAfterSpecificPeriodOrLectureNumberInDay = 0;
+        for (PeriodOrLecture periodOrLecture : periodOrLecturesList) {
+            if ((periodOrLecture.getPeriodNumber() > periodOrLectureNumberThatItShouldBeGreaterThan) && (!periodOrLecture.getIsAllocated())) {
+                getNumberOfFalseAfterSpecificPeriodOrLectureNumberInDay += 1;
+            }
+        }
+        return getNumberOfFalseAfterSpecificPeriodOrLectureNumberInDay;
     }
 
     /**
@@ -235,82 +324,6 @@ public class ProgrammeDayServices {
             }
         }
         return periodStartingNumber;
-    }
-
-
-    /**
-     * @see PeriodSet
-     */
-    public class UnallocatedPeriodSet extends PeriodSet {
-
-    }
-
-    /**
-     * @see PeriodSet
-     */
-    public class AllocatedPeriodSet extends PeriodSet {
-
-    }
-
-    /**
-     * this is a base class that will be extended by both {@link AllocatedPeriodSet} and {@link UnallocatedPeriodSet} <br>
-     * thus class will return a period set that is unallocated or allocated depending on the class extending this
-     * for eg. period 3&4 may be unallocated whilst all other periods are allocated in a day.
-     */
-    public abstract class PeriodSet {
-        /**
-         * the period where the unallocated period starts ie {@link PeriodOrLecture#periodNumber},not the index of the period!!Nnote that!!
-         * the period may start in periodNumber 3 and end in period number 4,meaning that {@link UnallocatedPeriodSet#totalNumberOfPeriodsForSet} will be 2
-         */
-        private int periodStartingNumber;
-        /**
-         * the period where the unallocated period ends ie {@link PeriodOrLecture#periodNumber},not the index of the period!!Nnote that!!
-         * the period may end in periodNumber 5 if it started in period 3.
-         */
-        private int periodEndingNumber;
-        /**
-         * the total number of periods for this set,if the {@linkplain UnallocatedPeriodSet#periodStartingNumber} = 3 and <br>
-         * {@linkplain UnallocatedPeriodSet#periodEndingNumber} =4,automatically,{@linkplain UnallocatedPeriodSet#totalNumberOfPeriodsForSet} =2periods
-         *
-         * @see UnallocatedPeriodSet#periodStartingNumber
-         */
-        private int totalNumberOfPeriodsForSet;
-
-        public int getPeriodStartingNumber() {
-            return periodStartingNumber;
-        }
-
-        /**
-         * @return int
-         * @see UnallocatedPeriodSet#periodStartingNumber
-         */
-        public void setPeriodStartingNumber(int periodStartingNumber) {
-            this.periodStartingNumber = periodStartingNumber;
-        }
-
-        /**
-         * @return int
-         * @see UnallocatedPeriodSet#periodEndingNumber
-         */
-        public int getPeriodEndingNumber() {
-            return periodEndingNumber;
-        }
-
-        public void setPeriodEndingNumber(int periodEndingNumber) {
-            this.periodEndingNumber = periodEndingNumber;
-        }
-
-        /**
-         * @return int
-         * @see UnallocatedPeriodSet#totalNumberOfPeriodsForSet
-         */
-        public int getTotalNumberOfPeriodsForSet() {
-            return totalNumberOfPeriodsForSet;
-        }
-
-        public void setTotalNumberOfPeriodsForSet(int totalNumberOfPeriodsForSet) {
-            this.totalNumberOfPeriodsForSet = totalNumberOfPeriodsForSet;
-        }
     }
 
 }

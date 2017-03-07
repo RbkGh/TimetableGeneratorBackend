@@ -4,6 +4,11 @@ import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.model.ProgrammeDay;
 import com.swiftpot.timetable.services.ProgrammeDayServices;
 import com.swiftpot.timetable.services.TimeTableGeneratorService;
+import com.swiftpot.timetable.services.servicemodels.AllocatedPeriodSet;
+import com.swiftpot.timetable.services.servicemodels.UnallocatedPeriodSet;
+import com.swiftpot.timetable.util.PrettyJSON;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,6 +39,7 @@ public class ProgrammeDayServicesTests {
     ProgrammeDayServices programmeDayServices;
 
     List<ProgrammeDay> programmeDaysList;
+    private static final Logger logger = LogManager.getLogger();
 
     @Before
     public void setupData() throws Exception {
@@ -55,6 +61,37 @@ public class ProgrammeDayServicesTests {
         boolean isProgrammeDayFullyAllocated =
                 programmeDayServices.isProgrammeDayFullyAllocated(programmeDaysList.get(3));
         assertThat(isProgrammeDayFullyAllocated, equalTo(false));
+    }
+
+    @Test
+    public void testGetPostUnallocatedPeriodSetListInAllocatedPeriodSet() {
+        int periodStartingNumber = 2;
+        int periodEndingNumber = 4;
+        int totalNumberOfPeriodsForSet = 3;
+
+        String subjectUniqueIdInDb = "SUBJ1";
+        String tutorUniqueIdInDb = "TUTJ1";
+        ProgrammeDay programmeDay = programmeDaysList.get(0);
+        for (PeriodOrLecture periodOrLecture : programmeDay.getPeriodList()) {
+            int currentPeriodOrLectureNumber = periodOrLecture.getPeriodNumber();
+            if ((currentPeriodOrLectureNumber >= periodStartingNumber) && (currentPeriodOrLectureNumber <= periodEndingNumber)) {
+                periodOrLecture.setIsAllocated(true);
+                periodOrLecture.setSubjectUniqueIdInDb(subjectUniqueIdInDb);
+                periodOrLecture.setTutorUniqueId(tutorUniqueIdInDb);
+            }
+        }
+
+        logger.debug("ProgrammeDay Periods before everything =>  {}", PrettyJSON.toListPrettyFormat(programmeDay.getPeriodList()));
+        AllocatedPeriodSet allocatedPeriodSet = new AllocatedPeriodSet();
+        allocatedPeriodSet.setPeriodStartingNumber(periodStartingNumber);
+        allocatedPeriodSet.setPeriodEndingNumber(periodEndingNumber);
+        allocatedPeriodSet.setTotalNumberOfPeriodsForSet(totalNumberOfPeriodsForSet);
+
+        List<UnallocatedPeriodSet> unallocatedPeriodSetList = programmeDayServices.getPostUnallocatedPeriodSetListInAllocatedPeriodSet(allocatedPeriodSet, programmeDay);
+
+        logger.debug("Post UnallocatedPeriodList =>{}", PrettyJSON.toListPrettyFormat(unallocatedPeriodSetList));
+        //assertThat(((unallocatedPeriodSetList.size()==1) && (unallocatedPeriodSetList.get(0).getPeriodStartingNumber()==5)),equalTo(true));
+        assertThat((unallocatedPeriodSetList.size() == 1), equalTo(true));
     }
 
 }
