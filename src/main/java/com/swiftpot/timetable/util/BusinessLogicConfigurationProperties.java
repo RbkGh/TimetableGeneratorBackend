@@ -85,7 +85,7 @@ public class BusinessLogicConfigurationProperties {
      * total periods for day
      */
     @Value("${timetable.period.total}")
-    public String TIMETABLE_PERIO_TOTAL;
+    public String TIMETABLE_PERIOD_TOTAL;
 
     @Value("${timetable.day.1}")
     public String TIMETABLE_DAY_1;

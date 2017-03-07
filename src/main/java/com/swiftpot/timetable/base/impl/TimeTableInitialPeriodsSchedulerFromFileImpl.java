@@ -29,7 +29,7 @@ public class TimeTableInitialPeriodsSchedulerFromFileImpl implements TimeTableIn
     @Override
     public List<PeriodOrLecture> generateAllPeriodsOrLecture() {
 
-        int totalTimeTablePeriods = Integer.parseInt(businessLogicConfigurationProperties.TIMETABLE_PERIO_TOTAL);
+        int totalTimeTablePeriods = Integer.parseInt(businessLogicConfigurationProperties.TIMETABLE_PERIOD_TOTAL);
         List<PeriodOrLecture> periodOrLectures = new ArrayList<>();
         //start from 1 instead of 0,as timetable periods is counted from 1 in the real world
         for (int i = 1; i <= totalTimeTablePeriods; i++) {

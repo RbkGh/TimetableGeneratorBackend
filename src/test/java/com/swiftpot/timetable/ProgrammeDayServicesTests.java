@@ -71,15 +71,9 @@ public class ProgrammeDayServicesTests {
 
         String subjectUniqueIdInDb = "SUBJ1";
         String tutorUniqueIdInDb = "TUTJ1";
-        ProgrammeDay programmeDay = programmeDaysList.get(0);
-        for (PeriodOrLecture periodOrLecture : programmeDay.getPeriodList()) {
-            int currentPeriodOrLectureNumber = periodOrLecture.getPeriodNumber();
-            if ((currentPeriodOrLectureNumber >= periodStartingNumber) && (currentPeriodOrLectureNumber <= periodEndingNumber)) {
-                periodOrLecture.setIsAllocated(true);
-                periodOrLecture.setSubjectUniqueIdInDb(subjectUniqueIdInDb);
-                periodOrLecture.setTutorUniqueId(tutorUniqueIdInDb);
-            }
-        }
+        ProgrammeDay programmeDay =
+                this.setUpProgrammeDay(programmeDaysList.get(0), subjectUniqueIdInDb, tutorUniqueIdInDb, periodStartingNumber, periodEndingNumber);
+
 
         logger.debug("ProgrammeDay Periods before everything =>  {}", PrettyJSON.toListPrettyFormat(programmeDay.getPeriodList()));
         AllocatedPeriodSet allocatedPeriodSet = new AllocatedPeriodSet();
@@ -92,6 +86,51 @@ public class ProgrammeDayServicesTests {
         logger.debug("Post UnallocatedPeriodList =>{}", PrettyJSON.toListPrettyFormat(unallocatedPeriodSetList));
         //assertThat(((unallocatedPeriodSetList.size()==1) && (unallocatedPeriodSetList.get(0).getPeriodStartingNumber()==5)),equalTo(true));
         assertThat((unallocatedPeriodSetList.size() == 1), equalTo(true));
+    }
+
+    @Test
+    public void testGetTotalUnallocatedPeriodSetListInAllocatedPeriodSetExpectTrue() {
+        int periodStartingNumber = 2;
+        int periodEndingNumber = 4;
+        int totalNumberOfPeriodsForSet = 3;
+
+        String subjectUniqueIdInDb = "SUBJ1";
+        String tutorUniqueIdInDb = "TUTJ1";
+        ProgrammeDay programmeDay =
+                this.setUpProgrammeDay(programmeDaysList.get(0), subjectUniqueIdInDb, tutorUniqueIdInDb, periodStartingNumber, periodEndingNumber);
+
+
+        int periodStartingNumber2 = 7;
+        int periodEndingNumber2 = 8;
+        String subjectUniqueIdInDb2 = "SUBJ2";
+        String tutorUniqueIdInDb2 = "TUTJ2";
+        programmeDay =
+                this.setUpProgrammeDay(programmeDay, subjectUniqueIdInDb2, tutorUniqueIdInDb2, periodStartingNumber2, periodEndingNumber2);
+
+        logger.debug("ProgrammeDay Periods before everything =>  {}", PrettyJSON.toListPrettyFormat(programmeDay.getPeriodList()));
+        AllocatedPeriodSet allocatedPeriodSet = new AllocatedPeriodSet();
+        allocatedPeriodSet.setPeriodStartingNumber(periodStartingNumber);
+        allocatedPeriodSet.setPeriodEndingNumber(periodEndingNumber);
+        allocatedPeriodSet.setTotalNumberOfPeriodsForSet(totalNumberOfPeriodsForSet);
+
+        List<UnallocatedPeriodSet> unallocatedPeriodSetList =
+                programmeDayServices.getListOfUnallocatedPeriodSetsInDay(programmeDay);
+
+        logger.debug("Post UnallocatedPeriodList =>{}", PrettyJSON.toListPrettyFormat(unallocatedPeriodSetList));
+        //assertThat(((unallocatedPeriodSetList.size()==1) && (unallocatedPeriodSetList.get(0).getPeriodStartingNumber()==5)),equalTo(true));
+        assertThat((unallocatedPeriodSetList.size() == 3), equalTo(true));
+    }
+
+    private ProgrammeDay setUpProgrammeDay(ProgrammeDay programmeDay, String subjectUniqueIdInDb, String tutorUniqueIdInDb, int periodStartingNumber, int periodEndingNumber) {
+        for (PeriodOrLecture periodOrLecture : programmeDay.getPeriodList()) {
+            int currentPeriodOrLectureNumber = periodOrLecture.getPeriodNumber();
+            if ((currentPeriodOrLectureNumber >= periodStartingNumber) && (currentPeriodOrLectureNumber <= periodEndingNumber)) {
+                periodOrLecture.setIsAllocated(true);
+                periodOrLecture.setSubjectUniqueIdInDb(subjectUniqueIdInDb);
+                periodOrLecture.setTutorUniqueId(tutorUniqueIdInDb);
+            }
+        }
+        return programmeDay;
     }
 
 }
