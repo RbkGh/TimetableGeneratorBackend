@@ -28,8 +28,8 @@ public class SubjectsAssignerService {
     /**
      * get subject periods allocation as a {@link List} of {@link Integer numbers},eg if 5 is passed in ,the allocation list will be {2,3}
      *
-     * @param totalPeriodAllocationForSubject
-     * @return
+     * @param totalPeriodAllocationForSubject Period Allocation value to find the breakdown,eg 8 => 3,3,2
+     * @return {@link List} of {@link Integer numbers} representing the breakdown of the subject allocations.
      */
     public List<Integer> getTotalSubjectPeriodAllocationAsList(int totalPeriodAllocationForSubject) {
 

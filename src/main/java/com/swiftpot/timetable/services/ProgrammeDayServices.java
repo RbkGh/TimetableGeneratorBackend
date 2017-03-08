@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.services;
 
 import com.sun.istack.internal.Nullable;
@@ -476,5 +480,18 @@ public class ProgrammeDayServices {
         }
         return periodStartingNumber;
     }
+
+//    public ProgrammeDay getProgrammeDayThatCanTakeTheNumberOfPeriodsIncoming(int periodNumberToBeGreaterThan,
+//                                                                             int numberOfPeriodsToBeSet,List<ProgrammeDay> programmeDaysList) {
+//        for (ProgrammeDay programmeDay : programmeDaysList) {
+//
+//        }
+//    }
+//
+//    private boolean canPeriodsInDayTakeNumberOfPeriodsToBeSetConsideringPeriodNumberToBeGreaterThan(int periodNumberToBeGreaterThan,
+//                                                                                                    int numberOfPeriodsToBeSet,
+//                                                                                                    List<PeriodOrLecture> periodOrLectureList) {
+//        int numberOfUnallocatedAfterPeriodNumberToBeGreaterThan =
+//    }
 
 }

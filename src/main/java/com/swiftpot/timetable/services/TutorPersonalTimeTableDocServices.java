@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.services;
 
 import com.swiftpot.timetable.model.ProgrammeDay;
@@ -31,7 +35,7 @@ public class TutorPersonalTimeTableDocServices {
      * @param subjectUniqueIdInDb               the subject to be set 's unique id in database ie. {@link com.swiftpot.timetable.repository.db.model.SubjectDoc#id}
      * @param programmeDayName                  the programme day name to set ie. {@link com.swiftpot.timetable.model.ProgrammeDay#dayName} .eg Monday could have "Monday" as the programme day name
      * @param periodNumberToStartSettingSubject the index to start setting the periods from ie. {@link com.swiftpot.timetable.model.PeriodOrLecture#periodNumber} eg. period 3,
-     * @param periodNumberToStopSettingSubject
+     * @param periodNumberToStopSettingSubject  the period number to stop setting the periods ie {@link com.swiftpot.timetable.model.PeriodOrLecture#periodNumber} eg. period 3,
      * @return TutorPersonalTimeTableDoc
      */
     public synchronized TutorPersonalTimeTableDoc updateTutorPersonalTimeTableDocWithPeriodsAndSaveInDb(String tutorUniqueIdInDb,
@@ -59,7 +63,7 @@ public class TutorPersonalTimeTableDocServices {
      * @param subjectUniqueIdInDb               the subject to be set 's unique id in database ie. {@link com.swiftpot.timetable.repository.db.model.SubjectDoc#id}
      * @param programmeDayName                  the programme day name to set ie. {@link com.swiftpot.timetable.model.ProgrammeDay#dayName} .eg Monday could have "Monday" as the programme day name
      * @param periodNumberToStartSettingSubject the index to start setting the periods from ie. {@link com.swiftpot.timetable.model.PeriodOrLecture#periodNumber} eg. period 3,
-     * @param periodNumberToStopSettingSubject
+     * @param periodNumberToStopSettingSubject  the period number to stop setting the periods ie {@link com.swiftpot.timetable.model.PeriodOrLecture#periodNumber} eg. period 3,
      * @return TutorPersonalTimeTableDoc
      */
     public synchronized TutorPersonalTimeTableDoc getTutorPersonalTimeTableWithIncomingPeriodsSet(String tutorUniqueIdInDb,
