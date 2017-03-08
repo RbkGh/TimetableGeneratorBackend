@@ -121,6 +121,45 @@ public class ProgrammeDayServicesTests {
         assertThat((unallocatedPeriodSetList.size() == 3), equalTo(true));
     }
 
+    @Test
+    public void testGetTotalUnallocatedPeriodSetListInAllocatedPeriodSetNewExpectation() {
+        int periodStartingNumber = 2;
+        int periodEndingNumber = 4;
+        int totalNumberOfPeriodsForSet = 3;
+
+        String subjectUniqueIdInDb = "SUBJ1";
+        String tutorUniqueIdInDb = "TUTJ1";
+        ProgrammeDay programmeDay =
+                this.setUpProgrammeDay(programmeDaysList.get(0), subjectUniqueIdInDb, tutorUniqueIdInDb, periodStartingNumber, periodEndingNumber);
+
+
+        int periodStartingNumber2 = 7;
+        int periodEndingNumber2 = 8;
+        String subjectUniqueIdInDb2 = "SUBJ2";
+        String tutorUniqueIdInDb2 = "TUTJ2";
+        programmeDay =
+                this.setUpProgrammeDay(programmeDay, subjectUniqueIdInDb2, tutorUniqueIdInDb2, periodStartingNumber2, periodEndingNumber2);
+
+        int periodStartingNumber3 = 10;
+        int periodEndingNumber3 = 10;
+        String subjectUniqueIdInDb3 = "SUBJ3";
+        String tutorUniqueIdInDb3 = "TUTJ3";
+        programmeDay =
+                this.setUpProgrammeDay(programmeDay, subjectUniqueIdInDb3, tutorUniqueIdInDb3, periodStartingNumber3, periodEndingNumber3);
+        logger.debug("ProgrammeDay Periods before everything =>  {}", PrettyJSON.toListPrettyFormat(programmeDay.getPeriodList()));
+        AllocatedPeriodSet allocatedPeriodSet = new AllocatedPeriodSet();
+        allocatedPeriodSet.setPeriodStartingNumber(periodStartingNumber);
+        allocatedPeriodSet.setPeriodEndingNumber(periodEndingNumber);
+        allocatedPeriodSet.setTotalNumberOfPeriodsForSet(totalNumberOfPeriodsForSet);
+
+        List<UnallocatedPeriodSet> unallocatedPeriodSetList =
+                programmeDayServices.getListOfUnallocatedPeriodSetsInDay(programmeDay);
+
+        logger.debug("Post UnallocatedPeriodList =>{}", PrettyJSON.toListPrettyFormat(unallocatedPeriodSetList));
+        //assertThat(((unallocatedPeriodSetList.size()==1) && (unallocatedPeriodSetList.get(0).getPeriodStartingNumber()==5)),equalTo(true));
+        assertThat((unallocatedPeriodSetList.size() == 3), equalTo(true));
+    }
+
     private ProgrammeDay setUpProgrammeDay(ProgrammeDay programmeDay, String subjectUniqueIdInDb, String tutorUniqueIdInDb, int periodStartingNumber, int periodEndingNumber) {
         for (PeriodOrLecture periodOrLecture : programmeDay.getPeriodList()) {
             int currentPeriodOrLectureNumber = periodOrLecture.getPeriodNumber();
