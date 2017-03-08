@@ -65,13 +65,21 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
     private static final String CLASS_WORSHIP_PERIOD_NUMBER_KEY = "worshipPeriodNumber";
 
     /**
-     * pass in empty value
+     * pass in non empty value
      */
-    private static final String DUMMY_WORSHIP_PERIOD_SUBJECT_UNIQUE_ID = "";
+    private static final String DUMMY_WORSHIP_PERIOD_SUBJECT_UNIQUE_ID = "WORSHIPPERIOD";
     /**
-     * pass in empty value
+     * pass in non empty value
      */
-    private static final String DUMMY_CLASSMEETING_PERIOD_SUBJECT_UNIQUE_ID = "";
+    private static final String DUMMY_CLASSMEETING_PERIOD_SUBJECT_UNIQUE_ID = "CLASSMEEETINGPERIOD";
+    /**
+     * pass in non empty value
+     */
+    private static final String DUMMY_CLASSMEETING_TUTOR_UNIQUE_ID = "TUTORCLASSMEETING";
+    /**
+     * pass in non empty value
+     */
+    private static final String DUMMY_WORSHIP_TUTOR_UNIQUE_ID = "TUTORCLASSMEETING";
 
     @Override
     public TimeTableSuperDoc allocateDefaultPeriodsOnTimeTable(TimeTableSuperDoc timeTableSuperDocWithInitialDefaultDataSet) throws Exception {
@@ -150,7 +158,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
                                 Objects.equals(programmeDayName, (worshipDayName.toUpperCase().trim()))) {
                             periodOrLecture.setIsAllocated(true);
                             periodOrLecture.setSubjectUniqueIdInDb(subjectUnniqueIdInDbDummyValue);
-                            periodOrLecture.setTutorUniqueId(subjectUnniqueIdInDbDummyValue);
+                            periodOrLecture.setTutorUniqueId(DUMMY_WORSHIP_TUTOR_UNIQUE_ID);
                             numberOfTimesSet[0] = numberOfTimesSet[0] + 1;
                         }
                     });
@@ -166,7 +174,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
      * allocate class meetings For all ProgrammeGroups
      *
      * @param timeTableSuperDoc
-     * @param subjectUniqueIdInDb pass in a dummy value ie EMPTY "" FOR SHORT
+     * @param subjectUniqueIdInDb pass in a dummy value ie NON EMPTY "WHATEVER" FOR SHORT
      * @return TimeTableSuperDoc
      */
     public TimeTableSuperDoc allocateClassMeetingPeriodForAllProgrammeGroups(TimeTableSuperDoc timeTableSuperDoc, String subjectUniqueIdInDb) throws Exception {
@@ -188,6 +196,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
                                 Objects.equals(programmeDayName, (classMeetingDayName.toUpperCase().trim()))) {
                             periodOrLecture.setIsAllocated(true);
                             periodOrLecture.setSubjectUniqueIdInDb(subjectUniqueIdInDb);
+                            periodOrLecture.setTutorUniqueId(DUMMY_CLASSMEETING_TUTOR_UNIQUE_ID);
                             numberOfTimesPeriodIsSet[0]++;
                         }
                     });
