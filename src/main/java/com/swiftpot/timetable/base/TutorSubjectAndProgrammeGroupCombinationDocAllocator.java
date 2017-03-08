@@ -5,8 +5,10 @@
 package com.swiftpot.timetable.base;
 
 import com.swiftpot.timetable.repository.db.model.SubjectDoc;
+import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
 import com.swiftpot.timetable.repository.db.model.TutorDoc;
 import com.swiftpot.timetable.repository.db.model.TutorSubjectAndProgrammeGroupCombinationDoc;
+import org.springframework.stereotype.Component;
 
 /**
  * This interface will be used to allocate {@link TutorSubjectAndProgrammeGroupCombinationDoc} <br>
@@ -16,6 +18,7 @@ import com.swiftpot.timetable.repository.db.model.TutorSubjectAndProgrammeGroupC
  *         <Rodney Kwabena Boachie at [rodney@swiftpot.com,rbk.unlimited@gmail.com]> on
  *         08-Mar-17 @ 12:04 PM
  */
+@Component
 public interface TutorSubjectAndProgrammeGroupCombinationDocAllocator {
 
     /**
@@ -24,8 +27,12 @@ public interface TutorSubjectAndProgrammeGroupCombinationDocAllocator {
      *
      * @param tutorUniqueIdInDb                           The {@link TutorDoc#id} of the {@link TutorDoc} object
      * @param tutorSubjectAndProgrammeGroupCombinationDoc the {@link TutorSubjectAndProgrammeGroupCombinationDoc} object
-     * @return {@link Integer 0} to acknowledge that the process is complete
+     * @param timeTableSuperDoc                           the {@link TimeTableSuperDoc}  With At Least Default Periods Set Already ,at least the timetable object must have passed through <br>
+     *                                                    {@link TimeTableDefaultPeriodsAllocator#allocateDefaultPeriodsOnTimeTable(TimeTableSuperDoc)} already
+     * @return {@link TimeTableSuperDoc} with updated values if there was any need for any update
      */
-    int allocateTutorSubjectAndProgrammeGroupCombinationCompletely
-    (String tutorUniqueIdInDb, TutorSubjectAndProgrammeGroupCombinationDoc tutorSubjectAndProgrammeGroupCombinationDoc);
+    TimeTableSuperDoc allocateTutorSubjectAndProgrammeGroupCombinationCompletely
+    (String tutorUniqueIdInDb,
+     TutorSubjectAndProgrammeGroupCombinationDoc tutorSubjectAndProgrammeGroupCombinationDoc,
+     TimeTableSuperDoc timeTableSuperDoc);
 }

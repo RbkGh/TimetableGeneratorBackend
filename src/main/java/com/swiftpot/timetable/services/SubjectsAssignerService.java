@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.services;
 
 import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
@@ -10,6 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
+ * Get subjects allocation as List
  * @author Ace Programmer Rbk
  *         <Rodney Kwabena Boachie at [rodney@swiftpot.com,rbk.unlimited@gmail.com]> on
  *         17-Dec-16 @ 12:43 AM
@@ -20,6 +25,12 @@ public class SubjectsAssignerService {
     @Autowired
     BusinessLogicConfigurationProperties propFile;
 
+    /**
+     * get subject periods allocation as a {@link List} of {@link Integer numbers},eg if 5 is passed in ,the allocation list will be {2,3}
+     *
+     * @param totalPeriodAllocationForSubject
+     * @return
+     */
     public List<Integer> getTotalSubjectPeriodAllocationAsList(int totalPeriodAllocationForSubject) {
 
         List<Integer> finalSubjectPeriodAllocationAsList;
