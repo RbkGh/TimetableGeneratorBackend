@@ -4,17 +4,14 @@
 
 package com.swiftpot.timetable.services;
 
-import com.sun.istack.internal.Nullable;
 import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.model.ProgrammeDay;
 import com.swiftpot.timetable.services.servicemodels.AllocatedPeriodSet;
 import com.swiftpot.timetable.services.servicemodels.PeriodSet;
 import com.swiftpot.timetable.services.servicemodels.UnallocatedPeriodSet;
-import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
 import com.swiftpot.timetable.util.PrettyJSON;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -28,9 +25,6 @@ import java.util.*;
  */
 @Service
 public class ProgrammeDayServices {
-
-    @Autowired
-    BusinessLogicConfigurationProperties businessLogicConfigurationProperties;
 
     private static final Logger logger = LogManager.getLogger();
 
@@ -234,88 +228,6 @@ public class ProgrammeDayServices {
 
     }
 
-    public List<UnallocatedPeriodSet> getNumberOfSubjectUniqueIdSetListInProgrammeDayListBeforeAParticularPeriodNumber
-            (int periodOrLectureNumberThatItShouldBeLessThan, List<PeriodOrLecture> periodOrLectureList) {
-
-        //int
-        Set<UnallocatedPeriodSet> uniqueUnallocatedPeriodSets = new HashSet<>();
-
-        int periodOrLectureListSize = Integer.valueOf(businessLogicConfigurationProperties.TIMETABLE_PERIOD_TOTAL);
-        int numberOfTimesToIterate = periodOrLectureNumberThatItShouldBeLessThan; //TODO set to peRIODoRlECTURETHATITSHOULDBELESSTHAN
-        while (numberOfTimesToIterate > 0) {
-            numberOfTimesToIterate -= 1;//decrement by 1
-
-            @Nullable
-            UnallocatedPeriodSet unallocatedPeriodSetNullableAllowed = this.
-                    getUnallocatedPeriodSet
-                            (periodOrLectureNumberThatItShouldBeLessThan, periodOrLectureList);
-            if (!Objects.isNull(unallocatedPeriodSetNullableAllowed)) {
-                uniqueUnallocatedPeriodSets.add(unallocatedPeriodSetNullableAllowed);
-            } else {
-
-            }
-        }
-
-        return new ArrayList<>(uniqueUnallocatedPeriodSets);
-    }
-
-
-    @Nullable
-    public UnallocatedPeriodSet getUnallocatedPeriodSet(int periodOrLectureNumberThatItShouldBeLessThan, List<PeriodOrLecture> periodOrLectureList) {
-        Set<UnallocatedPeriodSet> uniqueUnallocatedPeriodSets = new HashSet<>();
-        int periodNumberWhereFirstPositionOfFalseWasFoundAndIsLessThanPeriodNumberToCheckAgainst = 0;
-        for (PeriodOrLecture periodOrLecture : periodOrLectureList) {
-            int currentPeriodNumber = periodOrLecture.getPeriodNumber();
-            boolean isBooleanAllocated = periodOrLecture.getIsAllocated();
-            if ((currentPeriodNumber < periodOrLectureNumberThatItShouldBeLessThan) &&
-                    (!isBooleanAllocated)) {
-                periodNumberWhereFirstPositionOfFalseWasFoundAndIsLessThanPeriodNumberToCheckAgainst = currentPeriodNumber;
-                break;
-            }
-        }
-
-        if (periodNumberWhereFirstPositionOfFalseWasFoundAndIsLessThanPeriodNumberToCheckAgainst == 0) {
-            //add nothing to set of unallocatedPeriodSet List
-            return null;
-        } else {
-            int periodNumberWhereThereIsTrueAfterFalseFound = 0;
-            for (PeriodOrLecture periodOrLecture : periodOrLectureList) {
-                int currentPeriodNumber = periodOrLecture.getPeriodNumber();
-                if (periodOrLecture.getIsAllocated() && currentPeriodNumber > periodNumberWhereFirstPositionOfFalseWasFoundAndIsLessThanPeriodNumberToCheckAgainst) {
-                    periodNumberWhereThereIsTrueAfterFalseFound = currentPeriodNumber;
-                    break;
-                }
-            }
-            int periodStartingNumber = periodNumberWhereFirstPositionOfFalseWasFoundAndIsLessThanPeriodNumberToCheckAgainst;
-            int periodEndingNumber = (periodNumberWhereThereIsTrueAfterFalseFound - 1);
-            //we subtract 1 because the variable uses a reference that is true,
-            // hence minus 1 will actually point to a false,which is the acutal ending period number of the unallocated subject.
-            int totalNumberOfPeriodsForSet = (periodEndingNumber + 1) - (periodStartingNumber);
-            UnallocatedPeriodSet unallocatedPeriodSet = new UnallocatedPeriodSet();
-            unallocatedPeriodSet.setPeriodStartingNumber(periodStartingNumber); //set period starting number
-            unallocatedPeriodSet.setPeriodEndingNumber(periodEndingNumber); //set period ending number
-            unallocatedPeriodSet.setTotalNumberOfPeriodsForSet(totalNumberOfPeriodsForSet);//set totalNumberOfPeriodsForSet
-
-
-            return unallocatedPeriodSet;
-        }
-    }
-
-    public int getNumberOfFalseGreaterThanAPeriodNumberButLessThanAnotherPeriodNumber(int periodNumberToBeGreaterThan,
-                                                                                      int periodNumberToBeLessThan,
-                                                                                      List<PeriodOrLecture> periodOrLectureList) {
-        int getNumberOfFalseGreaterThanAPeriodNumberButLessThanAnotherPeriodNumber = 0;
-        for (PeriodOrLecture periodOrLecture : periodOrLectureList) {
-            int currentPeriodLectureNumber = periodOrLecture.getPeriodNumber();
-            if ((currentPeriodLectureNumber > periodNumberToBeGreaterThan) &&
-                    (currentPeriodLectureNumber < periodNumberToBeLessThan) &&
-                    (!periodOrLecture.getIsAllocated())) {
-                getNumberOfFalseGreaterThanAPeriodNumberButLessThanAnotherPeriodNumber += 1;
-            }
-        }
-        return getNumberOfFalseGreaterThanAPeriodNumberButLessThanAnotherPeriodNumber;
-    }
-
     /**
      * this will get all the {@link List} of {@link UnallocatedPeriodSet} that come after the <br>
      * {@link UnallocatedPeriodSet#periodEndingNumber},this will return 0 or empty list if none is found
@@ -373,24 +285,6 @@ public class ProgrammeDayServices {
             logger.info("finalUnallocatedPeriodSetsListPostAllocationPeriodSet ==>{}", PrettyJSON.toListPrettyFormat(new ArrayList<>(finalUnallocatedPeriodSetsListPostAllocationPeriodSet)));
             return new ArrayList<>(finalUnallocatedPeriodSetsListPostAllocationPeriodSet);
         }
-    }
-
-    /**
-     * get the total number of false before a specific Period or lecture number ie {@link PeriodOrLecture#periodNumber} in day ,not the index,<b>NOTE THAT!!,not the index position in the list!!</b>
-     *
-     * @param periodOrLectureNumberThatItShouldBeLessThan
-     * @param periodOrLecturesList
-     * @return
-     */
-    int getNumberOfFalseBeforeSpecificPeriodOrLectureNumberInDay(int periodOrLectureNumberThatItShouldBeLessThan, List<PeriodOrLecture> periodOrLecturesList) {
-        int getNumberOfFalseBeforeSpecificPeriodOrLectureNumberInDay = 0;
-        for (PeriodOrLecture periodOrLecture : periodOrLecturesList) {
-            int currentPeriodNumber = periodOrLecture.getPeriodNumber();
-            if ((currentPeriodNumber < periodOrLectureNumberThatItShouldBeLessThan) && (!periodOrLecture.getIsAllocated())) {
-                getNumberOfFalseBeforeSpecificPeriodOrLectureNumberInDay += 1;
-            }
-        }
-        return getNumberOfFalseBeforeSpecificPeriodOrLectureNumberInDay;
     }
 
     /**
@@ -480,18 +374,5 @@ public class ProgrammeDayServices {
         }
         return periodStartingNumber;
     }
-
-//    public ProgrammeDay getProgrammeDayThatCanTakeTheNumberOfPeriodsIncoming(int periodNumberToBeGreaterThan,
-//                                                                             int numberOfPeriodsToBeSet,List<ProgrammeDay> programmeDaysList) {
-//        for (ProgrammeDay programmeDay : programmeDaysList) {
-//
-//        }
-//    }
-//
-//    private boolean canPeriodsInDayTakeNumberOfPeriodsToBeSetConsideringPeriodNumberToBeGreaterThan(int periodNumberToBeGreaterThan,
-//                                                                                                    int numberOfPeriodsToBeSet,
-//                                                                                                    List<PeriodOrLecture> periodOrLectureList) {
-//        int numberOfUnallocatedAfterPeriodNumberToBeGreaterThan =
-//    }
 
 }
