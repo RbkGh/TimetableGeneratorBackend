@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.base.impl;
 
 import com.google.gson.Gson;
