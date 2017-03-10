@@ -40,8 +40,6 @@ public class ProgrammeDayPeriodSetListInitialGeneratorDefaultImpl implements Pro
     @Autowired
     ProgrammeDayPeriodSetService programmeDayPeriodSetService;
     @Autowired
-    private RandomNumberGenerator randomNumberGenerator;
-    @Autowired
     private TimeTableGeneratorService timeTableGeneratorService;
 
     @Override
@@ -87,6 +85,9 @@ public class ProgrammeDayPeriodSetListInitialGeneratorDefaultImpl implements Pro
     }
 
     private List<PeriodSetForProgrammeDay> generatePeriodSetForProgrammeDayListForProgrammeDay() {
+        RandomNumberGenerator randomNumberGenerator = new RandomNumberGenerator() {
+
+        };
         //generate random number to fetch a random number combination of programmeDay Period Allocation.
         List<PeriodSetForProgrammeDay> finalPeriodSetForProgrammeDays =
                 programmeDayPeriodSetService.getPeriodAllocationForDayAsProgDayPeriodSetList(randomNumberGenerator.generateRandomNumber(1, 2));
