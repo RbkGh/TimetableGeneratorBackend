@@ -49,9 +49,9 @@ public class ProgrammeDayPeriodSetListInitialGeneratorTests {
     public void setUpStuff() {
         programmeGroupDocList = new ArrayList<>();
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 2; i++) {
             ProgrammeGroupDoc programmeGroupDoc = new ProgrammeGroupDoc();
-            programmeGroupDoc.setProgrammeCode("PROGRAMMECODE+" + i);
+            programmeGroupDoc.setProgrammeCode("PROGRAMMECODE" + i);
 
             programmeGroupDocList.add(programmeGroupDoc);
         }
@@ -67,8 +67,7 @@ public class ProgrammeDayPeriodSetListInitialGeneratorTests {
 
         logger.info("ProgrammeGroupDayPeriodSetsDocs List generated ===>>\n\n\t\t,{}", PrettyJSON.toListPrettyFormat(programmeGroupDayPeriodSetsDocs));
         programmeGroupDayPeriodSetsDocs.forEach(programmeGroupDayPeriodSetsDoc -> assertThat(programmeGroupDayPeriodSetsDoc.
-                        getMapOfProgDayNameAndTheListOfPeriodSets().
-                        get(dayNameToFind),
-                equalTo(dayNameToFind)));
+                        getMapOfProgDayNameAndTheListOfPeriodSets().containsKey(dayNameToFind),
+                equalTo(true)));
     }
 }
