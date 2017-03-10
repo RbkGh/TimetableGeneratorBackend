@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.util;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -125,4 +129,15 @@ public class BusinessLogicConfigurationProperties {
 
     @Value("${timetable.period.classmeeting}")
     public int TIMETABLE_PERIOD_CLASS_MEETING;
+
+    @Value("${day.period.allocation.combination.1}")
+    public String DAY_PERIOD_ALLOCATION_COMBINATION_1;
+
+    @Value("${day.period.allocation.combination.2}")
+    public String DAY_PERIOD_ALLOCATION_COMBINATION_2;
+
+    @Value("${day.period.allocation.combination.3}")
+    public String DAY_PERIOD_ALLOCATION_COMBINATION_3;
+
+
 }

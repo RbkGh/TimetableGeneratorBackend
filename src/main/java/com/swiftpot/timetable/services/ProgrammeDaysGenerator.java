@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.services;
 
 import com.swiftpot.timetable.model.ProgrammeDay;
@@ -17,6 +21,13 @@ public class ProgrammeDaysGenerator {
     @Autowired
     TimeTableGeneratorService timeTableGeneratorService;
 
+    /**
+     * generate programmeDays
+     *
+     * @param programmeCode
+     * @return
+     * @throws Exception
+     */
     public List<ProgrammeDay> generateAllProgrammeDays(String programmeCode) throws Exception {
 
         return timeTableGeneratorService.generateAllProgrammeDaysFirstTime();
