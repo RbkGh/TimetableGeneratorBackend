@@ -8,6 +8,7 @@ import com.swiftpot.timetable.base.ProgrammeDayPeriodSetListInitialGenerator;
 import com.swiftpot.timetable.base.impl.ProgrammeDayPeriodSetListInitialGeneratorDefaultImpl;
 import com.swiftpot.timetable.repository.db.model.ProgrammeGroupDayPeriodSetsDoc;
 import com.swiftpot.timetable.repository.db.model.ProgrammeGroupDoc;
+import com.swiftpot.timetable.services.servicemodels.PeriodSetForProgrammeDay;
 import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
 import com.swiftpot.timetable.util.PrettyJSON;
 import org.apache.logging.log4j.LogManager;
@@ -21,6 +22,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -69,5 +71,29 @@ public class ProgrammeDayPeriodSetListInitialGeneratorTests {
         programmeGroupDayPeriodSetsDocs.forEach(programmeGroupDayPeriodSetsDoc -> assertThat(programmeGroupDayPeriodSetsDoc.
                         getMapOfProgDayNameAndTheListOfPeriodSets().containsKey(dayNameToFind),
                 equalTo(true)));
+    }
+
+    @Test
+    public void generateProgrammeDayPeriodSetForEachDayInProgrammeGroupListExtraCheck() throws Exception {
+        programmeDayPeriodSetListInitialGenerator = programmeDayPeriodSetListInitialGeneratorDefaultImpl;
+        List<ProgrammeGroupDayPeriodSetsDoc> programmeGroupDayPeriodSetsDocs =
+                programmeDayPeriodSetListInitialGenerator.generateProgrammeGroupDayPeriodSetsDocForEachProgrammeGroupDoc(programmeGroupDocList);
+
+        logger.info("ProgrammeGroupDayPeriodSetsDocs List generated ===>>\n\n\t\t,{}", PrettyJSON.toListPrettyFormat(programmeGroupDayPeriodSetsDocs));
+        programmeGroupDayPeriodSetsDocs.forEach(programmeGroupDayPeriodSetsDoc -> {
+            Map<String, List<PeriodSetForProgrammeDay>> programmeGroupDayPeriodSetsDocsMap =
+                    programmeGroupDayPeriodSetsDoc.
+                            getMapOfProgDayNameAndTheListOfPeriodSets();
+            programmeGroupDayPeriodSetsDocsMap.forEach((s, periodSetForProgrammeDays) -> {
+                int totalPeriodsForDay = 0;
+                for (PeriodSetForProgrammeDay periodSetForProgrammeDay : periodSetForProgrammeDays) {
+                    totalPeriodsForDay += periodSetForProgrammeDay.getTotalNumberOfPeriodsForSet();
+                }
+                logger.info("ProgrammeCode => {} ,ProgrammeDayName=> {} ,ListOfPeriodSetForDay==> \n{}"
+                        , programmeGroupDayPeriodSetsDoc.getProgrammeCode(), s, PrettyJSON.toListPrettyFormat(periodSetForProgrammeDays));
+                assertThat(totalPeriodsForDay, equalTo(10));
+            });
+        });
+
     }
 }
