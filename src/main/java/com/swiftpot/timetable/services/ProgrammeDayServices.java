@@ -379,6 +379,9 @@ public class ProgrammeDayServices {
     /**
      * get all {@link List} of {@link UnallocatedPeriodSet} from the {@link List} of {@link PeriodSetForProgrammeDay} <br>
      * and the {@link ProgrammeDay} that holds a {@link List} of {@link PeriodOrLecture} that have some of the periods allocated and some unallocated.
+     * <p>
+     * <br><br>
+     * <b>IMPORTANT : ENSURE THAT THE SAME {@link List} OF {@link PeriodSetForProgrammeDay} IS USED WHEN ASSIGNING THE PERIODS OF A TUTOR TO ENSURE THAT NO UNFORESEEN ERRORS OCCUR!!</b>
      *
      * @param periodSetForProgrammeDayList                {@link List} of {@link PeriodSetForProgrammeDay}
      * @param programmeDayWithSomePeriodsAlreadyAllocated the {@link ProgrammeDay} that holds a {@link List} of {@link PeriodOrLecture} that have some of the periods allocated and some unallocated.
@@ -415,5 +418,25 @@ public class ProgrammeDayServices {
         }
 
         return finalUnallocatedPeriodSetList;
+    }
+
+    /**
+     * get the {@link ProgrammeDay} object from the {@link List} of {@link ProgrammeDay} passed in.
+     *
+     * @param programmeDayName  the {@link ProgrammeDay#dayName} to search for
+     * @param programmeDaysList the {@link List} of {@link ProgrammeDay} to search
+     * @return {@link ProgrammeDay} that has the @param programmeDayName as its {@link ProgrammeDay#dayName}
+     */
+    public ProgrammeDay getProgrammeDayFromProgrammeDayListUsingProgrammeDayName(String programmeDayName, List<ProgrammeDay> programmeDaysList) {
+
+        ProgrammeDay programmeDayToReturn = new ProgrammeDay();
+
+        for (ProgrammeDay currentProgrammeDay : programmeDaysList) {
+            if (programmeDayName.equalsIgnoreCase(currentProgrammeDay.getDayName())) {
+                programmeDayToReturn = currentProgrammeDay;
+                break;
+            }
+        }
+        return programmeDayToReturn;
     }
 }

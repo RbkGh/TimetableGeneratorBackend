@@ -7,20 +7,20 @@ package com.swiftpot.timetable.base.impl;
 import com.swiftpot.timetable.base.TutorSubjectAndProgrammeGroupCombinationDocAllocator;
 import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.model.ProgrammeDay;
+import com.swiftpot.timetable.repository.ProgrammeGroupDayPeriodSetsDocRepository;
 import com.swiftpot.timetable.repository.ProgrammeGroupPersonalTimeTableDocRepository;
 import com.swiftpot.timetable.repository.TutorPersonalTimeTableDocRepository;
 import com.swiftpot.timetable.repository.TutorSubjectAndProgrammeGroupCombinationDocRepository;
-import com.swiftpot.timetable.repository.db.model.ProgrammeGroupPersonalTimeTableDoc;
-import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
-import com.swiftpot.timetable.repository.db.model.TutorPersonalTimeTableDoc;
-import com.swiftpot.timetable.repository.db.model.TutorSubjectAndProgrammeGroupCombinationDoc;
+import com.swiftpot.timetable.repository.db.model.*;
 import com.swiftpot.timetable.services.ProgrammeDayServices;
 import com.swiftpot.timetable.services.SubjectsAssignerService;
 import com.swiftpot.timetable.services.TutorPersonalTimeTableDocServices;
+import com.swiftpot.timetable.services.servicemodels.PeriodSetForProgrammeDay;
 import com.swiftpot.timetable.services.servicemodels.UnallocatedPeriodSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,17 +35,19 @@ import java.util.Map;
 public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl implements TutorSubjectAndProgrammeGroupCombinationDocAllocator {
 
     @Autowired
-    TutorSubjectAndProgrammeGroupCombinationDocRepository tutorSubjectAndProgrammeGroupCombinationDocRepository;
+    private TutorSubjectAndProgrammeGroupCombinationDocRepository tutorSubjectAndProgrammeGroupCombinationDocRepository;
     @Autowired
-    SubjectsAssignerService subjectsAssignerService;
+    private SubjectsAssignerService subjectsAssignerService;
     @Autowired
-    TutorPersonalTimeTableDocRepository tutorPersonalTimeTableDocRepository;
+    private TutorPersonalTimeTableDocRepository tutorPersonalTimeTableDocRepository;
     @Autowired
-    TutorPersonalTimeTableDocServices tutorPersonalTimeTableDocServices;
+    private TutorPersonalTimeTableDocServices tutorPersonalTimeTableDocServices;
     @Autowired
-    ProgrammeGroupPersonalTimeTableDocRepository programmeGroupPersonalTimeTableDocRepository;
+    private ProgrammeGroupPersonalTimeTableDocRepository programmeGroupPersonalTimeTableDocRepository;
     @Autowired
-    ProgrammeDayServices programmeDayServices;
+    private ProgrammeDayServices programmeDayServices;
+    @Autowired
+    private ProgrammeGroupDayPeriodSetsDocRepository programmeGroupDayPeriodSetsDocRepository;
 
     //todo remember to remove the todo in the interface implemented here that it is done once the implementation is complete
     @Override
@@ -85,17 +87,35 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
                     programmeGroupPersonalTimeTableDocRepository.findByProgrammeCodeIgnoreCase(programmeCode);
             List<ProgrammeDay> programmeGroupPersonalProgrammeDaysList = programmeGroupPersonalTimeTableDoc.getProgrammeDaysList();
 
+            ProgrammeGroupDayPeriodSetsDoc programmeGroupDayPeriodSetsDoc =
+                    programmeGroupDayPeriodSetsDocRepository.findByProgrammeCode(programmeCode);
+
+            Map<String, List<PeriodSetForProgrammeDay>> periodSetForProgrammeDayListMap = programmeGroupDayPeriodSetsDoc.getMapOfProgDayNameAndTheListOfPeriodSets();
             //go through programmeGroup personal programmeDay List
             for (ProgrammeDay programmeDay : programmeGroupPersonalProgrammeDaysList) {
                 if (!programmeDayServices.isProgrammeDayFullyAllocated(programmeDay)) {
+                    String programmeDayName = programmeDay.getDayName();
                     List<PeriodOrLecture> periodOrLectureList = programmeDay.getPeriodList();
                     List<UnallocatedPeriodSet> unallocatedPeriodSetList =
                             programmeDayServices.getListOfUnallocatedPeriodSetsInDay(programmeDay);
-                    Map<Boolean, UnallocatedPeriodSet> booleanUnallocatedPeriodSetMap =
+                    Map<Boolean, List<UnallocatedPeriodSet>> booleanUnallocatedPeriodSetMap =
                             this.isAnyOfUnallPeriodsListCapableOfGettingAssignedTheIncomingPeriodAllocValue
                                     (unallocatedPeriodSetList, periodAllocationValue1);
                     if (booleanUnallocatedPeriodSetMap.containsKey(true)) {
-                        //TODO find a way to infuse the subject breakdown allocation from the config.properties file,do this in next iteration.
+                        //TODO DONE!! COMPLETED!!! find a way to infuse the subject breakdown allocation from the config.properties file,do this in next iteration.
+                        List<PeriodSetForProgrammeDay> periodSetForProgrammeDayFromDb =
+                                periodSetForProgrammeDayListMap.get(programmeDayName);
+                        List<UnallocatedPeriodSet> actualUnallocatedPeriodList =
+                                programmeDayServices.
+                                        getUnallocatedPeriodSetFromPeriodSetForProgDay
+                                                (periodSetForProgrammeDayFromDb, programmeDay);
+
+                        ProgrammeDay tutorProgrammeDayTimeTable =
+                                programmeDayServices.
+                                        getProgrammeDayFromProgrammeDayListUsingProgrammeDayName
+                                                (programmeDayName, tutorPersonalTimeTableDocProgrammeDaysList);
+                        //TODO CONTINUE FROM HERE IN NEXT ROUND
+
                     }
                 }
             }
@@ -117,21 +137,27 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
      *
      * @param unallocatedPeriodSetsList    {@link List} of {@link UnallocatedPeriodSet}
      * @param periodToBeSetAllocationValue the value of the period to be allocated,eg,5periods or 3 periods
-     * @return {@link Map} of {@link Map<Boolean,UnallocatedPeriodSet>}
+     * @return {@link Map} of {@link Map<Boolean,List<UnallocatedPeriodSet>>}
      */
-    private Map<Boolean, UnallocatedPeriodSet> isAnyOfUnallPeriodsListCapableOfGettingAssignedTheIncomingPeriodAllocValue(
+    private Map<Boolean, List<UnallocatedPeriodSet>> isAnyOfUnallPeriodsListCapableOfGettingAssignedTheIncomingPeriodAllocValue(
             List<UnallocatedPeriodSet> unallocatedPeriodSetsList, int periodToBeSetAllocationValue) {
-        Map<Boolean, UnallocatedPeriodSet> booleanUnallocatedPeriodSetMap = new HashMap<>();
+
+        Map<Boolean, List<UnallocatedPeriodSet>> booleanUnallocatedPeriodSetMap = new HashMap<>();
+
+        List<UnallocatedPeriodSet> listOfUnallocatedPeriodsThatCanTakeIncomingPeriodAllocValue = new ArrayList<>();
         for (UnallocatedPeriodSet unallocatedPeriodSet : unallocatedPeriodSetsList) {
             int totalNumberOfPeriodsForSet = unallocatedPeriodSet.getTotalNumberOfPeriodsForSet();
             if (totalNumberOfPeriodsForSet >= periodToBeSetAllocationValue) {
-                booleanUnallocatedPeriodSetMap.put(true, unallocatedPeriodSet);
-                break;
+                listOfUnallocatedPeriodsThatCanTakeIncomingPeriodAllocValue.add(unallocatedPeriodSet);
             }
         }
-        if (booleanUnallocatedPeriodSetMap.isEmpty()) {
+
+        if (listOfUnallocatedPeriodsThatCanTakeIncomingPeriodAllocValue.isEmpty()) {
             booleanUnallocatedPeriodSetMap.put(false, null);
+        } else {
+            booleanUnallocatedPeriodSetMap.put(true, listOfUnallocatedPeriodsThatCanTakeIncomingPeriodAllocValue);
         }
+
         return booleanUnallocatedPeriodSetMap;
     }
 }

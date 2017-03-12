@@ -13,4 +13,12 @@ import org.springframework.data.mongodb.repository.MongoRepository;
  *         10-Mar-17 @ 1:43 PM
  */
 public interface ProgrammeGroupDayPeriodSetsDocRepository extends MongoRepository<ProgrammeGroupDayPeriodSetsDoc, String> {
+
+    /**
+     * find by {@link com.swiftpot.timetable.repository.db.model.ProgrammeGroupDoc#programmeCode}
+     *
+     * @param programmeCode the {@link com.swiftpot.timetable.repository.db.model.ProgrammeGroupDoc#programmeCode}
+     * @return {@link ProgrammeGroupDayPeriodSetsDoc}
+     */
+    ProgrammeGroupDayPeriodSetsDoc findByProgrammeCode(String programmeCode);
 }
