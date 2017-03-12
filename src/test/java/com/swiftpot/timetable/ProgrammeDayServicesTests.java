@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable;
 
 import com.swiftpot.timetable.model.PeriodOrLecture;
@@ -5,6 +9,7 @@ import com.swiftpot.timetable.model.ProgrammeDay;
 import com.swiftpot.timetable.services.ProgrammeDayServices;
 import com.swiftpot.timetable.services.TimeTableGeneratorService;
 import com.swiftpot.timetable.services.servicemodels.AllocatedPeriodSet;
+import com.swiftpot.timetable.services.servicemodels.PeriodSetForProgrammeDay;
 import com.swiftpot.timetable.services.servicemodels.UnallocatedPeriodSet;
 import com.swiftpot.timetable.util.PrettyJSON;
 import org.apache.logging.log4j.LogManager;
@@ -17,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -158,6 +164,79 @@ public class ProgrammeDayServicesTests {
         logger.debug("Post UnallocatedPeriodList =>{}", PrettyJSON.toListPrettyFormat(unallocatedPeriodSetList));
         //assertThat(((unallocatedPeriodSetList.size()==1) && (unallocatedPeriodSetList.get(0).getPeriodStartingNumber()==5)),equalTo(true));
         assertThat((unallocatedPeriodSetList.size() == 3), equalTo(true));
+    }
+
+    @Test
+    public void testGetUnallocatedPeriodsFromProgrammeDaySetList() {
+        List<PeriodSetForProgrammeDay> periodSetForProgrammeDayList = new ArrayList<>();
+
+        PeriodSetForProgrammeDay periodSetForProgrammeDay1 = new PeriodSetForProgrammeDay();
+        periodSetForProgrammeDay1.setPeriodStartingNumber(1);
+        periodSetForProgrammeDay1.setPeriodEndingNumber(3);
+        periodSetForProgrammeDay1.setTotalNumberOfPeriodsForSet(3);
+
+        PeriodSetForProgrammeDay periodSetForProgrammeDay2 = new PeriodSetForProgrammeDay();
+        periodSetForProgrammeDay2.setPeriodStartingNumber(4);
+        periodSetForProgrammeDay2.setPeriodEndingNumber(5);
+        periodSetForProgrammeDay2.setTotalNumberOfPeriodsForSet(2);
+
+        PeriodSetForProgrammeDay periodSetForProgrammeDay3 = new PeriodSetForProgrammeDay();
+        periodSetForProgrammeDay3.setPeriodStartingNumber(6);
+        periodSetForProgrammeDay3.setPeriodEndingNumber(8);
+        periodSetForProgrammeDay3.setTotalNumberOfPeriodsForSet(3);
+
+        PeriodSetForProgrammeDay periodSetForProgrammeDay4 = new PeriodSetForProgrammeDay();
+        periodSetForProgrammeDay4.setPeriodStartingNumber(9);
+        periodSetForProgrammeDay4.setPeriodEndingNumber(10);
+        periodSetForProgrammeDay4.setTotalNumberOfPeriodsForSet(2);
+
+        periodSetForProgrammeDayList.addAll(new ArrayList<>(Arrays.asList(periodSetForProgrammeDay1,
+                periodSetForProgrammeDay2,
+                periodSetForProgrammeDay3,
+                periodSetForProgrammeDay4)));
+
+        List<Integer> periodNumbersToMarkAsTrue = new ArrayList<>(Arrays.asList(1, 2, 3, 9, 10));
+        List<PeriodOrLecture> periodOrLectureList = new ArrayList<>();
+        for (int i = 1; i <= 10; i++) {
+            PeriodOrLecture periodOrLecture = new PeriodOrLecture("Whatever,Not needed In this context", i, "Period" + i);
+
+            if (periodNumbersToMarkAsTrue.contains(i)) {
+                periodOrLecture.setIsAllocated(true);
+            } else {
+                periodOrLecture.setIsAllocated(false);
+            }
+            periodOrLectureList.add(periodOrLecture);
+        }
+
+        ProgrammeDay programmeDay = new ProgrammeDay("Whatever,Not Really Needed In this Test!", periodOrLectureList);
+
+        List<UnallocatedPeriodSet> unallocatedPeriodSetList =
+                programmeDayServices.getUnallocatedPeriodSetFromPeriodSetForProgDay(periodSetForProgrammeDayList, programmeDay);
+        logger.debug("UnallocatedPeriodSet==>>>\n\t\t {}", PrettyJSON.toListPrettyFormat(unallocatedPeriodSetList));
+
+        UnallocatedPeriodSet unallocatedPeriodSet = new UnallocatedPeriodSet();
+        unallocatedPeriodSet.setPeriodStartingNumber(4);
+        unallocatedPeriodSet.setPeriodEndingNumber(5);
+        unallocatedPeriodSet.setTotalNumberOfPeriodsForSet(2);
+
+        UnallocatedPeriodSet unallocatedPeriodSet2 = new UnallocatedPeriodSet();
+        unallocatedPeriodSet2.setPeriodStartingNumber(6);
+        unallocatedPeriodSet2.setPeriodEndingNumber(8);
+        unallocatedPeriodSet2.setTotalNumberOfPeriodsForSet(3);
+
+        assertThat((unallocatedPeriodSetList.size() == 2) &&
+                        (unallocatedPeriodSetList.containsAll(new ArrayList<>(Arrays.asList(unallocatedPeriodSet, unallocatedPeriodSet2)))),
+                equalTo(true));
+
+        programmeDay.getPeriodList().forEach(periodOrLecture -> periodOrLecture.setIsAllocated(true));
+
+        logger.info("ProgrammeDay With all periods set to true ==>{}", PrettyJSON.toListPrettyFormat(programmeDay.getPeriodList()));
+
+        List<UnallocatedPeriodSet> unallocatedPeriodSetList2 =
+                programmeDayServices.getUnallocatedPeriodSetFromPeriodSetForProgDay(periodSetForProgrammeDayList, programmeDay);
+        logger.info("UnallocatedPeriodList2 when all periods are true,expect empty ==>{}", PrettyJSON.toListPrettyFormat(unallocatedPeriodSetList2));
+
+        assertThat(unallocatedPeriodSetList2.isEmpty(), equalTo(true));
     }
 
     private ProgrammeDay setUpProgrammeDay(ProgrammeDay programmeDay, String subjectUniqueIdInDb, String tutorUniqueIdInDb, int periodStartingNumber, int periodEndingNumber) {

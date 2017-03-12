@@ -8,6 +8,7 @@ import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.model.ProgrammeDay;
 import com.swiftpot.timetable.services.servicemodels.AllocatedPeriodSet;
 import com.swiftpot.timetable.services.servicemodels.PeriodSet;
+import com.swiftpot.timetable.services.servicemodels.PeriodSetForProgrammeDay;
 import com.swiftpot.timetable.services.servicemodels.UnallocatedPeriodSet;
 import com.swiftpot.timetable.util.PrettyJSON;
 import org.apache.logging.log4j.LogManager;
@@ -375,4 +376,44 @@ public class ProgrammeDayServices {
         return periodStartingNumber;
     }
 
+    /**
+     * get all {@link List} of {@link UnallocatedPeriodSet} from the {@link List} of {@link PeriodSetForProgrammeDay} <br>
+     * and the {@link ProgrammeDay} that holds a {@link List} of {@link PeriodOrLecture} that have some of the periods allocated and some unallocated.
+     *
+     * @param periodSetForProgrammeDayList                {@link List} of {@link PeriodSetForProgrammeDay}
+     * @param programmeDayWithSomePeriodsAlreadyAllocated the {@link ProgrammeDay} that holds a {@link List} of {@link PeriodOrLecture} that have some of the periods allocated and some unallocated.
+     * @return {@link List} of {@link UnallocatedPeriodSet} ,empty list is returned if all the periods are allocated
+     */
+    public List<UnallocatedPeriodSet> getUnallocatedPeriodSetFromPeriodSetForProgDay(List<PeriodSetForProgrammeDay> periodSetForProgrammeDayList,
+                                                                                     ProgrammeDay programmeDayWithSomePeriodsAlreadyAllocated) {
+        List<UnallocatedPeriodSet> finalUnallocatedPeriodSetList = new ArrayList<>();
+
+        for (PeriodSetForProgrammeDay periodSetForProgrammeDay : periodSetForProgrammeDayList) {
+            int totalNumberOfPeriodsForSet = periodSetForProgrammeDay.getTotalNumberOfPeriodsForSet(); //totalNumberOfPeriodsForSet
+            int periodStartingNumber = periodSetForProgrammeDay.getPeriodStartingNumber(); //periodStartingNumber
+            int periodEndingNumber = periodSetForProgrammeDay.getPeriodEndingNumber(); //periodEndingNumber
+
+
+            boolean isPeriodStartingNumberAllocated = true;
+            List<PeriodOrLecture> periodOrLectureListInProgrammeDay = programmeDayWithSomePeriodsAlreadyAllocated.getPeriodList();
+            for (PeriodOrLecture periodOrLecture : periodOrLectureListInProgrammeDay) {
+                //if the periodNumber is equivalent to the periodStartingNumber of the PeriodSetForProgrammeDay and the period is unallocated,then set to false and break out of loop.
+                if ((periodOrLecture.getPeriodNumber() == periodStartingNumber) && (!periodOrLecture.getIsAllocated())) {
+                    isPeriodStartingNumberAllocated = false;
+                    break;
+                }
+            }
+
+            if (!isPeriodStartingNumberAllocated) {
+                UnallocatedPeriodSet unallocatedPeriodSet = new UnallocatedPeriodSet();
+                unallocatedPeriodSet.setTotalNumberOfPeriodsForSet(totalNumberOfPeriodsForSet); //totalNumberOfPeriodsForSet
+                unallocatedPeriodSet.setPeriodStartingNumber(periodStartingNumber); //periodStartingNumber
+                unallocatedPeriodSet.setPeriodEndingNumber(periodEndingNumber); //periodEndingNumber
+
+                finalUnallocatedPeriodSetList.add(unallocatedPeriodSet); //finally add to finalUnallocatedPeriodSetList
+            }
+        }
+
+        return finalUnallocatedPeriodSetList;
+    }
 }
