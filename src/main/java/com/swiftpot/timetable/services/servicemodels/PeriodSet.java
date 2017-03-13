@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.services.servicemodels;
 
 /**
@@ -11,7 +15,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
- * this is a base class that will be extended by both {@link AllocatedPeriodSet} and {@link UnallocatedPeriodSet} <br>
+ * this is a base class that will be extended by both {@link AllocatedPeriodSet} and {@link UnallocatedPeriodSet} and others <br>
  * thus class will return a period set that is unallocated or allocated depending on the class extending this
  * for eg. period 3&4 may be unallocated whilst all other periods are allocated in a day.
  */

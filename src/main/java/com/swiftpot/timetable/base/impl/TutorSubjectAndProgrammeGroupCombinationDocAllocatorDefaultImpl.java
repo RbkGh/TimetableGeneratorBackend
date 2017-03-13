@@ -4,15 +4,18 @@
 
 package com.swiftpot.timetable.base.impl;
 
+import com.swiftpot.timetable.base.ProgrammeGroupPersonalTimeTableDocInitialGenerator;
+import com.swiftpot.timetable.base.TutorPersonalTimeTableInitialGenerator;
 import com.swiftpot.timetable.base.TutorSubjectAndProgrammeGroupCombinationDocAllocator;
+import com.swiftpot.timetable.base.TutorSubjectAndProgrammeGroupInitialGenerator;
 import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.model.ProgrammeDay;
-import com.swiftpot.timetable.repository.ProgrammeGroupDayPeriodSetsDocRepository;
-import com.swiftpot.timetable.repository.ProgrammeGroupPersonalTimeTableDocRepository;
-import com.swiftpot.timetable.repository.TutorPersonalTimeTableDocRepository;
-import com.swiftpot.timetable.repository.TutorSubjectAndProgrammeGroupCombinationDocRepository;
+import com.swiftpot.timetable.model.ProgrammeGroup;
+import com.swiftpot.timetable.model.YearGroup;
+import com.swiftpot.timetable.repository.*;
 import com.swiftpot.timetable.repository.db.model.*;
 import com.swiftpot.timetable.services.ProgrammeDayServices;
+import com.swiftpot.timetable.services.ProgrammeGroupPersonalTimeTableDocServices;
 import com.swiftpot.timetable.services.SubjectsAssignerService;
 import com.swiftpot.timetable.services.TutorPersonalTimeTableDocServices;
 import com.swiftpot.timetable.services.servicemodels.PeriodSetForProgrammeDay;
@@ -45,9 +48,17 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
     @Autowired
     private ProgrammeGroupPersonalTimeTableDocRepository programmeGroupPersonalTimeTableDocRepository;
     @Autowired
+    private ProgrammeGroupPersonalTimeTableDocServices programmeGroupPersonalTimeTableDocServices;
+    @Autowired
     private ProgrammeDayServices programmeDayServices;
     @Autowired
     private ProgrammeGroupDayPeriodSetsDocRepository programmeGroupDayPeriodSetsDocRepository;
+    @Autowired
+    private SubjectDocRepository subjectDocRepository;
+    @Autowired
+    private SubjectAllocationDocRepository subjectAllocationDocRepository;
+    @Autowired
+    private ProgrammeGroupDocRepository programmeGroupDocRepository;
 
     //todo remember to remove the todo in the interface implemented here that it is done once the implementation is complete
     @Override
@@ -90,7 +101,14 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
             ProgrammeGroupDayPeriodSetsDoc programmeGroupDayPeriodSetsDoc =
                     programmeGroupDayPeriodSetsDocRepository.findByProgrammeCode(programmeCode);
 
-            Map<String, List<PeriodSetForProgrammeDay>> periodSetForProgrammeDayListMap = programmeGroupDayPeriodSetsDoc.getMapOfProgDayNameAndTheListOfPeriodSets();
+            Map<String, List<PeriodSetForProgrammeDay>> periodSetForProgrammeDayListMap =
+                    programmeGroupDayPeriodSetsDoc.getMapOfProgDayNameAndTheListOfPeriodSets();
+
+
+            ProgrammeDay programmeDayToSetOnTimeTableSuperObject = new ProgrammeDay();
+
+            int periodStartingNumber = 0; //TODO TEST TO MAKE SURE THAT THIS WILL NOT REMAIN ZERO WHEN USING IT OUTSIDE THE FOR LOOP BELOW.
+            int periodEndingNumber = 0;  //TODO TEST TO MAKE SURE THAT THIS WILL NOT REMAIN ZERO WHEN USING IT OUTSIDE THE FOR LOOP BELOW.
             //go through programmeGroup personal programmeDay List
             for (ProgrammeDay programmeDay : programmeGroupPersonalProgrammeDaysList) {
                 if (!programmeDayServices.isProgrammeDayFullyAllocated(programmeDay)) {
@@ -103,8 +121,10 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
                                     (unallocatedPeriodSetList, periodAllocationValue1);
                     if (booleanUnallocatedPeriodSetMap.containsKey(true)) {
                         //TODO DONE!! COMPLETED!!! find a way to infuse the subject breakdown allocation from the config.properties file,do this in next iteration.
+                        //now we check if any of the unallocatedPeriods List can take the periods considering the personal timetable of the tutor too.
                         List<PeriodSetForProgrammeDay> periodSetForProgrammeDayFromDb =
                                 periodSetForProgrammeDayListMap.get(programmeDayName);
+
                         List<UnallocatedPeriodSet> actualUnallocatedPeriodList =
                                 programmeDayServices.
                                         getUnallocatedPeriodSetFromPeriodSetForProgDay
@@ -114,12 +134,87 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
                                 programmeDayServices.
                                         getProgrammeDayFromProgrammeDayListUsingProgrammeDayName
                                                 (programmeDayName, tutorPersonalTimeTableDocProgrammeDaysList);
-                        //TODO CONTINUE FROM HERE IN NEXT ROUND
+
+                        List<UnallocatedPeriodSet> finalUnallocatedListThatSatisfiesAllConstraints =
+                                this.getUnallocatedPeriodSetThatDoesNotConflictWithAllocatedPeriodsOnTutorPersonalTimeTable
+                                        (actualUnallocatedPeriodList, tutorProgrammeDayTimeTable);
+
+                        if (!finalUnallocatedListThatSatisfiesAllConstraints.isEmpty()) {//its not empty thus we can set it now finally
+
+                            UnallocatedPeriodSet unallocatedPeriodSetToUse = new UnallocatedPeriodSet();
+                            for (UnallocatedPeriodSet unallocatedPeriodSet : finalUnallocatedListThatSatisfiesAllConstraints) {
+                                if (unallocatedPeriodSet.getTotalNumberOfPeriodsForSet() == periodAllocationValue1) {
+                                    unallocatedPeriodSetToUse = unallocatedPeriodSet;
+                                    break;
+                                }
+                            }
+                            periodStartingNumber = unallocatedPeriodSetToUse.getPeriodStartingNumber(); //SET PERIOD STARTING NUMBER
+                            periodEndingNumber = unallocatedPeriodSetToUse.getPeriodEndingNumber(); //SET PERIOD ENDING NUMBER
+
+                            programmeDayToSetOnTimeTableSuperObject = programmeDay; //set the programmeDay to use to set the periods to on timetableSuperDoc object
+
+                            TutorPersonalTimeTableDoc finalTutorPersonalTimeTable =
+                                    tutorPersonalTimeTableDocServices.
+                                            updateTutorPersonalTimeTableDocWithPeriodsAndSaveInDb(tutorUniqueIdInDb,
+                                                    subjectUniqueIdInDb,
+                                                    programmeDayName,
+                                                    periodStartingNumber,
+                                                    periodEndingNumber);
+
+                            this.updateDbWithTotalPeriodsThatHasBeenSet
+                                    (programmeDay,
+                                            programmeCode,
+                                            subjectUniqueIdInDb,
+                                            periodAllocationValue1,
+                                            tutorUniqueIdInDb,
+                                            periodStartingNumber,
+                                            periodEndingNumber);
+                            break; //break out of iterations over programmeDays
+                        }
 
                     }
                 }
             }
 
+            String programmeDayNameToFind = programmeDayToSetOnTimeTableSuperObject.getDayName();
+
+            SubjectDoc subjectDocToUpdate = subjectDocRepository.findOne(subjectUniqueIdInDb);
+            String subjectCodeOfSubjectDoc = subjectDocToUpdate.getSubjectCode();
+
+            ProgrammeGroupDoc programmeGroupDocToUpdate = programmeGroupDocRepository.findByProgrammeCode(programmeCode);
+            int yearGroupOfProgrammeCode = programmeGroupDocToUpdate.getYearGroup();
+
+            SubjectAllocationDoc subjectAllocationDocToFindSubjectTotalAllocation =
+                    subjectAllocationDocRepository.
+                            findBySubjectCodeAndYearGroup(subjectCodeOfSubjectDoc, yearGroupOfProgrammeCode);
+
+            int subjectAllocationOfProgrammeCode = subjectAllocationDocToFindSubjectTotalAllocation.getTotalSubjectAllocation();
+
+            final int periodStartingNumberFinal = periodStartingNumber;
+            final int periodEndingNumberFinal = periodEndingNumber;
+            timeTableSuperDoc.getYearGroupsList().forEach((YearGroup yearGroup) -> {
+                if (yearGroup.getYearNumber() == yearGroupOfProgrammeCode) {
+                    yearGroup.getProgrammeGroupList().forEach((ProgrammeGroup programmeGroup) -> {
+                        if (programmeGroup.getProgrammeCode().equalsIgnoreCase(programmeCode)) {
+                            programmeGroup.getProgrammeDaysList().forEach((ProgrammeDay programmeDay) -> {
+                                if (programmeDay.getDayName().equalsIgnoreCase(programmeDayNameToFind)) {
+                                    programmeDay.getPeriodList().forEach((PeriodOrLecture periodOrLecture) -> {
+                                        if ((periodOrLecture.getPeriodNumber() >= periodStartingNumberFinal) &&
+                                                (periodOrLecture.getPeriodNumber() <= periodEndingNumberFinal)) {
+                                            periodOrLecture.setTutorUniqueId(tutorUniqueIdInDb); //set tutor unique id in db
+                                            periodOrLecture.setSubjectUniqueIdInDb(subjectUniqueIdInDb); //set subjectUniqueIdInDb
+                                            periodOrLecture.setIsAllocated(true);//set allocated to true.
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
+
+            return timeTableSuperDoc;//TODO CONTINUE HERE NOW IN NEXT ITERATION.
         } else if (listOfPeriodAllocationSize == 2) {
             int periodAllocationValue2 = listOfPeriodAllocation.get(1);
         } else if (listOfPeriodAllocationSize == 3) {
@@ -159,5 +254,88 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
         }
 
         return booleanUnallocatedPeriodSetMap;
+    }
+
+    /**
+     * get all {@link List} of {@link UnallocatedPeriodSet} that satisfy all the constraints on the tutor's personal timetable ie. {@link TutorPersonalTimeTableDoc}
+     *
+     * @param unallocatedPeriodSetsInProgrammeGroupDay the {@link ProgrammeDay}'s {@link List} of {@link UnallocatedPeriodSet} in programmeGroup,ie {@link com.swiftpot.timetable.model.ProgrammeGroup},
+     * @param tutorPersonalTimeTableOnDay
+     * @return {@link List} of {@link UnallocatedPeriodSet},returns empty list if none is found.
+     */
+    public List<UnallocatedPeriodSet> getUnallocatedPeriodSetThatDoesNotConflictWithAllocatedPeriodsOnTutorPersonalTimeTable
+    (List<UnallocatedPeriodSet> unallocatedPeriodSetsInProgrammeGroupDay, ProgrammeDay tutorPersonalTimeTableOnDay) {
+        List<UnallocatedPeriodSet> finalUnallocatedListConsideringTutorTimeTableConstraints = new ArrayList<>();
+
+        for (UnallocatedPeriodSet unallocatedPeriodSetInProgDayTimeTable : unallocatedPeriodSetsInProgrammeGroupDay) {
+            int periodStartingNumber = unallocatedPeriodSetInProgDayTimeTable.getPeriodStartingNumber();
+            int periodEndingNumber = unallocatedPeriodSetInProgDayTimeTable.getPeriodEndingNumber();
+            int totalNumberOfPeriodsForSet = unallocatedPeriodSetInProgDayTimeTable.getTotalNumberOfPeriodsForSet();
+
+            int noOfPeriodsGreaterThanOrEqualToPeriodStartingNoAndLesserThanOrEqualToPeriodEndingNumber = 0;
+            for (PeriodOrLecture periodOrLectureInTutorPersonalTimeTableOnDay : tutorPersonalTimeTableOnDay.getPeriodList()) {
+                int currentPeriodNumber = periodOrLectureInTutorPersonalTimeTableOnDay.getPeriodNumber();
+
+                if ((currentPeriodNumber >= periodStartingNumber) && (currentPeriodNumber <= periodEndingNumber) &&
+                        (!periodOrLectureInTutorPersonalTimeTableOnDay.getIsAllocated())) {
+                    noOfPeriodsGreaterThanOrEqualToPeriodStartingNoAndLesserThanOrEqualToPeriodEndingNumber += 1; //add 1
+                }
+            }
+
+            if (noOfPeriodsGreaterThanOrEqualToPeriodStartingNoAndLesserThanOrEqualToPeriodEndingNumber == totalNumberOfPeriodsForSet) {
+                finalUnallocatedListConsideringTutorTimeTableConstraints.add(unallocatedPeriodSetInProgDayTimeTable);//we can to final list as condition is ok.
+            }
+        }
+
+        return finalUnallocatedListConsideringTutorTimeTableConstraints;
+    }
+
+    /**
+     * TODO DONE!!!!! Remember to initialize the {@link TutorSubjectAndProgrammeGroupCombinationDoc} <br> immediately during first initialization so that we can search for it and retrieve and set periods left for a tutor's subject and programmeGroup {@link TutorPersonalTimeTableInitialGenerator#generatePersonalTimeTableForAllTutorsInDbAndSaveIntoDb()} handles that <br><br>
+     * TODO DONE!!!!! Remember to initialize the {@link com.swiftpot.timetable.repository.db.model.ProgrammeGroupPersonalTimeTableDoc} <br> immediately during first initialization so that we can search for it and update the timetable of each programmeGroup upon every write on {@link TimeTableSuperDoc}<br>{@link ProgrammeGroupPersonalTimeTableDocInitialGenerator#generateAllProgrammeGroupPersonalTimetableDocForAllProgrammeGroupDocsInDbAndSaveInDb()} handles that. <br><br>
+     * TODO DONE!!!!! Remember to initialize the {@link com.swiftpot.timetable.repository.db.model.TutorSubjectAndProgrammeGroupCombinationDoc} <br> immediately during first initialization so that we can search for it and update the {@link TutorSubjectAndProgrammeGroupCombinationDoc#totalPeriodLeftToBeAllocated} for that tutor for that subject upon every write on {@link TimeTableSuperDoc} object <br> {@link TutorSubjectAndProgrammeGroupInitialGenerator#generateAllInitialSubjectAndProgrammeGroupCombinationDocsForAllTutorsInDB()} handles that <br><br>
+     * TODO RETURN SOMETHING FROM THIS METHOD,AS I DON'T REALLY TRUST MONGODB'S WRITE CONCERN FULLY YET.
+     * <br><b>THE LOAD OF PARAMETERS ON THIS METHOD IS ABSURD,VERY STUPID,BUT IT HAPPENED BY ACCIDENT,SO ENJOY UNTIL THIS SIDE GETS REFACTORED =D :P</b> <br><br>
+     *
+     * @param programmeCode
+     * @param subjectUniqueIdInDb
+     * @param totalPeriodsThatHasBeenSet
+     * @param tutorIdResponsibleForSubject
+     * @param startingPeriod
+     * @param stoppingPeriod
+     */
+    void updateDbWithTotalPeriodsThatHasBeenSet(ProgrammeDay programmeDay,
+                                                String programmeCode,
+                                                String subjectUniqueIdInDb,
+                                                int totalPeriodsThatHasBeenSet,
+                                                String tutorIdResponsibleForSubject,
+                                                int startingPeriod,
+                                                int stoppingPeriod) {
+        String programmeDayName = programmeDay.getDayName();
+
+        //now we decrement the value of the totalSubjectsPeriodLeft in db by the totalPeriodsThatHasBeenSet
+        TutorSubjectAndProgrammeGroupCombinationDoc tutorSubjectAndProgrammeGroupCombinationDoc =
+                tutorSubjectAndProgrammeGroupCombinationDocRepository.
+                        findBySubjectUniqueIdAndProgrammeCode
+                                (subjectUniqueIdInDb, programmeCode);
+
+        int currentTotalPeriodsLeft = tutorSubjectAndProgrammeGroupCombinationDoc.getTotalPeriodLeftToBeAllocated();
+        int periodLoadLeft = currentTotalPeriodsLeft - totalPeriodsThatHasBeenSet;
+        tutorSubjectAndProgrammeGroupCombinationDoc.setTotalPeriodLeftToBeAllocated(periodLoadLeft);
+
+        tutorSubjectAndProgrammeGroupCombinationDocRepository.save(tutorSubjectAndProgrammeGroupCombinationDoc);
+
+        ProgrammeGroupPersonalTimeTableDoc programmeGroupPersonalTimeTableDoc =
+                programmeGroupPersonalTimeTableDocServices.
+                        updateProgrammeGroupPersonalTimeTableDocWithPeriodsAndSaveInDb
+                                (tutorIdResponsibleForSubject, programmeCode, subjectUniqueIdInDb, programmeDayName, startingPeriod, stoppingPeriod);
+
+
+        //now we have to update the tutorDoc's personal timetable too..
+        TutorPersonalTimeTableDoc tutorPersonalTimeTableDoc =
+                tutorPersonalTimeTableDocServices.
+                        updateTutorPersonalTimeTableDocWithPeriodsAndSaveInDb
+                                (tutorIdResponsibleForSubject, subjectUniqueIdInDb, programmeDayName, startingPeriod, stoppingPeriod);
+
     }
 }

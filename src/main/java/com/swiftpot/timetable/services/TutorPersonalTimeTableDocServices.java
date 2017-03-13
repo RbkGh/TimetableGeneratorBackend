@@ -36,7 +36,7 @@ public class TutorPersonalTimeTableDocServices {
      * @param programmeDayName                  the programme day name to set ie. {@link com.swiftpot.timetable.model.ProgrammeDay#dayName} .eg Monday could have "Monday" as the programme day name
      * @param periodNumberToStartSettingSubject the index to start setting the periods from ie. {@link com.swiftpot.timetable.model.PeriodOrLecture#periodNumber} eg. period 3,
      * @param periodNumberToStopSettingSubject  the period number to stop setting the periods ie {@link com.swiftpot.timetable.model.PeriodOrLecture#periodNumber} eg. period 3,
-     * @return TutorPersonalTimeTableDoc
+     * @return {@link TutorPersonalTimeTableDoc}
      */
     public synchronized TutorPersonalTimeTableDoc updateTutorPersonalTimeTableDocWithPeriodsAndSaveInDb(String tutorUniqueIdInDb,
                                                                                                         String subjectUniqueIdInDb,
@@ -88,7 +88,6 @@ public class TutorPersonalTimeTableDocServices {
         tutorPersonalTimeTableDoc.getProgrammeDaysList().set(indexLocationOfProgrammeDayName, programmeDayWithEverythingSet);
         return tutorPersonalTimeTableDoc;
     }
-
 
 
 }
