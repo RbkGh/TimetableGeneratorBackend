@@ -23,7 +23,7 @@ public class RandomNumberGeneratorTest {
         };
 
         int min = 1;
-        int max = 4;
+        int max = 3;
         for (int i = 0; i < 100; i++) {
             int genNumber = randomNumberGenerator.generateRandomNumber(min, max);
             System.out.println("Generated number = " + genNumber + "\n");

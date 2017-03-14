@@ -25,14 +25,16 @@ public interface TutorSubjectAndProgrammeGroupCombinationDocAllocator {
      * allocate the {@link TutorDoc#id} and the <br>
      * {@link SubjectDoc#id} onto the timetable object for tutor,programmeCode and any other entities involved.
      *
-     * @param tutorUniqueIdInDb                           The {@link TutorDoc#id} of the {@link TutorDoc} object
-     * @param tutorSubjectAndProgrammeGroupCombinationDoc the {@link TutorSubjectAndProgrammeGroupCombinationDoc} object
-     * @param timeTableSuperDoc                           the {@link TimeTableSuperDoc}  With At Least Default Periods Set Already ,at least the timetable object must have passed through <br>
+     * @param tutorUniqueIdInDb                           The {@link TutorDoc#id} of the {@link TutorDoc} object <br><br>
+     * @param totalSubjectAllocationInDb                  The {@link SubjectDoc}'s totalSubjectAllocation,ie. the {@link com.swiftpot.timetable.repository.db.model.SubjectAllocationDoc#totalSubjectAllocation} of the subject<br><br>
+     * @param tutorSubjectAndProgrammeGroupCombinationDoc the {@link TutorSubjectAndProgrammeGroupCombinationDoc} object <br><br>
+     * @param timeTableSuperDoc                           the {@link TimeTableSuperDoc}  With At Least Default Periods Set Already ,at least the timetable object must have passed through <br><br>
      *                                                    {@link TimeTableDefaultPeriodsAllocator#allocateDefaultPeriodsOnTimeTable(TimeTableSuperDoc)} already
      * @return {@link TimeTableSuperDoc} with updated values if there was any need for any update
      */
     TimeTableSuperDoc allocateTutorSubjectAndProgrammeGroupCombinationCompletely
     (String tutorUniqueIdInDb,
+     int totalSubjectAllocationInDb,
      TutorSubjectAndProgrammeGroupCombinationDoc tutorSubjectAndProgrammeGroupCombinationDoc,
      TimeTableSuperDoc timeTableSuperDoc);
 }
