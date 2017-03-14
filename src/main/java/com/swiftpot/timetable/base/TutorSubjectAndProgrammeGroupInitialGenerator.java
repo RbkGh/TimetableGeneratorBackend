@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.base;
 
 /**
@@ -18,5 +22,5 @@ public interface TutorSubjectAndProgrammeGroupInitialGenerator {
      * for every {@link com.swiftpot.timetable.repository.db.model.TutorDoc} in DB.<br>
      * <b>THIS SHOULD BE GENERATED AT THE BEGINNING OF GENERATION OF A TIMETABLE</b>
      */
-    void generateAllInitialSubjectAndProgrammeGroupCombinationDocsForAllTutorsInDB();
+    void generateAllInitialSubjectAndProgrammeGroupCombinationDocsForAllTutorsInDBAndSaveInDb();
 }

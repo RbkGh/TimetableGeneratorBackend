@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.base.impl;
 
 import com.swiftpot.timetable.base.TutorSubjectAndProgrammeGroupInitialGenerator;
@@ -30,7 +34,7 @@ public class TutorSubjectAndProgrammeGroupInitialGeneratorDefaultImpl implements
     TutorSubjectAndProgrammeGroupCombinationDocRepository tutorSubjectAndProgrammeGroupCombinationDocRepository;
 
     @Override
-    public void generateAllInitialSubjectAndProgrammeGroupCombinationDocsForAllTutorsInDB() {
+    public void generateAllInitialSubjectAndProgrammeGroupCombinationDocsForAllTutorsInDBAndSaveInDb() {
         List<TutorDoc> allTutorDocsInDb = tutorDocRepository.findAll();
         List<TutorSubjectAndProgrammeGroupCombinationDoc> tutorSubjectAndProgrammeGroupCombinationDocsList =
                 this.getAllInitialSubjectAndProgrammeGroupCombinationDocsGenerated(allTutorDocsInDb);
