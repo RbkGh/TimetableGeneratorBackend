@@ -4,6 +4,7 @@
 
 package com.swiftpot.timetable.base.impl;
 
+import com.google.gson.Gson;
 import com.swiftpot.timetable.base.ProgrammeGroupPersonalTimeTableDocInitialGenerator;
 import com.swiftpot.timetable.base.TutorPersonalTimeTableInitialGenerator;
 import com.swiftpot.timetable.base.TutorSubjectAndProgrammeGroupCombinationDocAllocator;
@@ -23,10 +24,7 @@ import com.swiftpot.timetable.services.servicemodels.UnallocatedPeriodSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Ace Programmer Rbk
@@ -113,7 +111,6 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
             for (ProgrammeDay programmeDay : programmeGroupPersonalProgrammeDaysList) {
                 if (!programmeDayServices.isProgrammeDayFullyAllocated(programmeDay)) {
                     String programmeDayName = programmeDay.getDayName();
-                    List<PeriodOrLecture> periodOrLectureList = programmeDay.getPeriodList();
                     List<UnallocatedPeriodSet> unallocatedPeriodSetList =
                             programmeDayServices.getListOfUnallocatedPeriodSetsInDay(programmeDay);
                     Map<Boolean, List<UnallocatedPeriodSet>> booleanUnallocatedPeriodSetMap =
@@ -178,21 +175,15 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
 
             String programmeDayNameToFind = programmeDayToSetOnTimeTableSuperObject.getDayName();
 
-            SubjectDoc subjectDocToUpdate = subjectDocRepository.findOne(subjectUniqueIdInDb);
-            String subjectCodeOfSubjectDoc = subjectDocToUpdate.getSubjectCode();
-
             ProgrammeGroupDoc programmeGroupDocToUpdate = programmeGroupDocRepository.findByProgrammeCode(programmeCode);
             int yearGroupOfProgrammeCode = programmeGroupDocToUpdate.getYearGroup();
 
-            SubjectAllocationDoc subjectAllocationDocToFindSubjectTotalAllocation =
-                    subjectAllocationDocRepository.
-                            findBySubjectCodeAndYearGroup(subjectCodeOfSubjectDoc, yearGroupOfProgrammeCode);
-
-            int subjectAllocationOfProgrammeCode = subjectAllocationDocToFindSubjectTotalAllocation.getTotalSubjectAllocation();
+            String timeTableSuperDocString = new Gson().toJson(timeTableSuperDoc);
+            TimeTableSuperDoc timeTableSuperDocGeneratedFromString = new Gson().fromJson(timeTableSuperDocString, TimeTableSuperDoc.class); //CONVERT BACK TO OBJECT FROM JSON TO PREVENT PROBLEMS OF WRONG WRITES IN UNSOLICITED PLACES
 
             final int periodStartingNumberFinal = periodStartingNumber;
             final int periodEndingNumberFinal = periodEndingNumber;
-            timeTableSuperDoc.getYearGroupsList().forEach((YearGroup yearGroup) -> {
+            timeTableSuperDocGeneratedFromString.getYearGroupsList().forEach((YearGroup yearGroup) -> {
                 if (yearGroup.getYearNumber() == yearGroupOfProgrammeCode) {
                     yearGroup.getProgrammeGroupList().forEach((ProgrammeGroup programmeGroup) -> {
                         if (programmeGroup.getProgrammeCode().equalsIgnoreCase(programmeCode)) {
@@ -214,7 +205,7 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
             });
 
 
-            return timeTableSuperDoc;//TODO CONTINUE HERE NOW IN NEXT ITERATION.
+            return timeTableSuperDocGeneratedFromString;//TODO CONTINUE HERE NOW IN NEXT ITERATION.
         } else if (listOfPeriodAllocationSize == 2) {
             int periodAllocationValue2 = listOfPeriodAllocation.get(1);
         } else if (listOfPeriodAllocationSize == 3) {
@@ -225,6 +216,31 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
 
 
         return null;
+    }
+
+    /**
+     * is subjectUniqueIdInDb passed in present in day at least 5 or 6 times in the lecture periods?
+     *
+     * @param subjectUniqueIdInDb the {@link SubjectDoc#id}
+     * @param programmeDay        the {@link ProgrammeDay} to search its {@link List} of {@link PeriodOrLecture}
+     * @return {@link Boolean#TRUE} IF subjectUniqueIdInDb passed in present day IS at least 5 or 6 times in the lecture periods.{@link Boolean#FALSE} if otherwise
+     */
+    public boolean isSubjectAllocatedEqualToFiveTimesOrEqualToSixTimesInProgrammeDay(String subjectUniqueIdInDb, ProgrammeDay programmeDay) {
+        boolean isSubjectAllocatedEqualToFiveTimesOrEqualToSixTimesInProgrammeDay = false;
+        int numberOfTimesSubjectUniqueIdInDbIsFoundInListOfPeriodsForDay = 0;
+
+        for (PeriodOrLecture periodOrLecture : programmeDay.getPeriodList()) {
+            if (periodOrLecture.getIsAllocated() && (Objects.equals(subjectUniqueIdInDb, periodOrLecture.getSubjectUniqueIdInDb()))) {
+                numberOfTimesSubjectUniqueIdInDbIsFoundInListOfPeriodsForDay += 1;
+            }
+        }
+
+        if ((numberOfTimesSubjectUniqueIdInDbIsFoundInListOfPeriodsForDay == 5) ||
+                ((numberOfTimesSubjectUniqueIdInDbIsFoundInListOfPeriodsForDay == 6))
+                ) {
+            isSubjectAllocatedEqualToFiveTimesOrEqualToSixTimesInProgrammeDay = true;
+        }
+        return isSubjectAllocatedEqualToFiveTimesOrEqualToSixTimesInProgrammeDay;
     }
 
     /**

@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 
@@ -116,5 +118,81 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorTests {
         logger.info("finalUnallocatedPeriodSets==> expect empty list {}", PrettyJSON.toListPrettyFormat(finalUnallocatedPeriodSets));
 
         assertThat(finalUnallocatedPeriodSets.size(), equalTo(0));
+    }
+
+
+    @Test
+    public void isSubjectAllocatedEqualToFiveTimesOrEqualToSixTimesInProgrammeDay() {
+
+        List<PeriodOrLecture> periodOrLecturesForDay3 = new ArrayList<>();
+        List<Integer> periodNumbersToSetToTrue = new ArrayList<>(Arrays.asList(2, 3, 4, 5, 8));
+        String subjectDummy = "SubjectDUMMY";
+        for (int i = 1; i <= 10; i++) {
+            PeriodOrLecture periodOrLecture = new PeriodOrLecture();
+            periodOrLecture.setPeriodNumber(i);
+            if (periodNumbersToSetToTrue.contains(i)) {
+                periodOrLecture.setIsAllocated(true);
+                periodOrLecture.setSubjectUniqueIdInDb(subjectDummy);
+            }
+            periodOrLecturesForDay3.add(periodOrLecture);
+        }
+
+        programmeDay.setPeriodList(periodOrLecturesForDay3);
+
+        logger.info("ProgrammeDay Before anything ==>{}", PrettyJSON.toPrettyFormat(new Gson().toJson(programmeDay)));
+
+        boolean resultOfComputation = tutorSubjectAndProgrammeGroupCombinationDocAllocator.
+                isSubjectAllocatedEqualToFiveTimesOrEqualToSixTimesInProgrammeDay(subjectDummy, programmeDay);
+        System.out.println("isSubjectAllocatedEqualToFiveTimesOrEqualToSixTimesInProgrammeDay ===>" + resultOfComputation);
+
+        assertTrue(resultOfComputation);
+
+        programmeDay.getPeriodList().get(9).setIsAllocated(true);
+        programmeDay.getPeriodList().get(9).setSubjectUniqueIdInDb(subjectDummy);
+
+        boolean resultOfComputation2 = tutorSubjectAndProgrammeGroupCombinationDocAllocator.
+                isSubjectAllocatedEqualToFiveTimesOrEqualToSixTimesInProgrammeDay(subjectDummy, programmeDay);
+        System.out.println("isSubjectAllocatedEqualToFiveTimesOrEqualToSixTimesInProgrammeDay ===>when true is six times,expect true again " + resultOfComputation2);
+
+        assertTrue(resultOfComputation2);
+
+        periodOrLecturesForDay3 = new ArrayList<>();
+        for (int i = 1; i <= 10; i++) {
+            PeriodOrLecture periodOrLecture = new PeriodOrLecture();
+            periodOrLecture.setPeriodNumber(i);
+            if (periodNumbersToSetToTrue.contains(i)) {
+                periodOrLecture.setIsAllocated(false);
+            }
+            periodOrLecturesForDay3.add(periodOrLecture);
+        }
+
+        programmeDay.setPeriodList(periodOrLecturesForDay3);
+
+        boolean resultOfComputation3 = tutorSubjectAndProgrammeGroupCombinationDocAllocator.
+                isSubjectAllocatedEqualToFiveTimesOrEqualToSixTimesInProgrammeDay(subjectDummy, programmeDay);
+        System.out.println("isSubjectAllocatedEqualToFiveTimesOrEqualToSixTimesInProgrammeDay ===>when false all day,expect false here ==>" + resultOfComputation3);
+
+        assertFalse(resultOfComputation3);
+
+        List<Integer> periodNumbersToSetToTrue2 = new ArrayList<>(Arrays.asList(2, 3, 4));
+        periodOrLecturesForDay3 = new ArrayList<>();
+        for (int i = 1; i <= 10; i++) {
+            PeriodOrLecture periodOrLecture = new PeriodOrLecture();
+            periodOrLecture.setPeriodNumber(i);
+            if (periodNumbersToSetToTrue2.contains(i)) {
+                periodOrLecture.setIsAllocated(true);
+                periodOrLecture.setSubjectUniqueIdInDb(subjectDummy);
+            }
+            periodOrLecturesForDay3.add(periodOrLecture);
+        }
+
+        programmeDay.setPeriodList(periodOrLecturesForDay3);
+
+        boolean resultOfComputation4 = tutorSubjectAndProgrammeGroupCombinationDocAllocator.
+                isSubjectAllocatedEqualToFiveTimesOrEqualToSixTimesInProgrammeDay(subjectDummy, programmeDay);
+        System.out.println("isSubjectAllocatedEqualToFiveTimesOrEqualToSixTimesInProgrammeDay ===>when number of times subject is seen is less than 5 and 6 ==>" + resultOfComputation4);
+
+        assertFalse(resultOfComputation4);
+
     }
 }
