@@ -8,6 +8,7 @@ import com.swiftpot.timetable.command.TimetableGenerationCommand;
 import com.swiftpot.timetable.factory.TimeTableDefaultPeriodsAllocatorFactory;
 import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
 import com.swiftpot.timetable.services.TimeTablePopulatorService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -21,11 +22,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class AllocateDefaultPeriodsForAllProgrammeGroupsCommand implements TimetableGenerationCommand {
 
+    @Autowired
     private TimeTablePopulatorService timeTablePopulatorService;
-
-    public AllocateDefaultPeriodsForAllProgrammeGroupsCommand(TimeTablePopulatorService timeTablePopulatorService) {
-        this.timeTablePopulatorService = timeTablePopulatorService;
-    }
 
     @Override
     public TimeTableSuperDoc executeTimeTableGenerationOperation(TimeTableSuperDoc timeTableSuperDoc) throws Exception {

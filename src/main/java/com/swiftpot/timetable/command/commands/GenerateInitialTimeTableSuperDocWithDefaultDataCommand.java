@@ -7,6 +7,7 @@ package com.swiftpot.timetable.command.commands;
 import com.swiftpot.timetable.command.TimetableGenerationCommand;
 import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
 import com.swiftpot.timetable.services.TimeTablePopulatorService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -20,11 +21,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class GenerateInitialTimeTableSuperDocWithDefaultDataCommand implements TimetableGenerationCommand {
 
+    @Autowired
     private TimeTablePopulatorService timeTablePopulatorService;
-
-    public GenerateInitialTimeTableSuperDocWithDefaultDataCommand(TimeTablePopulatorService timeTablePopulatorService) {
-        this.timeTablePopulatorService = timeTablePopulatorService;
-    }
 
     @Override
     public TimeTableSuperDoc executeTimeTableGenerationOperation(TimeTableSuperDoc timeTableSuperDoc) throws Exception {
