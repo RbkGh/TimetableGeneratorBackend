@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable;
 
 import com.google.gson.Gson;
@@ -107,8 +111,7 @@ public class TimeTableGenerationWithMockitoTests {
         Mockito.when(programmeGroupDocRepository.findByYearGroup(3)).thenReturn(Arrays.asList(programmeGroupDoc3));
 
 
-
-        timeTableSuperDoc = timeTablePopulatorService.partOneSetYearGroups();
+        timeTableSuperDoc = timeTablePopulatorService.partOneGenerateInitialTimeTableSuperDocWithInitialData();
     }
 
     @Test

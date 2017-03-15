@@ -1,11 +1,18 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.services;
 
+import com.google.gson.Gson;
+import com.swiftpot.timetable.base.TutorSubjectAndProgrammeGroupCombinationDocAllocator;
+import com.swiftpot.timetable.base.impl.TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl;
 import com.swiftpot.timetable.factory.TimeTableDefaultPeriodsAllocatorFactory;
 import com.swiftpot.timetable.model.ProgrammeGroup;
+import com.swiftpot.timetable.model.TutorSubjectIdAndProgrammeCodesListObj;
 import com.swiftpot.timetable.model.YearGroup;
-import com.swiftpot.timetable.repository.ProgrammeGroupDocRepository;
-import com.swiftpot.timetable.repository.db.model.ProgrammeGroupDoc;
-import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
+import com.swiftpot.timetable.repository.*;
+import com.swiftpot.timetable.repository.db.model.*;
 import com.swiftpot.timetable.util.YearGroupNumberAndNames;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,14 +29,33 @@ import java.util.List;
 public class TimeTablePopulatorService {
 
     @Autowired
-    ProgrammeGroupDocRepository programmeGroupDocRepository;
+    private ProgrammeGroupDocRepository programmeGroupDocRepository;
     @Autowired
-    ProgrammeDaysGenerator programmeDaysGenerator;
+    private ProgrammeDaysGenerator programmeDaysGenerator;
     @Autowired
-    TimeTableDefaultPeriodsAllocatorFactory timeTableDefaultPeriodsAllocatorFactory;
+    private TimeTableDefaultPeriodsAllocatorFactory timeTableDefaultPeriodsAllocatorFactory;
+    @Autowired
+    private TutorDocRepository tutorDocRepository;
+    @Autowired
+    private TutorSubjectAndProgrammeGroupCombinationDocAllocator tutorSubjectAndProgrammeGroupCombinationDocAllocator;
+    @Autowired
+    private TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl tutorSubjectAndProgrammeGroupCombinationDocAllocatorDefault;
+    @Autowired
+    private SubjectAllocationDocRepository subjectAllocationDocRepository;
+    @Autowired
+    private SubjectDocRepository subjectDocRepository;
+    @Autowired
+    private TutorSubjectAndProgrammeGroupCombinationDocRepository tutorSubjectAndProgrammeGroupCombinationDocRepository;
 
-    public TimeTableSuperDoc partOneSetYearGroups() throws Exception {
-        List<ProgrammeGroupDoc> allProgrammeGroupDocsListInDb = getAllProgrammeGroupDocsListInDb();
+
+    /**
+     * generate an initial {@link TimeTableSuperDoc} with default data,ie {@link YearGroup},{@link ProgrammeGroup},{@link com.swiftpot.timetable.model.ProgrammeDay}s and other initial data
+     *
+     * @return {@link TimeTableSuperDoc} with default initial data set.
+     * @throws Exception
+     */
+    public TimeTableSuperDoc partOneGenerateInitialTimeTableSuperDocWithInitialData() throws Exception {
+        List<ProgrammeGroupDoc> allProgrammeGroupDocsListInDb = this.getAllProgrammeGroupDocsListInDb();
 
         TimeTableSuperDoc timeTableSuperDoc = new TimeTableSuperDoc();
         //set yearGroupList
@@ -70,9 +96,87 @@ public class TimeTablePopulatorService {
         return timeTableSuperDoc;
     }
 
+    /**
+     * allocate default periods for all programmeDays on timetableSuperDoc object
+     *
+     * @param timeTableDefaultPeriodsAllocatorType       the type of allocator to pass in . eg pass in {@link TimeTableDefaultPeriodsAllocatorFactory#DEFAULT_IMPLEMENTATION} for the default implementation.
+     * @param timeTableSuperDocWithInitialDefaultDataSet the {@link TimeTableSuperDoc} that has passed through {@link TimeTablePopulatorService#partOneGenerateInitialTimeTableSuperDocWithInitialData()} already for default data to be set already.
+     * @return {@link TimeTableSuperDoc}
+     * @throws Exception
+     */
     public TimeTableSuperDoc partTwoAllocateDefaultPeriods(String timeTableDefaultPeriodsAllocatorType, TimeTableSuperDoc timeTableSuperDocWithInitialDefaultDataSet) throws Exception {
         return timeTableDefaultPeriodsAllocatorFactory.getTimeTableDefaultPeriodsAllocator(timeTableDefaultPeriodsAllocatorType).
                 allocateDefaultPeriodsOnTimeTable(timeTableSuperDocWithInitialDefaultDataSet);
+    }
+
+    /**
+     * the final stage of generation of {@link TimeTableSuperDoc} ,this will generate and allocate all periods for {@link TutorDoc} ie all {@link TutorDoc#tutorSubjectsAndProgrammeCodesList}
+     *
+     * @param timeTableSuperDocWithDefaultPeriodsSetAlready the {@link TimeTableSuperDoc} with default periods set already.
+     * @return final fully generated {@link TimeTableSuperDoc}
+     */
+    public TimeTableSuperDoc partThreeAllocatePeriodsForEachTutor(TimeTableSuperDoc timeTableSuperDocWithDefaultPeriodsSetAlready) {
+        tutorSubjectAndProgrammeGroupCombinationDocAllocator = tutorSubjectAndProgrammeGroupCombinationDocAllocatorDefault;
+
+        String timeTableSuperDocString = new Gson().toJson(timeTableSuperDocWithDefaultPeriodsSetAlready);
+        TimeTableSuperDoc timeTableSuperDocGeneratedFromString = new Gson().fromJson(timeTableSuperDocString, TimeTableSuperDoc.class);
+
+        List<TutorDoc> tutorDocsInDb =
+                tutorDocRepository.findAll();
+        for (TutorDoc tutorDoc : tutorDocsInDb) {
+            List<TutorSubjectIdAndProgrammeCodesListObj> tutorSubjectIdAndProgrammeCodesListObjs =
+                    tutorDoc.getTutorSubjectsAndProgrammeCodesList();
+
+            for (TutorSubjectIdAndProgrammeCodesListObj tutorSubjectIdAndProgrammeCodesListObj : tutorSubjectIdAndProgrammeCodesListObjs) {
+                String tutorUniqueIdInDb = tutorDoc.getId();
+                String subjectUniqueIdInDb = tutorSubjectIdAndProgrammeCodesListObj.getTutorSubjectId();
+                List<String> tutorProgrammeCodeList =
+                        tutorSubjectIdAndProgrammeCodesListObj.getTutorProgrammeCodesList();
+
+
+                for (String programmeCode : tutorProgrammeCodeList) {
+                    int totalSubjectAllocationForSubjectInDb =
+                            this.getTotalSubjectAllocationForSubject(subjectUniqueIdInDb, programmeCode);
+
+                    TutorSubjectAndProgrammeGroupCombinationDoc tutorSubjectAndProgrammeGroupCombinationDoc =
+                            tutorSubjectAndProgrammeGroupCombinationDocRepository.
+                                    findBySubjectUniqueIdAndProgrammeCode(subjectUniqueIdInDb, programmeCode);
+
+
+                    timeTableSuperDocGeneratedFromString = tutorSubjectAndProgrammeGroupCombinationDocAllocator.
+                            allocateTutorSubjectAndProgrammeGroupCombinationCompletely
+                                    (tutorUniqueIdInDb,
+                                            totalSubjectAllocationForSubjectInDb,
+                                            tutorSubjectAndProgrammeGroupCombinationDoc,
+                                            timeTableSuperDocGeneratedFromString);
+                }
+
+            }
+        }
+
+        return timeTableSuperDocGeneratedFromString;
+    }
+
+    /**
+     * get the total subject allocation of a subject based on the {@link SubjectDoc#id} passed in and the {@link ProgrammeGroupDoc#programmeCode}
+     *
+     * @param subjectUniqueIdInDb the {@link SubjectDoc#id}
+     * @param programmeCode       the {@link ProgrammeGroupDoc#programmeCode}
+     * @return {@link Integer}
+     */
+    private synchronized int getTotalSubjectAllocationForSubject(String subjectUniqueIdInDb, String programmeCode) {
+        SubjectDoc subjectDoc =
+                subjectDocRepository.findOne(subjectUniqueIdInDb);
+        String subjectCode = subjectDoc.getSubjectCode();
+
+        ProgrammeGroupDoc programmeGroupDoc =
+                programmeGroupDocRepository.findByProgrammeCode(programmeCode);
+        int yearGroupOfProgrammeGroup = programmeGroupDoc.getYearGroup();
+
+        SubjectAllocationDoc subjectAllocationDoc =
+                subjectAllocationDocRepository.
+                        findBySubjectCodeAndYearGroup(subjectCode, yearGroupOfProgrammeGroup);
+        return subjectAllocationDoc.getTotalSubjectAllocation();
     }
 
     private List<ProgrammeGroupDoc> getAllProgrammeGroupDocsListInDb() {

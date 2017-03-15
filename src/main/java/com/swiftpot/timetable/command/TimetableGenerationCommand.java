@@ -4,6 +4,7 @@
 
 package com.swiftpot.timetable.command;
 
+import com.sun.istack.internal.Nullable;
 import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
 import org.springframework.stereotype.Component;
 
@@ -17,8 +18,8 @@ public interface TimetableGenerationCommand {
     /**
      * generate {@link TimeTableSuperDoc} object from database.
      *
-     * @param timeTableSuperDoc The {@link TimeTableSuperDoc} object to operate on.
+     * @param timeTableSuperDoc The {@link Nullable}{@link TimeTableSuperDoc} object to operate on.
      * @return {@link TimeTableSuperDoc}
      */
-    TimeTableSuperDoc executeTimeTableGenerationOperation(TimeTableSuperDoc timeTableSuperDoc) throws Exception;
+    TimeTableSuperDoc executeTimeTableGenerationOperation(@Nullable TimeTableSuperDoc timeTableSuperDoc) throws Exception;
 }

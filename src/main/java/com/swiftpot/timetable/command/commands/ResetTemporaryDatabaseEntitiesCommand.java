@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
  *         14-Mar-17 @ 6:10 PM
  */
 @Component
-public class EmptyTemporaryDatabaseEntitiesCommand implements TimetableGenerationCommand {
+public class ResetTemporaryDatabaseEntitiesCommand implements TimetableGenerationCommand {
 
     @Autowired
     private PeriodAndTimeAndSubjectAndTutorAssignedDocRepository periodAndTimeAndSubjectAndTutorAssignedDocRepository;
@@ -35,7 +35,7 @@ public class EmptyTemporaryDatabaseEntitiesCommand implements TimetableGeneratio
     public TimeTableSuperDoc executeTimeTableGenerationOperation(TimeTableSuperDoc timeTableSuperDoc) {
         int completedStatus = this.resetTemporaryEntitiesInDb();
         System.out.println("All temporary entities deleted successfully" + completedStatus);
-        return timeTableSuperDoc;
+        return new TimeTableSuperDoc();//return empty
     }
 
     /**

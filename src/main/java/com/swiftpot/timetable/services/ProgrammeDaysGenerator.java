@@ -22,10 +22,10 @@ public class ProgrammeDaysGenerator {
     TimeTableGeneratorService timeTableGeneratorService;
 
     /**
-     * generate programmeDays
+     * generate programmeDays ie. {@link List} of {@link ProgrammeDay} first time
      *
      * @param programmeCode
-     * @return
+     * @return {@link List} of {@link ProgrammeDay}
      * @throws Exception
      */
     public List<ProgrammeDay> generateAllProgrammeDays(String programmeCode) throws Exception {

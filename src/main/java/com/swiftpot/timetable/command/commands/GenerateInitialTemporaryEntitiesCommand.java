@@ -48,9 +48,15 @@ public class GenerateInitialTemporaryEntitiesCommand implements TimetableGenerat
     public TimeTableSuperDoc executeTimeTableGenerationOperation(TimeTableSuperDoc timeTableSuperDoc) throws Exception {
         int completedTask = this.generateAllTemporaryEntitiesForTimeTableGeneration();
         System.out.println("generateAllTemporaryEntitiesForTimeTableGeneration completed successfully==>" + completedTask);
-        return timeTableSuperDoc;
+        return new TimeTableSuperDoc();
     }
 
+    /**
+     * return 0 because I dont trust mongo's writeconcern stuff fully yet.
+     *
+     * @return {@link Integer}
+     * @throws Exception
+     */
     private synchronized int generateAllTemporaryEntitiesForTimeTableGeneration() throws Exception {
         programmeDayPeriodSetListInitialGenerator = programmeDayPeriodSetListInitialGeneratorDefault;
         programmeDayPeriodSetListInitialGenerator.
