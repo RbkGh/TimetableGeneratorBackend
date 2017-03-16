@@ -23,7 +23,7 @@ public class TimeTableMainDoc {
     String timeTableName;
 
     /**
-     * list of {@link TutorPersonalTimeTableWithFullTutorEntity}
+     * list of {@link TutorPersonalTimeTableDoc}
      */
     List<TutorPersonalTimeTableDoc> tutorPersonalTimeTableDocs;
 
