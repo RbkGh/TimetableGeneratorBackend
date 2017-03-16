@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.model;
 
 /**
@@ -20,6 +24,18 @@ public class PeriodOrLecture {
      * the unique {@link com.swiftpot.timetable.repository.db.model.TutorDoc#id id} of {@link com.swiftpot.timetable.repository.db.model.TutorDoc tutorDoc } object.
      */
     private String tutorUniqueId;
+
+    /**
+     * the full {@link com.swiftpot.timetable.repository.db.model.TutorDoc#firstName} + {@link com.swiftpot.timetable.repository.db.model.TutorDoc#surName}
+     * this is set only at the final generation stage. when returning to the user.although setting it at anytime with the correct value is also good ,doesn't spoil anything.
+     */
+    private String tutorFullName;
+
+    /**
+     * the {@link com.swiftpot.timetable.repository.db.model.SubjectDoc#subjectFullName}
+     * this is set only at the final generation stage. when returning to the user.although setting it at anytime with the correct value is also good ,doesn't spoil anything.
+     */
+    private String subjectFullName;
 
     public PeriodOrLecture() {
     }
@@ -87,5 +103,23 @@ public class PeriodOrLecture {
 
     public void setTutorUniqueId(String tutorUniqueId) {
         this.tutorUniqueId = tutorUniqueId;
+    }
+
+    public String getTutorFullName() {
+        return tutorFullName;
+    }
+
+    public PeriodOrLecture setTutorFullName(String tutorFullName) {
+        this.tutorFullName = tutorFullName;
+        return this;
+    }
+
+    public String getSubjectFullName() {
+        return subjectFullName;
+    }
+
+    public PeriodOrLecture setSubjectFullName(String subjectFullName) {
+        this.subjectFullName = subjectFullName;
+        return this;
     }
 }
