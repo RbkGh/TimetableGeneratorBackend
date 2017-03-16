@@ -57,7 +57,7 @@ public class TimeTableGenerationController {
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    private OutgoingPayload generateTimeTable() throws Exception {
+    private OutgoingPayload getAllTimeTableInDb() throws Exception {
         List<TimeTableMainDoc> timeTableMainDocs = timeTableMainDocRepository.findAll();
         return new SuccessfulOutgoingPayload(timeTableMainDocs);
     }
