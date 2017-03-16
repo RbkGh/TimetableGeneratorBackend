@@ -56,6 +56,12 @@ public class TimeTableGenerationController {
         return new SuccessfulOutgoingPayload(timeTableMainDoc);
     }
 
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    private OutgoingPayload generateTimeTable() throws Exception {
+        List<TimeTableMainDoc> timeTableMainDocs = timeTableMainDocRepository.findAll();
+        return new SuccessfulOutgoingPayload(timeTableMainDocs);
+    }
+
     private TimeTableMainDoc generateFullTimeTableObject(TimeTableGenerationRequest timeTableGenerationRequest) throws Exception {
         //generate timetable and pick result from db.
         timeTableGenerationClient.generateTimeTable();
