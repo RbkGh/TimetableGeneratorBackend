@@ -4,7 +4,7 @@
 
 package com.swiftpot.timetable.controllers;
 
-import com.sun.istack.internal.Nullable;
+import com.sun.istack.Nullable;
 import com.swiftpot.timetable.command.TimeTableGenerationClient;
 import com.swiftpot.timetable.model.*;
 import com.swiftpot.timetable.repository.*;

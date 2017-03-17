@@ -49,6 +49,11 @@ dependencies {
 	compile('commons-collections:commons-collections:3.2.2')
 	compile('com.google.code.gson:gson:2.8.0')
 	compile('org.apache.commons:commons-lang3:3.5')
+
+	compile('com.sun.istack:istack-commons-runtime:3.0.5')
+
+
 	providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 	testCompile('org.springframework.boot:spring-boot-starter-test')
+
 }

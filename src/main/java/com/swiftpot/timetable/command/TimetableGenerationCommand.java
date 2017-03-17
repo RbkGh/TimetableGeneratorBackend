@@ -4,7 +4,7 @@
 
 package com.swiftpot.timetable.command;
 
-import com.sun.istack.internal.Nullable;
+import com.sun.istack.Nullable;
 import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
 import org.springframework.stereotype.Component;
 

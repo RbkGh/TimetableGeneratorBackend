@@ -4,7 +4,7 @@
 
 package com.swiftpot.timetable.command.invokers;
 
-import com.sun.istack.internal.Nullable;
+import com.sun.istack.Nullable;
 import com.swiftpot.timetable.command.commands.commandfactory.TimeTableGenerationCommandFactory;
 import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
 import org.springframework.beans.factory.annotation.Autowired;
