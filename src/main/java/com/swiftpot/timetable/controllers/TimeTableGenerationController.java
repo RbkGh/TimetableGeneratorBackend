@@ -75,6 +75,9 @@ public class TimeTableGenerationController {
                 programmeGroupPersonalTimeTableDocRepository.findAll();
 
         for (TutorPersonalTimeTableDoc tutorPersonalTimeTableDoc : tutorPersonalTimeTableDocsList) {
+            TutorDoc tutorDoc = tutorDocRepository.findOne(tutorPersonalTimeTableDoc.getTutorUniqueIdInDb());
+            tutorPersonalTimeTableDoc.setTutorDoc(tutorDoc); //set tutorDoc
+
             List<ProgrammeDay> programmeDays = tutorPersonalTimeTableDoc.getProgrammeDaysList();
             for (ProgrammeDay programmeDay : programmeDays) {
                 List<PeriodOrLecture> periodOrLectureList = programmeDay.getPeriodList();
@@ -82,7 +85,6 @@ public class TimeTableGenerationController {
                     if (Objects.nonNull(periodOrLecture.getSubjectUniqueIdInDb())) {
                         if (!periodOrLecture.getSubjectUniqueIdInDb().isEmpty()) {
                             @Nullable SubjectDoc subjectDoc = subjectDocRepository.findOne(periodOrLecture.getTutorUniqueId());
-                            @Nullable TutorDoc tutorDoc = tutorDocRepository.findOne(periodOrLecture.getTutorUniqueId());
                             if (Objects.nonNull(subjectDoc)) {
                                 periodOrLecture.setSubjectFullName(subjectDoc.getSubjectFullName());
                             }

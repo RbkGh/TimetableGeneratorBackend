@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.repository.db.model;
 
 import com.swiftpot.timetable.model.ProgrammeDay;
@@ -21,6 +25,11 @@ public class TutorPersonalTimeTableDoc {
     private String tutorUniqueIdInDb;
 
     /**
+     * {@link TutorDoc}
+     */
+    private TutorDoc tutorDoc;
+
+    /**
      * Tutor's List of {@link ProgrammeDay} this is equivalent to the <br>
      * same days that are available on the {@link TimeTableSuperDoc}(ie the list of {@link ProgrammeDay} on the <br>
      * {@link com.swiftpot.timetable.model.ProgrammeGroup } object on the timetable object.
@@ -33,6 +42,14 @@ public class TutorPersonalTimeTableDoc {
 
     public void setTutorUniqueIdInDb(String tutorUniqueIdInDb) {
         this.tutorUniqueIdInDb = tutorUniqueIdInDb;
+    }
+
+    public TutorDoc getTutorDoc() {
+        return tutorDoc;
+    }
+
+    public void setTutorDoc(TutorDoc tutorDoc) {
+        this.tutorDoc = tutorDoc;
     }
 
     public List<ProgrammeDay> getProgrammeDaysList() {
