@@ -1,7 +1,9 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.repository.db.model;
 
-import com.swiftpot.timetable.base.TimeTableSuperDocBase;
-import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.model.YearGroup;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -27,6 +29,14 @@ public class TimeTableSuperDoc {
 
     public TimeTableSuperDoc(List<YearGroup> yearGroupsList) {
         this.yearGroupsList = yearGroupsList;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public List<YearGroup> getYearGroupsList() {

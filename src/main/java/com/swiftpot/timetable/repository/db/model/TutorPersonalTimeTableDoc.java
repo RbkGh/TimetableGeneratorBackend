@@ -5,6 +5,7 @@
 package com.swiftpot.timetable.repository.db.model;
 
 import com.swiftpot.timetable.model.ProgrammeDay;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
@@ -19,6 +20,8 @@ import java.util.List;
 @Document(collection = "TutorPersonalTimeTableDoc")
 public class TutorPersonalTimeTableDoc {
 
+    @Id
+    private String id;
     /**
      * this is a reference of the {@link TutorDoc#id} of {@link TutorDoc}
      */
@@ -35,6 +38,14 @@ public class TutorPersonalTimeTableDoc {
      * {@link com.swiftpot.timetable.model.ProgrammeGroup } object on the timetable object.
      */
     private List<ProgrammeDay> programmeDaysList;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getTutorUniqueIdInDb() {
         return tutorUniqueIdInDb;

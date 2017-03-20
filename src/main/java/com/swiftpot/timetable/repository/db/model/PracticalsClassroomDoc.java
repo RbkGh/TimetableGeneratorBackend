@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.repository.db.model;
 
 import com.swiftpot.timetable.model.ProgrammeDay;
@@ -53,6 +57,14 @@ public class PracticalsClassroomDoc {
         this.programmeDaysList = programmeDaysList;
         this.maxDaysCapacityForWeek = maxDaysCapacityForWeek;
         this.remainingDaysToBeAllocated = remainingDaysToBeAllocated;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getPracticalsClassRoomCode() {

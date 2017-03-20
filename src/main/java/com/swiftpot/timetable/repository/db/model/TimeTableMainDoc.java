@@ -4,6 +4,7 @@
 
 package com.swiftpot.timetable.repository.db.model;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
@@ -18,6 +19,9 @@ import java.util.List;
 @Document(collection = "TimeTableMainDoc")
 public class TimeTableMainDoc {
 
+    @Id
+    private String id;
+
     int year;
 
     String timeTableName;
@@ -31,6 +35,14 @@ public class TimeTableMainDoc {
      * List of {@link ProgrammeGroupPersonalTimeTableDoc}
      */
     List<ProgrammeGroupPersonalTimeTableDoc> programmeGroupPersonalTimeTableDocs;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public int getYear() {
         return year;

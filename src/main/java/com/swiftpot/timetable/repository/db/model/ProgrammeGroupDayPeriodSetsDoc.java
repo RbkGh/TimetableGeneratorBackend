@@ -5,6 +5,7 @@
 package com.swiftpot.timetable.repository.db.model;
 
 import com.swiftpot.timetable.services.servicemodels.PeriodSetForProgrammeDay;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
@@ -18,6 +19,9 @@ import java.util.Map;
 @Document(collection = "ProgrammeGroupDayPeriodSetsDoc")
 public class ProgrammeGroupDayPeriodSetsDoc {
 
+    @Id
+    private String id;
+
     /**
      * the {@link ProgrammeGroupDoc#programmeCode} of the {@link ProgrammeGroupDoc}
      */
@@ -29,6 +33,13 @@ public class ProgrammeGroupDayPeriodSetsDoc {
      */
     private Map<String, List<PeriodSetForProgrammeDay>> mapOfProgDayNameAndTheListOfPeriodSets;
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
     /**
      * @return String
      * @see ProgrammeGroupDayPeriodSetsDoc#programmeCode

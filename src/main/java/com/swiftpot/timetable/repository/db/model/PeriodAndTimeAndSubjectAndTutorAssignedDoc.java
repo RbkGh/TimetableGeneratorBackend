@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.repository.db.model;
 
 
@@ -14,13 +18,21 @@ import java.util.List;
  *         <Rodney Kwabena Boachie at [rodney@swiftpot.com,rbk.unlimited@gmail.com]> on
  *         17-Dec-16 @ 11:30 AM
  */
-@Document
+@Document(collection = "PeriodAndTimeAndSubjectAndTutorAssignedDoc")
 public class PeriodAndTimeAndSubjectAndTutorAssignedDoc {
 
     @Id
     private String id;
 
     private List<YearGroup> yearGroup;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public List<YearGroup> getYearGroup() {
         return yearGroup;

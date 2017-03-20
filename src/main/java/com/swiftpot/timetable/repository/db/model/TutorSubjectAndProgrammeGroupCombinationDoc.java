@@ -1,11 +1,18 @@
 
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.repository.db.model;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "TutorSubjectAndProgrammeGroupCombinationDoc")
 public class TutorSubjectAndProgrammeGroupCombinationDoc {
 
+    @Id
+    private String id;
     /**
      * the {@link SubjectDoc#id} of the {@link SubjectDoc}
      */
@@ -25,6 +32,14 @@ public class TutorSubjectAndProgrammeGroupCombinationDoc {
         this.subjectUniqueId = subjectUniqueId;
         this.programmeCode = programmeCode;
         this.totalPeriodLeftToBeAllocated = totalPeriodLeftToBeAllocated;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getProgrammeCode() {
