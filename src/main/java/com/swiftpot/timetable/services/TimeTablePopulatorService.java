@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Ace Programmer Rbk
@@ -46,7 +47,8 @@ public class TimeTablePopulatorService {
     private SubjectDocRepository subjectDocRepository;
     @Autowired
     private TutorSubjectAndProgrammeGroupCombinationDocRepository tutorSubjectAndProgrammeGroupCombinationDocRepository;
-
+    @Autowired
+    private DepartmentDocRepository departmentDocRepository;
 
     /**
      * generate an initial {@link TimeTableSuperDoc} with default data,ie {@link YearGroup},{@link ProgrammeGroup},{@link com.swiftpot.timetable.model.ProgrammeDay}s and other initial data
@@ -82,6 +84,12 @@ public class TimeTablePopulatorService {
                 programmeGroup.setIsProgrammeRequiringPracticalsClassroom(x.getIsTechnicalWorkshopOrLabRequired());
                 //Now we need to set programmeDaysList ,Initialize it typically from Monday To Friday with the days and the periodsList
                 programmeGroup.setProgrammeDaysList(programmeDaysGenerator.generateAllProgrammeDays(x.getProgrammeCode()));
+                //now we set programme subjects unique ids List
+                List<String> programmeGroupSubjectUniqueIdList = this.getProgrammeGroupSubjectUniqueIdList(x);
+                if (programmeGroupSubjectUniqueIdList.isEmpty()) {
+                    programmeGroup.setProgrammeSubjectsUniqueIdInDbList(null);
+                }
+                programmeGroup.setProgrammeSubjectsUniqueIdInDbList(programmeGroupSubjectUniqueIdList);
                 //finally in this loop,finish off by adding the programmeGroup to the programmeGroupList
                 programmeGroupList.add(programmeGroup);
             }
@@ -181,6 +189,22 @@ public class TimeTablePopulatorService {
 
     private List<ProgrammeGroupDoc> getAllProgrammeGroupDocsListInDb() {
         return programmeGroupDocRepository.findAll();
+    }
+
+    /**
+     * get all subjects offered by department,if english department,only english department unique id will be returned ,if auto engineering ,physics ,chem and others may be returned.
+     *
+     * @param programmeGroupDoc
+     * @return
+     */
+    private List<String> getProgrammeGroupSubjectUniqueIdList(ProgrammeGroupDoc programmeGroupDoc) {
+        DepartmentDoc departmentDoc = departmentDocRepository.
+                findByDeptProgrammeInitials(programmeGroupDoc.getProgrammeInitials());
+        if (Objects.isNull(departmentDoc)) {
+            return new ArrayList<>(0);
+        } else {
+            return departmentDoc.getProgrammeSubjectsDocIdList();
+        }
     }
 
 }

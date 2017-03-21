@@ -272,6 +272,9 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
 
         //to get totalNumberOfProgrammeSubjectsUniqueIdInDbList practicalCourseTotalPeriod,scan and check that SubjectDoc property isSubjectAPracticalSubject = true
         List<String> programmeSubjectsUniqueIdInDbList = currentProgrammeGroup.getProgrammeSubjectsUniqueIdInDbList();
+//        if (programmeSubjectsUniqueIdInDbList.isEmpty() || Objects.isNull(programmeSubjectsUniqueIdInDbList)) { //programmeGroup is a core subject
+//
+//        }
         int totalNumberOfProgrammeSubjectsUniqueIdInDbList = programmeSubjectsUniqueIdInDbList.size();
         String programmeCode = currentProgrammeGroup.getProgrammeCode();
         String practicalSubjectId = null;
