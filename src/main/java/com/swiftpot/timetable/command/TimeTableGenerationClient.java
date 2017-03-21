@@ -31,35 +31,30 @@ public class TimeTableGenerationClient {
 
 
         //reset temporary entities in database
-        timeTableGenerationInvoker = new TimeTableGenerationInvoker(TimeTableGenerationCommandFactory.RESET_TEMPORARY_DATABASE_ENTITIES);
+        timeTableGenerationInvoker.setTimeTableGenerationImplType(TimeTableGenerationCommandFactory.RESET_TEMPORARY_DATABASE_ENTITIES);
         timeTableGenerationInvoker.executeTimeTableGenerationOperation(null);
 
 
         //generate initial temporary entities
-        timeTableGenerationInvoker = new TimeTableGenerationInvoker(TimeTableGenerationCommandFactory.GENERATE_INITIAL_TEMPORARY_ENTITIES);
+        timeTableGenerationInvoker.setTimeTableGenerationImplType(TimeTableGenerationCommandFactory.GENERATE_INITIAL_TEMPORARY_ENTITIES);
         timeTableGenerationInvoker.executeTimeTableGenerationOperation(null);
 
 
         //generate initial timetable with default data
-        timeTableGenerationInvoker =
-                new TimeTableGenerationInvoker
-                        (TimeTableGenerationCommandFactory.GENERATE_INITIAL_TIMETABLESUPERDOC_WITH_DEFAULT_DATA);
+        timeTableGenerationInvoker.setTimeTableGenerationImplType(TimeTableGenerationCommandFactory.GENERATE_INITIAL_TIMETABLESUPERDOC_WITH_DEFAULT_DATA);
         TimeTableSuperDoc timeTableSuperDocWithDefaultData =
                 timeTableGenerationInvoker.executeTimeTableGenerationOperation(null);
 
 
         //allocate default periods for all programmeGroups in db
-        timeTableGenerationInvoker =
-                new TimeTableGenerationInvoker(TimeTableGenerationCommandFactory.ALLOCATE_DEFAULT_PERIODS_FOR_ALL_PROGRAMMEGROUPS);
+        timeTableGenerationInvoker.setTimeTableGenerationImplType(TimeTableGenerationCommandFactory.ALLOCATE_DEFAULT_PERIODS_FOR_ALL_PROGRAMMEGROUPS);
         TimeTableSuperDoc timeTableSuperDocWithAllDefaultPeriodsSet =
                 timeTableGenerationInvoker.
                         executeTimeTableGenerationOperation(timeTableSuperDocWithDefaultData);
 
 
         //allocate periods for all tutors
-        timeTableGenerationInvoker =
-                new TimeTableGenerationInvoker
-                        (TimeTableGenerationCommandFactory.ALLOCATE_PERIODS_FOR_ALL_TUTORS);
+        timeTableGenerationInvoker.setTimeTableGenerationImplType(TimeTableGenerationCommandFactory.ALLOCATE_PERIODS_FOR_ALL_TUTORS);
         TimeTableSuperDoc finalTimeTableSuperDoc =
                 timeTableGenerationInvoker.
                         executeTimeTableGenerationOperation

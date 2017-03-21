@@ -8,7 +8,6 @@ import com.sun.istack.Nullable;
 import com.swiftpot.timetable.command.commands.commandfactory.TimeTableGenerationCommandFactory;
 import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -24,20 +23,23 @@ public class TimeTableGenerationInvoker {
 
     private String timeTableGenerationImplType;
 
-    /**
-     * use {@link Value} to annotate the injected parameter value.
-     *
-     * @param timeTableGenerationImplType type must be one of the static final Strings in {@link TimeTableGenerationCommandFactory} <br>
-     *                                    eg. {@link TimeTableGenerationCommandFactory#RESET_TEMPORARY_DATABASE_ENTITIES}
-     */
-    public TimeTableGenerationInvoker(@Value("timeTableGenerationImplType") String timeTableGenerationImplType) {
-        this.timeTableGenerationImplType = timeTableGenerationImplType;
+
+    public TimeTableGenerationInvoker() {
+
     }
 
     public TimeTableSuperDoc executeTimeTableGenerationOperation(@Nullable TimeTableSuperDoc timeTableSuperDoc) throws Exception {
         return this.
                 timeTableGenerationCommandFactory.
-                getTimeTableGenerationCommandImpl(timeTableGenerationImplType).
+                getTimeTableGenerationCommandImpl(this.timeTableGenerationImplType).
                 executeTimeTableGenerationOperation(timeTableSuperDoc);
+    }
+
+    /**
+     * @param timeTableGenerationImplType type must be one of the static final Strings in {@link TimeTableGenerationCommandFactory} <br>
+     *                                    eg. {@link TimeTableGenerationCommandFactory#RESET_TEMPORARY_DATABASE_ENTITIES}
+     */
+    public void setTimeTableGenerationImplType(String timeTableGenerationImplType) {
+        this.timeTableGenerationImplType = timeTableGenerationImplType;
     }
 }
