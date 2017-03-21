@@ -46,6 +46,8 @@ public class TimeTablePopulatorService {
     private SubjectDocRepository subjectDocRepository;
     @Autowired
     private TutorSubjectAndProgrammeGroupCombinationDocRepository tutorSubjectAndProgrammeGroupCombinationDocRepository;
+    @Autowired
+    private DepartmentDocRepository departmentDocRepository;
 
 
     /**
@@ -82,6 +84,12 @@ public class TimeTablePopulatorService {
                 programmeGroup.setIsProgrammeRequiringPracticalsClassroom(x.getIsTechnicalWorkshopOrLabRequired());
                 //Now we need to set programmeDaysList ,Initialize it typically from Monday To Friday with the days and the periodsList
                 programmeGroup.setProgrammeDaysList(programmeDaysGenerator.generateAllProgrammeDays(x.getProgrammeCode()));
+                //now we set programme subjects unique ids List
+                if (x.getIsTechnicalWorkshopOrLabRequired()) { //at this point we expect that there is at least one practicals subject present
+                    programmeGroup.setProgrammeSubjectsUniqueIdInDbList(this.getProgrammeGroupSubjectUniqueIdList(x));
+                } else {
+                    programmeGroup.setProgrammeSubjectsUniqueIdInDbList(null);//not a practicals subject,thus set to null
+                }
                 //finally in this loop,finish off by adding the programmeGroup to the programmeGroupList
                 programmeGroupList.add(programmeGroup);
             }
@@ -183,4 +191,15 @@ public class TimeTablePopulatorService {
         return programmeGroupDocRepository.findAll();
     }
 
+    /**
+     * get all subjects offered by department,if english department,only english department unique id will be returned ,if auto engineering ,physics ,chem and others may be returned.
+     *
+     * @param programmeGroupDoc
+     * @return
+     */
+    private List<String> getProgrammeGroupSubjectUniqueIdList(ProgrammeGroupDoc programmeGroupDoc) {
+        DepartmentDoc departmentDoc = departmentDocRepository.
+                findByDeptProgrammeInitials(programmeGroupDoc.getProgrammeInitials());
+        return departmentDoc.getProgrammeSubjectsDocIdList();
+    }
 }
