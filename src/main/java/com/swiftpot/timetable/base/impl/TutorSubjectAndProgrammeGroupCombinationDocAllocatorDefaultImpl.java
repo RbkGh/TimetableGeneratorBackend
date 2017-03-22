@@ -59,11 +59,20 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
                                                                                         int totalSubjectAllocationInDb,
                                                                                         TutorSubjectAndProgrammeGroupCombinationDoc tutorSubjectAndProgrammeGroupCombinationDoc,
                                                                                         TimeTableSuperDoc timeTableSuperDoc) {
-        TutorSubjectAndProgrammeGroupCombinationDoc currentStateOfTutorSubjectAndProgrammeGroupCombDoc =
-                tutorSubjectAndProgrammeGroupCombinationDocRepository.
-                        findBySubjectUniqueIdAndProgrammeCode
-                                (tutorSubjectAndProgrammeGroupCombinationDoc.getSubjectUniqueId(), tutorSubjectAndProgrammeGroupCombinationDoc.getProgrammeCode());
-        while (currentStateOfTutorSubjectAndProgrammeGroupCombDoc.getTotalPeriodLeftToBeAllocated() > 0) {
+        String subjectUniqueIdBefore = tutorSubjectAndProgrammeGroupCombinationDoc.getSubjectUniqueId();
+        String programmeCodeBefore = tutorSubjectAndProgrammeGroupCombinationDoc.getProgrammeCode();
+
+
+        while ((tutorSubjectAndProgrammeGroupCombinationDocRepository.
+                findBySubjectUniqueIdAndProgrammeCode
+                        (subjectUniqueIdBefore, programmeCodeBefore).
+                getTotalPeriodLeftToBeAllocated()) > 0) {
+
+            TutorSubjectAndProgrammeGroupCombinationDoc currentStateOfTutorSubjectAndProgrammeGroupCombDoc =
+                    tutorSubjectAndProgrammeGroupCombinationDocRepository.
+                            findBySubjectUniqueIdAndProgrammeCode
+                                    (subjectUniqueIdBefore, programmeCodeBefore);
+
             int totalPeriodLeftToBeAllocated = currentStateOfTutorSubjectAndProgrammeGroupCombDoc.getTotalPeriodLeftToBeAllocated();
             String programmeCode = currentStateOfTutorSubjectAndProgrammeGroupCombDoc.getProgrammeCode();
             String subjectUniqueIdInDb = currentStateOfTutorSubjectAndProgrammeGroupCombDoc.getSubjectUniqueId();
@@ -85,132 +94,132 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
         List<Integer> listOfPeriodAllocation = subjectsAssignerService.getTotalSubjectPeriodAllocationAsList(totalPeriodsLeftToBeAllocated);
         int listOfPeriodAllocationSize = listOfPeriodAllocation.size();
         int periodAllocationValue1 = listOfPeriodAllocation.get(0);//THERE WILL ALWAYS BE A VALUE IN THIS
-            TutorPersonalTimeTableDoc tutorPersonalTimeTableDoc = tutorPersonalTimeTableDocRepository.findByTutorUniqueIdInDb(tutorUniqueIdInDb);
-            List<ProgrammeDay> tutorPersonalTimeTableDocProgrammeDaysList = tutorPersonalTimeTableDoc.getProgrammeDaysList();
+        TutorPersonalTimeTableDoc tutorPersonalTimeTableDoc = tutorPersonalTimeTableDocRepository.findByTutorUniqueIdInDb(tutorUniqueIdInDb);
+        List<ProgrammeDay> tutorPersonalTimeTableDocProgrammeDaysList = tutorPersonalTimeTableDoc.getProgrammeDaysList();
 
-            ProgrammeGroupPersonalTimeTableDoc programmeGroupPersonalTimeTableDoc =
-                    programmeGroupPersonalTimeTableDocRepository.findByProgrammeCodeIgnoreCase(programmeCode);
-            List<ProgrammeDay> programmeGroupPersonalProgrammeDaysList = programmeGroupPersonalTimeTableDoc.getProgrammeDaysList();
+        ProgrammeGroupPersonalTimeTableDoc programmeGroupPersonalTimeTableDoc =
+                programmeGroupPersonalTimeTableDocRepository.findByProgrammeCodeIgnoreCase(programmeCode);
+        List<ProgrammeDay> programmeGroupPersonalProgrammeDaysList = programmeGroupPersonalTimeTableDoc.getProgrammeDaysList();
 
-            ProgrammeGroupDayPeriodSetsDoc programmeGroupDayPeriodSetsDoc =
-                    programmeGroupDayPeriodSetsDocRepository.findByProgrammeCode(programmeCode);
+        ProgrammeGroupDayPeriodSetsDoc programmeGroupDayPeriodSetsDoc =
+                programmeGroupDayPeriodSetsDocRepository.findByProgrammeCode(programmeCode);
 
-            Map<String, List<PeriodSetForProgrammeDay>> periodSetForProgrammeDayListMap =
-                    programmeGroupDayPeriodSetsDoc.getMapOfProgDayNameAndTheListOfPeriodSets();
-
-
-            ProgrammeDay programmeDayToSetOnTimeTableSuperObject = new ProgrammeDay();
-
-            int periodStartingNumber = 0; //TODO TEST TO MAKE SURE THAT THIS WILL NOT REMAIN ZERO WHEN USING IT OUTSIDE THE FOR LOOP BELOW.
-            int periodEndingNumber = 0;  //TODO TEST TO MAKE SURE THAT THIS WILL NOT REMAIN ZERO WHEN USING IT OUTSIDE THE FOR LOOP BELOW.
-            //go through programmeGroup personal programmeDay List
-            for (ProgrammeDay programmeDay : programmeGroupPersonalProgrammeDaysList) {
-                if (!programmeDayServices.isProgrammeDayFullyAllocated(programmeDay)) {
-                    String programmeDayName = programmeDay.getDayName();
-                    List<UnallocatedPeriodSet> unallocatedPeriodSetList =
-                            programmeDayServices.getListOfUnallocatedPeriodSetsInDay(programmeDay);
-                    Map<Boolean, List<UnallocatedPeriodSet>> booleanUnallocatedPeriodSetMap =
-                            this.isAnyOfUnallPeriodsListCapableOfGettingAssignedTheIncomingPeriodAllocValue
-                                    (unallocatedPeriodSetList, periodAllocationValue1);
-                    if (booleanUnallocatedPeriodSetMap.containsKey(true)) {
-                        //TODO DONE!! COMPLETED!!! find a way to infuse the subject breakdown allocation from the config.properties file,do this in next iteration.
-                        //now we check if any of the unallocatedPeriods List can take the periods considering the personal timetable of the tutor too.
-                        List<PeriodSetForProgrammeDay> periodSetForProgrammeDayFromDb =
-                                periodSetForProgrammeDayListMap.get(programmeDayName);
-
-                        List<UnallocatedPeriodSet> actualUnallocatedPeriodList =
-                                programmeDayServices.
-                                        getUnallocatedPeriodSetFromPeriodSetForProgDay
-                                                (periodSetForProgrammeDayFromDb, programmeDay);
-
-                        ProgrammeDay tutorProgrammeDayTimeTable =
-                                programmeDayServices.
-                                        getProgrammeDayFromProgrammeDayListUsingProgrammeDayName
-                                                (programmeDayName, tutorPersonalTimeTableDocProgrammeDaysList);
-
-                        List<UnallocatedPeriodSet> finalUnallocatedListThatSatisfiesAllConstraints =
-                                this.getUnallocatedPeriodSetThatDoesNotConflictWithAllocatedPeriodsOnTutorPersonalTimeTable
-                                        (actualUnallocatedPeriodList, tutorProgrammeDayTimeTable);
-
-                        if (!finalUnallocatedListThatSatisfiesAllConstraints.isEmpty()) {//its not empty thus we can set it now finally
-
-                            List<Integer> listOfPeriodAllocationForTotalPeriods = subjectsAssignerService.getTotalSubjectPeriodAllocationAsList(totalSubjectAllocationInDb);//if subject breakdown for total allocation is >2
-                            if (listOfPeriodAllocationForTotalPeriods.size() > 2 &&
-                                    this.isSubjectAllocatedEqualToFourOrFiveOrSixTimesInProgrammeDay(subjectUniqueIdInDb, programmeDay)) {
-                                //the subject has not been set more than five or six period times in a day
-                            } else {
+        Map<String, List<PeriodSetForProgrammeDay>> periodSetForProgrammeDayListMap =
+                programmeGroupDayPeriodSetsDoc.getMapOfProgDayNameAndTheListOfPeriodSets();
 
 
-                                UnallocatedPeriodSet unallocatedPeriodSetToUse = new UnallocatedPeriodSet();
-                                for (UnallocatedPeriodSet unallocatedPeriodSet : finalUnallocatedListThatSatisfiesAllConstraints) {
-                                    if (unallocatedPeriodSet.getTotalNumberOfPeriodsForSet() == periodAllocationValue1) {
-                                        unallocatedPeriodSetToUse = unallocatedPeriodSet;
-                                        break;
-                                    }
+        ProgrammeDay programmeDayToSetOnTimeTableSuperObject = new ProgrammeDay();
+
+        int periodStartingNumber = 0; //TODO TEST TO MAKE SURE THAT THIS WILL NOT REMAIN ZERO WHEN USING IT OUTSIDE THE FOR LOOP BELOW.
+        int periodEndingNumber = 0;  //TODO TEST TO MAKE SURE THAT THIS WILL NOT REMAIN ZERO WHEN USING IT OUTSIDE THE FOR LOOP BELOW.
+        //go through programmeGroup personal programmeDay List
+        for (ProgrammeDay programmeDay : programmeGroupPersonalProgrammeDaysList) {
+            if (!programmeDayServices.isProgrammeDayFullyAllocated(programmeDay)) {
+                String programmeDayName = programmeDay.getDayName();
+                List<UnallocatedPeriodSet> unallocatedPeriodSetList =
+                        programmeDayServices.getListOfUnallocatedPeriodSetsInDay(programmeDay);
+                Map<Boolean, List<UnallocatedPeriodSet>> booleanUnallocatedPeriodSetMap =
+                        this.isAnyOfUnallPeriodsListCapableOfGettingAssignedTheIncomingPeriodAllocValue
+                                (unallocatedPeriodSetList, periodAllocationValue1);
+                if (booleanUnallocatedPeriodSetMap.containsKey(true)) {
+                    //TODO DONE!! COMPLETED!!! find a way to infuse the subject breakdown allocation from the config.properties file,do this in next iteration.
+                    //now we check if any of the unallocatedPeriods List can take the periods considering the personal timetable of the tutor too.
+                    List<PeriodSetForProgrammeDay> periodSetForProgrammeDayFromDb =
+                            periodSetForProgrammeDayListMap.get(programmeDayName);
+
+                    List<UnallocatedPeriodSet> actualUnallocatedPeriodList =
+                            programmeDayServices.
+                                    getUnallocatedPeriodSetFromPeriodSetForProgDay
+                                            (periodSetForProgrammeDayFromDb, programmeDay);
+
+                    ProgrammeDay tutorProgrammeDayTimeTable =
+                            programmeDayServices.
+                                    getProgrammeDayFromProgrammeDayListUsingProgrammeDayName
+                                            (programmeDayName, tutorPersonalTimeTableDocProgrammeDaysList);
+
+                    List<UnallocatedPeriodSet> finalUnallocatedListThatSatisfiesAllConstraints =
+                            this.getUnallocatedPeriodSetThatDoesNotConflictWithAllocatedPeriodsOnTutorPersonalTimeTable
+                                    (actualUnallocatedPeriodList, tutorProgrammeDayTimeTable);
+
+                    if (!finalUnallocatedListThatSatisfiesAllConstraints.isEmpty()) {//its not empty thus we can set it now finally
+
+                        List<Integer> listOfPeriodAllocationForTotalPeriods = subjectsAssignerService.getTotalSubjectPeriodAllocationAsList(totalSubjectAllocationInDb);//if subject breakdown for total allocation is >2
+                        if (listOfPeriodAllocationForTotalPeriods.size() > 2 &&
+                                this.isSubjectAllocatedEqualToFourOrFiveOrSixTimesInProgrammeDay(subjectUniqueIdInDb, programmeDay)) {
+                            //the subject has not been set more than five or six period times in a day
+                        } else {
+
+
+                            UnallocatedPeriodSet unallocatedPeriodSetToUse = new UnallocatedPeriodSet();
+                            for (UnallocatedPeriodSet unallocatedPeriodSet : finalUnallocatedListThatSatisfiesAllConstraints) {
+                                if (unallocatedPeriodSet.getTotalNumberOfPeriodsForSet() == periodAllocationValue1) {
+                                    unallocatedPeriodSetToUse = unallocatedPeriodSet;
+                                    break;
                                 }
-                                periodStartingNumber = unallocatedPeriodSetToUse.getPeriodStartingNumber(); //SET PERIOD STARTING NUMBER
-                                periodEndingNumber = unallocatedPeriodSetToUse.getPeriodEndingNumber(); //SET PERIOD ENDING NUMBER
-
-                                programmeDayToSetOnTimeTableSuperObject = programmeDay; //set the programmeDay to use to set the periods to on timetableSuperDoc object
-
-                                TutorPersonalTimeTableDoc finalTutorPersonalTimeTable =
-                                        tutorPersonalTimeTableDocServices.
-                                                updateTutorPersonalTimeTableDocWithPeriodsAndSaveInDb(tutorUniqueIdInDb,
-                                                        subjectUniqueIdInDb,
-                                                        programmeDayName,
-                                                        periodStartingNumber,
-                                                        periodEndingNumber);
-
-                                this.updateDbWithTotalPeriodsThatHasBeenSet
-                                        (programmeDay,
-                                                programmeCode,
-                                                subjectUniqueIdInDb,
-                                                periodAllocationValue1,
-                                                tutorUniqueIdInDb,
-                                                periodStartingNumber,
-                                                periodEndingNumber);
-                                break; //break out of iterations over programmeDays
                             }
-                        }
+                            periodStartingNumber = unallocatedPeriodSetToUse.getPeriodStartingNumber(); //SET PERIOD STARTING NUMBER
+                            periodEndingNumber = unallocatedPeriodSetToUse.getPeriodEndingNumber(); //SET PERIOD ENDING NUMBER
 
+                            programmeDayToSetOnTimeTableSuperObject = programmeDay; //set the programmeDay to use to set the periods to on timetableSuperDoc object
+
+                            TutorPersonalTimeTableDoc finalTutorPersonalTimeTable =
+                                    tutorPersonalTimeTableDocServices.
+                                            updateTutorPersonalTimeTableDocWithPeriodsAndSaveInDb(tutorUniqueIdInDb,
+                                                    subjectUniqueIdInDb,
+                                                    programmeDayName,
+                                                    periodStartingNumber,
+                                                    periodEndingNumber);
+
+                            this.updateDbWithTotalPeriodsThatHasBeenSet
+                                    (programmeDay,
+                                            programmeCode,
+                                            subjectUniqueIdInDb,
+                                            periodAllocationValue1,
+                                            tutorUniqueIdInDb,
+                                            periodStartingNumber,
+                                            periodEndingNumber);
+                            break; //break out of iterations over programmeDays
+                        }
                     }
+
                 }
             }
+        }
 
         //TODO IMPORTANT!!!! THROW EXCEPTION WHEN NO DAY MET THE CRITERIA !!!!!!
-            String programmeDayNameToFind = programmeDayToSetOnTimeTableSuperObject.getDayName();
+        String programmeDayNameToFind = programmeDayToSetOnTimeTableSuperObject.getDayName();
 
-            ProgrammeGroupDoc programmeGroupDocToUpdate = programmeGroupDocRepository.findByProgrammeCode(programmeCode);
-            int yearGroupOfProgrammeCode = programmeGroupDocToUpdate.getYearGroup();
+        ProgrammeGroupDoc programmeGroupDocToUpdate = programmeGroupDocRepository.findByProgrammeCode(programmeCode);
+        int yearGroupOfProgrammeCode = programmeGroupDocToUpdate.getYearGroup();
 
-            String timeTableSuperDocString = new Gson().toJson(timeTableSuperDoc);
-            TimeTableSuperDoc timeTableSuperDocGeneratedFromString = new Gson().fromJson(timeTableSuperDocString, TimeTableSuperDoc.class); //CONVERT BACK TO OBJECT FROM JSON TO PREVENT PROBLEMS OF WRONG WRITES IN UNSOLICITED PLACES
+        String timeTableSuperDocString = new Gson().toJson(timeTableSuperDoc);
+        TimeTableSuperDoc timeTableSuperDocGeneratedFromString = new Gson().fromJson(timeTableSuperDocString, TimeTableSuperDoc.class); //CONVERT BACK TO OBJECT FROM JSON TO PREVENT PROBLEMS OF WRONG WRITES IN UNSOLICITED PLACES
 
-            final int periodStartingNumberFinal = periodStartingNumber;
-            final int periodEndingNumberFinal = periodEndingNumber;
-            timeTableSuperDocGeneratedFromString.getYearGroupsList().forEach((YearGroup yearGroup) -> {
-                if (yearGroup.getYearNumber() == yearGroupOfProgrammeCode) {
-                    yearGroup.getProgrammeGroupList().forEach((ProgrammeGroup programmeGroup) -> {
-                        if (programmeGroup.getProgrammeCode().equalsIgnoreCase(programmeCode)) {
-                            programmeGroup.getProgrammeDaysList().forEach((ProgrammeDay programmeDay) -> {
-                                if (programmeDay.getDayName().equalsIgnoreCase(programmeDayNameToFind)) {
-                                    programmeDay.getPeriodList().forEach((PeriodOrLecture periodOrLecture) -> {
-                                        if ((periodOrLecture.getPeriodNumber() >= periodStartingNumberFinal) &&
-                                                (periodOrLecture.getPeriodNumber() <= periodEndingNumberFinal)) {
-                                            periodOrLecture.setTutorUniqueId(tutorUniqueIdInDb); //set tutor unique id in db
-                                            periodOrLecture.setSubjectUniqueIdInDb(subjectUniqueIdInDb); //set subjectUniqueIdInDb
-                                            periodOrLecture.setIsAllocated(true);//set allocated to true.
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    });
-                }
-            });
+        final int periodStartingNumberFinal = periodStartingNumber;
+        final int periodEndingNumberFinal = periodEndingNumber;
+        timeTableSuperDocGeneratedFromString.getYearGroupsList().forEach((YearGroup yearGroup) -> {
+            if (yearGroup.getYearNumber() == yearGroupOfProgrammeCode) {
+                yearGroup.getProgrammeGroupList().forEach((ProgrammeGroup programmeGroup) -> {
+                    if (programmeGroup.getProgrammeCode().equalsIgnoreCase(programmeCode)) {
+                        programmeGroup.getProgrammeDaysList().forEach((ProgrammeDay programmeDay) -> {
+                            if (programmeDay.getDayName().equalsIgnoreCase(programmeDayNameToFind)) {
+                                programmeDay.getPeriodList().forEach((PeriodOrLecture periodOrLecture) -> {
+                                    if ((periodOrLecture.getPeriodNumber() >= periodStartingNumberFinal) &&
+                                            (periodOrLecture.getPeriodNumber() <= periodEndingNumberFinal)) {
+                                        periodOrLecture.setTutorUniqueId(tutorUniqueIdInDb); //set tutor unique id in db
+                                        periodOrLecture.setSubjectUniqueIdInDb(subjectUniqueIdInDb); //set subjectUniqueIdInDb
+                                        periodOrLecture.setIsAllocated(true);//set allocated to true.
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        });
 
 
-            return timeTableSuperDocGeneratedFromString;//TODO CONTINUE HERE NOW IN NEXT ITERATION.
+        return timeTableSuperDocGeneratedFromString;//TODO CONTINUE HERE NOW IN NEXT ITERATION.
 
     }
 
