@@ -342,10 +342,14 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
                                 (subjectUniqueIdInDb, programmeCode);
 
         int currentTotalPeriodsLeft = tutorSubjectAndProgrammeGroupCombinationDoc.getTotalPeriodLeftToBeAllocated();
-        int periodLoadLeft = currentTotalPeriodsLeft - totalPeriodsThatHasBeenSet;
-        tutorSubjectAndProgrammeGroupCombinationDoc.setTotalPeriodLeftToBeAllocated(periodLoadLeft);
+        int periodLoadLeftAfterDeduction = currentTotalPeriodsLeft - totalPeriodsThatHasBeenSet;
+        tutorSubjectAndProgrammeGroupCombinationDoc.setTotalPeriodLeftToBeAllocated(periodLoadLeftAfterDeduction);
 
-        tutorSubjectAndProgrammeGroupCombinationDocRepository.save(tutorSubjectAndProgrammeGroupCombinationDoc);
+        TutorSubjectAndProgrammeGroupCombinationDoc tutorSubjectAndProgrammeGroupCombinationDocUpdated =
+                new TutorSubjectAndProgrammeGroupCombinationDoc(subjectUniqueIdInDb, programmeCode, periodLoadLeftAfterDeduction);
+        tutorSubjectAndProgrammeGroupCombinationDocUpdated.setId(tutorSubjectAndProgrammeGroupCombinationDoc.getId());
+
+        tutorSubjectAndProgrammeGroupCombinationDocRepository.save(tutorSubjectAndProgrammeGroupCombinationDocUpdated);
 
         ProgrammeGroupPersonalTimeTableDoc programmeGroupPersonalTimeTableDoc =
                 programmeGroupPersonalTimeTableDocServices.

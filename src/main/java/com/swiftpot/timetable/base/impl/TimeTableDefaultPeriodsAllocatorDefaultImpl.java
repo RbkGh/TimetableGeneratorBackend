@@ -83,7 +83,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
     /**
      * pass in non empty value
      */
-    private static final String DUMMY_WORSHIP_TUTOR_UNIQUE_ID = "TUTORCLASSMEETING";
+    private static final String DUMMY_WORSHIP_TUTOR_UNIQUE_ID = "TUTORWORSHIPPERIOD";
 
     @Override
     public TimeTableSuperDoc allocateDefaultPeriodsOnTimeTable(TimeTableSuperDoc timeTableSuperDocWithInitialDefaultDataSet) throws Exception {
@@ -169,8 +169,9 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
                 });
             });
         });
-
         System.out.println("numberOfTimesSet%%%%%%%%%%%======" + numberOfTimesSet[0]);
+        //update programmeGrouppersonal timetable in db
+        this.updateProgrammeGroupTimeTableWithWorshipPeriods(subjectUnniqueIdInDbDummyValue);
         return timeTableSuperDocGeneratedFromString;
     }
 
@@ -209,6 +210,9 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
         });
 
         System.out.println("numberOfTimesSet%%%%%%%%%%%======" + numberOfTimesPeriodIsSet[0]);
+
+        //allocate class meeting periods to programmeGroup personal timetable
+        this.updateProgrammeGroupTimeTableWithClassMeetingPeriods(subjectUniqueIdInDb);
         return timeTableSuperDocGeneratedFromString;
     }
 
@@ -339,7 +343,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
         int totalPeriodsToIterateThrough = periodOrLecturesList.size();
         int totalPeriodsThatHasBeenSet = 0;
         for (int i = 0; i < totalPeriodsToIterateThrough; i++) {
-            if (i >= periodToStartSettingSubjectFrom) {
+            if ((periodOrLecturesList.get(i).getPeriodNumber() >= periodToStartSettingSubjectFrom) && (totalPeriodsThatHasBeenSet <= totalPeriodForPracticalCourse)) {
                 //we increment totalPeriodsThatHasBeenSet by 1 setSubjectUniqueIdInDbAndTutorUniqueIdForAllAffectedPeriodsOfferingPracticals
                 totalPeriodsThatHasBeenSet++;
                 PeriodOrLecture currentPeriodOrLecture = periodOrLecturesList.get(i);
@@ -352,9 +356,9 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
         }
 
         int startingPeriod = periodToStartSettingSubjectFrom;
-        int stoppingPeriod = startingPeriod + totalPeriodsThatHasBeenSet - 1; //this should automatically amount to the period number that the allocation ends,-1 because if starting period starts from 2,and the total periods set is 1,without subtracting 1,it will mean that the period will end at period 3 instead of the same period which is 2
+        int stoppingPeriod = startingPeriod + totalPeriodForPracticalCourse - 1; //this should automatically amount to the period number that the allocation ends,-1 because if starting period starts from 2,and the total periods set is 1,without subtracting 1,it will mean that the period will end at period 3 instead of the same period which is 2
         //updateDb Accordingly to reflect totalSubjectsPeriodLeft in db for both tutorDoc and periods left for the subject to be exhausted
-        this.updateDbWithTotalPeriodsThatHasBeenSet(programmeDay, programmeCode, practicalSubjectId, totalPeriodForPracticalCourse, totalPeriodsThatHasBeenSet, tutorIdResponsibleForSubject, startingPeriod, stoppingPeriod);
+        this.updateDbWithTotalPeriodsThatHasBeenSet(programmeDay, programmeCode, practicalSubjectId, totalPeriodForPracticalCourse, tutorIdResponsibleForSubject, startingPeriod, stoppingPeriod);
 
         return periodOrLecturesList;
     }
@@ -368,7 +372,6 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
      * @param programmeCode
      * @param subjectUniqueIdInDb
      * @param totalPeriodForPracticalCourse
-     * @param totalPeriodsThatHasBeenSet
      * @param tutorIdResponsibleForSubject
      * @param startingPeriod
      * @param stoppingPeriod
@@ -377,7 +380,6 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
                                                 String programmeCode,
                                                 String subjectUniqueIdInDb,
                                                 int totalPeriodForPracticalCourse,
-                                                int totalPeriodsThatHasBeenSet,
                                                 String tutorIdResponsibleForSubject,
                                                 int startingPeriod,
                                                 int stoppingPeriod) {
@@ -386,9 +388,15 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
         //now we decrement the value of the totalSubjectsPeriodLeft in db by the totalPeriodsThatHasBeenSet
         TutorSubjectAndProgrammeGroupCombinationDoc tutorSubjectAndProgrammeGroupCombinationDoc = tutorSubjectAndProgrammeGroupCombinationDocRepository.
                 findBySubjectUniqueIdAndProgrammeCode(subjectUniqueIdInDb, programmeCode);
-        int periodLoadLeft = totalPeriodForPracticalCourse - totalPeriodsThatHasBeenSet;
-        tutorSubjectAndProgrammeGroupCombinationDoc.setTotalPeriodLeftToBeAllocated(periodLoadLeft);
-        tutorSubjectAndProgrammeGroupCombinationDocRepository.save(tutorSubjectAndProgrammeGroupCombinationDoc);
+        int totalPeriodLoadLeftToBeAllocatedForTutor = tutorSubjectAndProgrammeGroupCombinationDoc.getTotalPeriodLeftToBeAllocated();
+        int periodLoadLeftAfterDeduction = totalPeriodLoadLeftToBeAllocatedForTutor - totalPeriodForPracticalCourse;
+        tutorSubjectAndProgrammeGroupCombinationDoc.setTotalPeriodLeftToBeAllocated(periodLoadLeftAfterDeduction);
+
+        TutorSubjectAndProgrammeGroupCombinationDoc tutorSubjectAndProgrammeGroupCombinationDocUpdated =
+                new TutorSubjectAndProgrammeGroupCombinationDoc(subjectUniqueIdInDb, programmeCode, periodLoadLeftAfterDeduction);
+        tutorSubjectAndProgrammeGroupCombinationDocUpdated.setId(tutorSubjectAndProgrammeGroupCombinationDoc.getId());
+
+        tutorSubjectAndProgrammeGroupCombinationDocRepository.save(tutorSubjectAndProgrammeGroupCombinationDocUpdated);
 
         ProgrammeGroupPersonalTimeTableDoc programmeGroupPersonalTimeTableDoc = programmeGroupPersonalTimeTableDocServices.
                 updateProgrammeGroupPersonalTimeTableDocWithPeriodsAndSaveInDb
@@ -442,5 +450,69 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
         }
 
         return programmeDayName;
+    }
+
+    /**
+     * update all list of {@link ProgrammeGroupPersonalTimeTableDoc}s in db with the worship periods
+     *
+     * @param subjectUniqueIdInDb
+     * @throws Exception
+     */
+    private void updateProgrammeGroupTimeTableWithWorshipPeriods(String subjectUniqueIdInDb) throws Exception {
+        int worshipDayNumberr = this.getWorshipPeriodDayNumberAndPeriodNumber().get(CLASS_WORSHIP_DAY_NUMBER_KEY);
+        String worshipDayName = getProgrammeDayName(worshipDayNumberr);
+        System.out.println("WorshipDay Number=" + worshipDayNumberr + "\nWorshipDayName=" + worshipDayName);
+        int worshipPeriodNumber = this.getWorshipPeriodDayNumberAndPeriodNumber().get(CLASS_WORSHIP_PERIOD_NUMBER_KEY);
+
+        List<ProgrammeGroupPersonalTimeTableDoc> programmeGroupPersonalTimeTableDocs =
+                programmeGroupPersonalTimeTableDocRepository.findAll();
+
+        programmeGroupPersonalTimeTableDocs.forEach(programmeGroupPersonalTimeTableDoc -> {
+            programmeGroupPersonalTimeTableDoc.getProgrammeDaysList().forEach(programmeDay -> {
+                if (Objects.equals(worshipDayName, programmeDay.getDayName())) {
+                    programmeDay.getPeriodList().forEach(periodOrLecture -> {
+                        if (Objects.equals(worshipPeriodNumber, periodOrLecture.getPeriodNumber())) {
+                            periodOrLecture.setIsAllocated(true);
+                            periodOrLecture.setSubjectUniqueIdInDb(subjectUniqueIdInDb);
+                            periodOrLecture.setTutorUniqueId(DUMMY_WORSHIP_TUTOR_UNIQUE_ID);
+                        }
+                    });
+                }
+            });
+        });
+
+        programmeGroupPersonalTimeTableDocRepository.save(programmeGroupPersonalTimeTableDocs);
+    }
+
+    /**
+     * update all list of {@link ProgrammeGroupPersonalTimeTableDoc}s in db with the class meeting periods.
+     *
+     * @param subjectUniqueIdInDb
+     * @throws Exception
+     */
+    private void updateProgrammeGroupTimeTableWithClassMeetingPeriods(String subjectUniqueIdInDb) throws Exception {
+        int classMeetingDayNumber = this.getClassMeetingPeriodDayNumberAndPeriodNumber().get(CLASS_MEETING_DAY_NUMBER_KEY);
+        String classMeetingDayName = this.getProgrammeDayName(classMeetingDayNumber);
+        System.out.println("classMeetingDayNumber=" + classMeetingDayNumber + "\nclassMeetingDayName=" + classMeetingDayName);
+        int classMeetingPeriodNumber = this.getClassMeetingPeriodDayNumberAndPeriodNumber().get(CLASS_MEETING_PERIOD_NUMBER_KEY);
+
+        List<ProgrammeGroupPersonalTimeTableDoc> programmeGroupPersonalTimeTableDocs =
+                programmeGroupPersonalTimeTableDocRepository.findAll();
+
+        programmeGroupPersonalTimeTableDocs.forEach(programmeGroupPersonalTimeTableDoc -> {
+            programmeGroupPersonalTimeTableDoc.getProgrammeDaysList().forEach(programmeDay -> {
+                if (Objects.equals(classMeetingDayName, programmeDay.getDayName())) {
+                    programmeDay.getPeriodList().forEach(periodOrLecture -> {
+                        if (Objects.equals(classMeetingPeriodNumber, periodOrLecture.getPeriodNumber())) {
+                            periodOrLecture.setIsAllocated(true);
+                            periodOrLecture.setSubjectUniqueIdInDb(subjectUniqueIdInDb);
+                            periodOrLecture.setTutorUniqueId(DUMMY_CLASSMEETING_TUTOR_UNIQUE_ID);
+                        }
+                    });
+                }
+            });
+        });
+
+        programmeGroupPersonalTimeTableDocRepository.save(programmeGroupPersonalTimeTableDocs);
     }
 }

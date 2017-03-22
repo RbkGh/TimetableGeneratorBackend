@@ -113,7 +113,7 @@ public class ProgrammeDayServices {
     }
 
     /**
-     * get the first index of the location where getIsAllocated is equal to false
+     * get the first periodNumber where getIsAllocated is equal to false
      *
      * @param periodOrLecturesList {@link List<PeriodOrLecture>}
      * @return int
@@ -123,7 +123,7 @@ public class ProgrammeDayServices {
         List<Integer> listOfIndexesWhereFalseWasSeen = new ArrayList<>();
         for (int i = 0; i < totalPeriodsToIterateThrough; i++) {
             if (periodOrLecturesList.get(i).getIsAllocated() == false) {
-                listOfIndexesWhereFalseWasSeen.add(i);
+                listOfIndexesWhereFalseWasSeen.add(periodOrLecturesList.get(i).getPeriodNumber());
             }
         }
         //first will be first element in list
