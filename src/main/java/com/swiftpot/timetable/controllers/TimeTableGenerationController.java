@@ -87,9 +87,13 @@ public class TimeTableGenerationController {
                             @Nullable SubjectDoc subjectDoc = subjectDocRepository.findOne(periodOrLecture.getTutorUniqueId());
                             if (Objects.nonNull(subjectDoc)) {
                                 periodOrLecture.setSubjectFullName(subjectDoc.getSubjectFullName());
+                            } else {
+                                periodOrLecture.setSubjectFullName(periodOrLecture.getSubjectUniqueIdInDb());//at this point only class meetings and worship periods have null subjectDoc as those are not registered as actual subjects.
                             }
                             if (Objects.nonNull(tutorDoc)) {
                                 periodOrLecture.setTutorFullName(tutorDoc.getFirstName() + " " + tutorDoc.getSurName());
+                            } else {
+                                periodOrLecture.setTutorFullName(periodOrLecture.getTutorUniqueId());//the tutor unique id and subjectUniqueId has been set with default values already.
                             }
                         }
                     }
@@ -109,9 +113,13 @@ public class TimeTableGenerationController {
                             @Nullable TutorDoc tutorDoc = tutorDocRepository.findOne(periodOrLecture.getTutorUniqueId());
                             if (Objects.nonNull(subjectDoc)) {
                                 periodOrLecture.setSubjectFullName(subjectDoc.getSubjectFullName());
+                            } else {
+                                periodOrLecture.setSubjectFullName(periodOrLecture.getSubjectUniqueIdInDb());//at this point only class meetings and worship periods have null subjectDoc as those are not registered as actual subjects.
                             }
                             if (Objects.nonNull(tutorDoc)) {
                                 periodOrLecture.setTutorFullName(tutorDoc.getFirstName() + " " + tutorDoc.getSurName());
+                            } else {
+                                periodOrLecture.setTutorFullName(periodOrLecture.getTutorUniqueId());//the tutor unique id and subjectUniqueId has been set with default values already.
                             }
                         }
                     }
