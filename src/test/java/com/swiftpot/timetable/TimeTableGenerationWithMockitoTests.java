@@ -10,7 +10,9 @@ import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.model.ProgrammeDay;
 import com.swiftpot.timetable.model.ProgrammeGroup;
 import com.swiftpot.timetable.model.YearGroup;
+import com.swiftpot.timetable.repository.DepartmentDocRepository;
 import com.swiftpot.timetable.repository.ProgrammeGroupDocRepository;
+import com.swiftpot.timetable.repository.db.model.DepartmentDoc;
 import com.swiftpot.timetable.repository.db.model.ProgrammeGroupDoc;
 import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
 import com.swiftpot.timetable.services.TimeTablePopulatorService;
@@ -55,6 +57,8 @@ public class TimeTableGenerationWithMockitoTests {
 
     @MockBean
     ProgrammeGroupDocRepository programmeGroupDocRepository;
+    @MockBean
+    private DepartmentDocRepository departmentDocRepository;
 
     TimeTableSuperDoc timeTableSuperDoc;
     private static final Logger logger = LogManager.getLogger();
@@ -68,9 +72,12 @@ public class TimeTableGenerationWithMockitoTests {
 
         programmeFullName1 = "Building Construction Technology";
         programmeCode1 = "BCT-1A";
+        String programmeInitials1 = "BCT";
+        String programmeInitials2 = "BUS-ACC";
+        String programmeInitials3 = "CTECH-IT-HARDWARE";
         ProgrammeGroupDoc programmeGroupDoc1 = new ProgrammeGroupDoc();
         programmeGroupDoc1.setProgrammeFullName(programmeFullName1);
-        programmeGroupDoc1.setProgrammeInitials("BCT");
+        programmeGroupDoc1.setProgrammeInitials(programmeInitials1);
         programmeGroupDoc1.setYearGroup(1);
         programmeGroupDoc1.setProgrammeCode(programmeCode1);
         programmeGroupDoc1.setDefaultClassRoomId("class1kj");
@@ -80,7 +87,7 @@ public class TimeTableGenerationWithMockitoTests {
 
         ProgrammeGroupDoc programmeGroupDoc2 = new ProgrammeGroupDoc();
         programmeGroupDoc2.setProgrammeFullName("Business Studies in Accounting");
-        programmeGroupDoc2.setProgrammeInitials("BUS-ACC");
+        programmeGroupDoc2.setProgrammeInitials(programmeInitials2);
         programmeGroupDoc2.setYearGroup(2);
         programmeGroupDoc2.setProgrammeCode("BUS-ACC2A");
         programmeGroupDoc2.setDefaultClassRoomId("class1kj");
@@ -90,7 +97,7 @@ public class TimeTableGenerationWithMockitoTests {
 
         ProgrammeGroupDoc programmeGroupDoc3 = new ProgrammeGroupDoc();
         programmeGroupDoc3.setProgrammeFullName("Computer Technology - Hardware");
-        programmeGroupDoc3.setProgrammeInitials("CTECH-IT-HARDWARE");
+        programmeGroupDoc3.setProgrammeInitials(programmeInitials2);
         programmeGroupDoc3.setYearGroup(3);
         programmeGroupDoc3.setProgrammeCode("CTECH-IT-HARDWARE3A");
         programmeGroupDoc3.setDefaultClassRoomId("class1kj");
@@ -109,7 +116,11 @@ public class TimeTableGenerationWithMockitoTests {
         Mockito.when(programmeGroupDocRepository.findByYearGroup(1)).thenReturn(Arrays.asList(programmeGroupDoc1));
         Mockito.when(programmeGroupDocRepository.findByYearGroup(2)).thenReturn(Arrays.asList(programmeGroupDoc2));
         Mockito.when(programmeGroupDocRepository.findByYearGroup(3)).thenReturn(Arrays.asList(programmeGroupDoc3));
-
+        DepartmentDoc departmentDoc = new DepartmentDoc();
+        departmentDoc.setProgrammeSubjectsDocIdList(Arrays.asList("3452", "EF34R"));
+        Mockito.when(departmentDocRepository.findByDeptProgrammeInitials(programmeInitials1)).thenReturn(departmentDoc);
+        Mockito.when(departmentDocRepository.findByDeptProgrammeInitials(programmeInitials2)).thenReturn(departmentDoc);
+        Mockito.when(departmentDocRepository.findByDeptProgrammeInitials(programmeInitials2)).thenReturn(departmentDoc);
 
         timeTableSuperDoc = timeTablePopulatorService.partOneGenerateInitialTimeTableSuperDocWithInitialData();
     }
