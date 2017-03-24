@@ -12,9 +12,6 @@ buildscript {
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
 
-		//jrebel config
-		classpath group: 'org.zeroturnaround', name: 'gradle-jrebel-plugin', version: '1.1.5'
-		//jrebel config
 	}
 }
 apply plugin: 'war'
@@ -22,7 +19,7 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
-apply plugin: 'rebel'
+
 
 war {
 	baseName = 'timetable-technical'
@@ -56,7 +53,7 @@ dependencies {
 	compile('org.apache.commons:commons-lang3:3.5')
 
 	compile('com.sun.istack:istack-commons-runtime:3.0.5')
-
+	compile("org.springframework.boot:spring-boot-devtools")
 
 	providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 	testCompile('org.springframework.boot:spring-boot-starter-test')

@@ -84,7 +84,7 @@ public class TimeTableGenerationController {
                 for (PeriodOrLecture periodOrLecture : periodOrLectureList) {
                     if (Objects.nonNull(periodOrLecture.getSubjectUniqueIdInDb())) {
                         if (!periodOrLecture.getSubjectUniqueIdInDb().isEmpty()) {
-                            @Nullable SubjectDoc subjectDoc = subjectDocRepository.findOne(periodOrLecture.getTutorUniqueId());
+                            @Nullable SubjectDoc subjectDoc = subjectDocRepository.findOne(periodOrLecture.getSubjectUniqueIdInDb());
                             if (Objects.nonNull(subjectDoc)) {
                                 periodOrLecture.setSubjectFullName(subjectDoc.getSubjectFullName());
                             } else {
@@ -109,7 +109,7 @@ public class TimeTableGenerationController {
                 for (PeriodOrLecture periodOrLecture : periodOrLectureList) {
                     if (Objects.nonNull(periodOrLecture.getSubjectUniqueIdInDb())) {
                         if (!periodOrLecture.getSubjectUniqueIdInDb().isEmpty()) {
-                            @Nullable SubjectDoc subjectDoc = subjectDocRepository.findOne(periodOrLecture.getTutorUniqueId());
+                            @Nullable SubjectDoc subjectDoc = subjectDocRepository.findOne(periodOrLecture.getSubjectUniqueIdInDb());
                             @Nullable TutorDoc tutorDoc = tutorDocRepository.findOne(periodOrLecture.getTutorUniqueId());
                             if (Objects.nonNull(subjectDoc)) {
                                 periodOrLecture.setSubjectFullName(subjectDoc.getSubjectFullName());

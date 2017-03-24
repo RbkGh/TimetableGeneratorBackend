@@ -36,31 +36,31 @@ import java.util.concurrent.atomic.AtomicReference;
 public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDefaultPeriodsAllocator {
 
     @Autowired
-    TutorDocRepository tutorDocRepository;
+    private TutorDocRepository tutorDocRepository;
     @Autowired
-    SubjectDocRepository subjectDocRepository;
+    private SubjectDocRepository subjectDocRepository;
     @Autowired
-    BusinessLogicConfigurationProperties businessLogicConfigurationProperties;
+    private BusinessLogicConfigurationProperties businessLogicConfigurationProperties;
     @Autowired
-    TutorResponsibleForSubjectRetrieverFactory tutorResponsibleForSubjectRetrieverFactory;
+    private TutorResponsibleForSubjectRetrieverFactory tutorResponsibleForSubjectRetrieverFactory;
     @Autowired
-    TutorSubjectAndProgrammeGroupCombinationDocRepository tutorSubjectAndProgrammeGroupCombinationDocRepository;
+    private TutorSubjectAndProgrammeGroupCombinationDocRepository tutorSubjectAndProgrammeGroupCombinationDocRepository;
     @Autowired
-    SubjectAllocationDocRepository subjectAllocationDocRepository;
+    private SubjectAllocationDocRepository subjectAllocationDocRepository;
     @Autowired
-    IProgrammeDayHelper iProgrammeDayHelper;
+    private IProgrammeDayHelper iProgrammeDayHelper;
     @Autowired
-    ProgrammeDayHelperUtilDefaultImpl programmeDayHelperUtilDefault;
+    private ProgrammeDayHelperUtilDefaultImpl programmeDayHelperUtilDefault;
     @Autowired
-    TutorPersonalTimeTableDocRepository tutorPersonalTimeTableDocRepository;
+    private TutorPersonalTimeTableDocRepository tutorPersonalTimeTableDocRepository;
     @Autowired
-    TutorPersonalTimeTableDocServices tutorPersonalTimeTableDocServices;
+    private TutorPersonalTimeTableDocServices tutorPersonalTimeTableDocServices;
     @Autowired
-    ProgrammeGroupPersonalTimeTableDocServices programmeGroupPersonalTimeTableDocServices;
+    private ProgrammeGroupPersonalTimeTableDocServices programmeGroupPersonalTimeTableDocServices;
     @Autowired
-    ProgrammeGroupPersonalTimeTableDocRepository programmeGroupPersonalTimeTableDocRepository;
+    private ProgrammeGroupPersonalTimeTableDocRepository programmeGroupPersonalTimeTableDocRepository;
     @Autowired
-    ProgrammeDayServices programmeDayServices;
+    private ProgrammeDayServices programmeDayServices;
 
     private static final String CLASS_MEETING_DAY_NUMBER_KEY = "CLASS_MEETING_DAYNUMBER";
     private static final String CLASS_MEETING_PERIOD_NUMBER_KEY = "CLASS_MEETING_PERIODNUMBER";
