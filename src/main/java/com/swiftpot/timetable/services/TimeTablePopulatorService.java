@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ace Programmer Rbk
@@ -48,6 +49,8 @@ public class TimeTablePopulatorService {
     private TutorSubjectAndProgrammeGroupCombinationDocRepository tutorSubjectAndProgrammeGroupCombinationDocRepository;
     @Autowired
     private DepartmentDocRepository departmentDocRepository;
+    @Autowired
+    private ProgrammeGroupDocServices programmeGroupDocServices;
 
 
     /**
@@ -63,22 +66,22 @@ public class TimeTablePopulatorService {
         //set yearGroupList
         List<YearGroup> yearGroupsList = new ArrayList<>();
 
-        int numberOfProgrammeGroupDocs = allProgrammeGroupDocsListInDb.size();
+        Map<Integer, List<ProgrammeGroupDoc>> mapOfYearGroupAndProgrammeGroupDocs =
+                programmeGroupDocServices.
+                        getYearGroupNumbersAndProgrammeGroupsThatExistInEachYearGroupNumber(allProgrammeGroupDocsListInDb);
+
+        int numberOfYearGroups = mapOfYearGroupAndProgrammeGroupDocs.size();
         //go through ProgrammeGroupDoc list and set new YearGroup for each instance and add to yearGroupsList
-        for (int currentNo = 0; currentNo < numberOfProgrammeGroupDocs; currentNo++) {
-            int currentYearGroup = allProgrammeGroupDocsListInDb.get(currentNo).getYearGroup();
+        for (int currentNo = 1; currentNo <= numberOfYearGroups; currentNo++) { //no yearGroup starts from 0,hence we start our loop from 1 instead of 0
+            int currentYearGroup = 1;
             String currentYearName = YearGroupNumberAndNames.getYearGroupName(currentYearGroup);
 
-            YearGroup yearGroup = new YearGroup();
-            yearGroup.setYearName(currentYearName);
-            yearGroup.setYearNumber(currentYearGroup);
-
-            //now to set programmeGroupList for YearGroup,fetch all ProgrammeGroupDoc from db with current yeargroup Number
             List<ProgrammeGroup> programmeGroupList = new ArrayList<>();
-            ProgrammeGroup programmeGroup = new ProgrammeGroup();
-            List<ProgrammeGroupDoc> programmeGroupDocForCurrentYearGroupList = programmeGroupDocRepository.findByYearGroup(currentYearGroup);
+            //now to set programmeGroupList for YearGroup,get the programmeGroupDocs List from the map using the currentYearGroup number as the key.
+            List<ProgrammeGroupDoc> programmeGroupDocForCurrentYearGroupList = mapOfYearGroupAndProgrammeGroupDocs.get(currentYearGroup);
             //set each ProgrammeGroup's parameters from ProgramGroupDoc and add to ProgrammeGroup list
             for (ProgrammeGroupDoc x : programmeGroupDocForCurrentYearGroupList) {
+                ProgrammeGroup programmeGroup = new ProgrammeGroup();
                 programmeGroup.setProgrammeCode(x.getProgrammeCode());
                 //set wether the programmeCode Requires a technical Workshop or not
                 programmeGroup.setIsProgrammeRequiringPracticalsClassroom(x.getIsTechnicalWorkshopOrLabRequired());
@@ -93,6 +96,10 @@ public class TimeTablePopulatorService {
                 //finally in this loop,finish off by adding the programmeGroup to the programmeGroupList
                 programmeGroupList.add(programmeGroup);
             }
+
+            YearGroup yearGroup = new YearGroup();
+            yearGroup.setYearName(currentYearName);
+            yearGroup.setYearNumber(currentYearGroup);
             //now we can set programmeGroupList for YearGroup,as we have finished iterating through
             yearGroup.setProgrammeGroupList(programmeGroupList);
             //now we can add current YearGroup Object to the yearGroupList

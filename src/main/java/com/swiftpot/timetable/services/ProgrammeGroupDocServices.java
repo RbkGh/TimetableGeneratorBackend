@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.services;
 
 import com.swiftpot.timetable.repository.DepartmentDocRepository;
@@ -10,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -97,5 +102,35 @@ public class ProgrammeGroupDocServices {
 
         List<ProgrammeGroupDoc> finalProgrammeGroupDocsToReturn = finalProgrammeGroupDocsInDeptSet.stream().collect(Collectors.toList());//convert set to List
         return finalProgrammeGroupDocsToReturn;
+    }
+
+    /**
+     * get the total number of YearGroupNumbers({@link com.swiftpot.timetable.model.YearGroup#yearNumber} and the corresponding programmeGroupDocs in each yearGroup.
+     *
+     * @param programmeGroupDocs the programmeGroup to sort.
+     * @return {@link Map<Integer,List<ProgrammeGroupDoc>}
+     */
+    public Map<Integer, List<ProgrammeGroupDoc>> getYearGroupNumbersAndProgrammeGroupsThatExistInEachYearGroupNumber(List<ProgrammeGroupDoc> programmeGroupDocs) {
+        Map<Integer, List<ProgrammeGroupDoc>> mapOfYearGroupAndProgrammeGroupDocs = new ConcurrentHashMap<>();
+
+        //remove any duplicate yearGroup numbers.
+        Set<Integer> yearGroupSet = new HashSet<>();
+        for (ProgrammeGroupDoc programmeGroupDoc : programmeGroupDocs) {
+            yearGroupSet.add(programmeGroupDoc.getYearGroup());
+        }
+
+        for (int yearGroupNumber : yearGroupSet) {
+            List<ProgrammeGroupDoc> programmeGroupDocsList = new ArrayList<>();
+            for (ProgrammeGroupDoc programmeGroupDoc : programmeGroupDocs) {
+                if (Objects.equals(yearGroupNumber, programmeGroupDoc.getYearGroup())) {
+                    programmeGroupDocsList.add(programmeGroupDoc);
+                }
+            }
+            if (!programmeGroupDocsList.isEmpty()) {
+                mapOfYearGroupAndProgrammeGroupDocs.put(yearGroupNumber, programmeGroupDocsList);
+            }
+        }
+
+        return mapOfYearGroupAndProgrammeGroupDocs;
     }
 }
