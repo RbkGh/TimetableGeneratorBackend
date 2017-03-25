@@ -34,6 +34,7 @@ public class TutorPersonalTimeTableDocServices {
      * @param tutorUniqueIdInDb                 the tutor's uniqueId in database ie. {@link com.swiftpot.timetable.repository.db.model.TutorDoc#id}
      * @param subjectUniqueIdInDb               the subject to be set 's unique id in database ie. {@link com.swiftpot.timetable.repository.db.model.SubjectDoc#id}
      * @param programmeDayName                  the programme day name to set ie. {@link com.swiftpot.timetable.model.ProgrammeDay#dayName} .eg Monday could have "Monday" as the programme day name
+     * @param programmeCode                     the {@link com.swiftpot.timetable.repository.db.model.ProgrammeGroupDoc#programmeCode} that will be used to set the tutor's specific class he is teaching at a specific period ie. {@link com.swiftpot.timetable.model.PeriodOrLecture#programmeCodeThatTutorIsTeaching}
      * @param periodNumberToStartSettingSubject the index to start setting the periods from ie. {@link com.swiftpot.timetable.model.PeriodOrLecture#periodNumber} eg. period 3,
      * @param periodNumberToStopSettingSubject  the period number to stop setting the periods ie {@link com.swiftpot.timetable.model.PeriodOrLecture#periodNumber} eg. period 3,
      * @return {@link TutorPersonalTimeTableDoc}
@@ -41,12 +42,14 @@ public class TutorPersonalTimeTableDocServices {
     public synchronized TutorPersonalTimeTableDoc updateTutorPersonalTimeTableDocWithPeriodsAndSaveInDb(String tutorUniqueIdInDb,
                                                                                                         String subjectUniqueIdInDb,
                                                                                                         String programmeDayName,
+                                                                                                        String programmeCode,
                                                                                                         int periodNumberToStartSettingSubject,
                                                                                                         int periodNumberToStopSettingSubject) {
         TutorPersonalTimeTableDoc tutorPersonalTimeTableDoc =
                 this.getTutorPersonalTimeTableWithIncomingPeriodsSet(tutorUniqueIdInDb,
                         subjectUniqueIdInDb,
                         programmeDayName,
+                        programmeCode,
                         periodNumberToStartSettingSubject,
                         periodNumberToStopSettingSubject);
         TutorPersonalTimeTableDoc tutorPersonalTimeTableDocSaved = tutorPersonalTimeTableDocRepository.save(tutorPersonalTimeTableDoc);
@@ -62,6 +65,7 @@ public class TutorPersonalTimeTableDocServices {
      * @param tutorUniqueIdInDb                 the tutor's uniqueId in database ie. {@link com.swiftpot.timetable.repository.db.model.TutorDoc#id}
      * @param subjectUniqueIdInDb               the subject to be set 's unique id in database ie. {@link com.swiftpot.timetable.repository.db.model.SubjectDoc#id}
      * @param programmeDayName                  the programme day name to set ie. {@link com.swiftpot.timetable.model.ProgrammeDay#dayName} .eg Monday could have "Monday" as the programme day name
+     * @param programmeCode                     the {@link com.swiftpot.timetable.repository.db.model.ProgrammeGroupDoc#programmeCode} that will be used to set the tutor's specific class he is teaching at a specific period ie. {@link com.swiftpot.timetable.model.PeriodOrLecture#programmeCodeThatTutorIsTeaching}* @param programmeCode
      * @param periodNumberToStartSettingSubject the index to start setting the periods from ie. {@link com.swiftpot.timetable.model.PeriodOrLecture#periodNumber} eg. period 3,
      * @param periodNumberToStopSettingSubject  the period number to stop setting the periods ie {@link com.swiftpot.timetable.model.PeriodOrLecture#periodNumber} eg. period 3,
      * @return TutorPersonalTimeTableDoc
@@ -69,6 +73,7 @@ public class TutorPersonalTimeTableDocServices {
     public synchronized TutorPersonalTimeTableDoc getTutorPersonalTimeTableWithIncomingPeriodsSet(String tutorUniqueIdInDb,
                                                                                                   String subjectUniqueIdInDb,
                                                                                                   String programmeDayName,
+                                                                                                  String programmeCode,
                                                                                                   int periodNumberToStartSettingSubject,
                                                                                                   int periodNumberToStopSettingSubject) {
         TutorPersonalTimeTableDoc tutorPersonalTimeTableDoc =
@@ -81,6 +86,7 @@ public class TutorPersonalTimeTableDocServices {
 
         ProgrammeDay programmeDayWithEverythingSet =
                 programmeDayServices.setPeriodsOnProgrammeDayTimetable(programmeDayToSetThePeriodsAndTutorIdTo,
+                        programmeCode,
                         tutorUniqueIdInDb,
                         subjectUniqueIdInDb,
                         periodNumberToStartSettingSubject,

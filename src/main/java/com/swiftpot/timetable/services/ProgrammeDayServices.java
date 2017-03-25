@@ -71,6 +71,7 @@ public class ProgrammeDayServices {
      * set periods and tutor of subject for the affected periods on a particular programmeDay.
      *
      * @param programmeDay                      the {@link ProgrammeDay} to set the periods on.
+     * @param programmeCode                     the {@link com.swiftpot.timetable.repository.db.model.ProgrammeGroupDoc#programmeCode} that will be used to set the tutor's specific class he is teaching at a specific period ie. {@link com.swiftpot.timetable.model.PeriodOrLecture#programmeCodeThatTutorIsTeaching}* @param programmeCode
      * @param tutorUniqueIdInDb                 the tutor's unique {@link com.swiftpot.timetable.repository.db.model.TutorDoc#id}
      * @param subjectUniqueIdInDb               the subject's unique {@link com.swiftpot.timetable.repository.db.model.SubjectDoc#id}
      * @param periodNumberToStartSettingSubject the period number to start setting the subject and tutor ids from .
@@ -78,6 +79,7 @@ public class ProgrammeDayServices {
      * @return {@link ProgrammeDay} with the periods set to the subject and tutor.
      */
     ProgrammeDay setPeriodsOnProgrammeDayTimetable(ProgrammeDay programmeDay,
+                                                   String programmeCode,
                                                    String tutorUniqueIdInDb,
                                                    String subjectUniqueIdInDb,
                                                    int periodNumberToStartSettingSubject,
@@ -89,6 +91,7 @@ public class ProgrammeDayServices {
             if ((currentPeriodNumber >= periodNumberToStartSettingSubject) && (currentPeriodNumber <= periodNumberToStopSettingSubject)) {
                 periodOrLecture.setTutorUniqueId(tutorUniqueIdInDb);
                 periodOrLecture.setSubjectUniqueIdInDb(subjectUniqueIdInDb);
+                periodOrLecture.setProgrammeCodeThatTutorIsTeaching(programmeCode);
                 periodOrLecture.setIsAllocated(true);
             }
         }

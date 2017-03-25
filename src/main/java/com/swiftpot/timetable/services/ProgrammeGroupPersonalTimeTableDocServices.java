@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.services;
 
 import com.swiftpot.timetable.model.ProgrammeDay;
@@ -83,6 +87,7 @@ public class ProgrammeGroupPersonalTimeTableDocServices {
 
         ProgrammeDay programmeDayWithEverythingSet =
                 programmeDayServices.setPeriodsOnProgrammeDayTimetable(programmeDayToSetThePeriodsAndTutorIdTo,
+                        programmeCode,
                         tutorUniqueIdInDb,
                         subjectUniqueIdInDb,
                         periodNumberToStartSettingSubject,

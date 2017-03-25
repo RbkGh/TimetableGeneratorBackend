@@ -167,6 +167,7 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
                                             updateTutorPersonalTimeTableDocWithPeriodsAndSaveInDb(tutorUniqueIdInDb,
                                                     subjectUniqueIdInDb,
                                                     programmeDayName,
+                                                    programmeCode,
                                                     periodStartingNumber,
                                                     periodEndingNumber);
 
@@ -361,7 +362,7 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
         TutorPersonalTimeTableDoc tutorPersonalTimeTableDoc =
                 tutorPersonalTimeTableDocServices.
                         updateTutorPersonalTimeTableDocWithPeriodsAndSaveInDb
-                                (tutorIdResponsibleForSubject, subjectUniqueIdInDb, programmeDayName, startingPeriod, stoppingPeriod);
+                                (tutorIdResponsibleForSubject, subjectUniqueIdInDb, programmeDayName, programmeCode, startingPeriod, stoppingPeriod);
 
     }
 }

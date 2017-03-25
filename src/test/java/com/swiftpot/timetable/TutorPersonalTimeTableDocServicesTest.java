@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable;
 
 import com.google.gson.Gson;
@@ -73,7 +77,7 @@ public class TutorPersonalTimeTableDocServicesTest {
         Type typeOfSrc = new TypeToken<TutorPersonalTimeTableDoc>() {
         }.getType();
         TutorPersonalTimeTableDoc tutorPersonalTimeTableDoc = tutorPersonalTimeTableDocServices.
-                getTutorPersonalTimeTableWithIncomingPeriodsSet(tutorUniqueIdInDb, subjectUniqueId, programmeDayName, periodNumberToStartSettingSubject, periodNumberToStopSettingSubject);
+                getTutorPersonalTimeTableWithIncomingPeriodsSet(tutorUniqueIdInDb, subjectUniqueId, programmeDayName, "programmeCodeDummy", periodNumberToStartSettingSubject, periodNumberToStopSettingSubject);
         logger.info("TutorPersonalTimeTableDoc generated with set periods =\n{}",
                 PrettyJSON.toPrettyFormat(new Gson().toJson(tutorPersonalTimeTableDoc, typeOfSrc)));
         assertThat(tutorPersonalTimeTableDoc.getProgrammeDaysList().get(2).getPeriodList().get(2).getIsAllocated(), equalTo(true));
@@ -86,7 +90,7 @@ public class TutorPersonalTimeTableDocServicesTest {
         Type typeOfSrc = new TypeToken<TutorPersonalTimeTableDoc>() {
         }.getType();
         TutorPersonalTimeTableDoc tutorPersonalTimeTableDoc = tutorPersonalTimeTableDocServices.
-                getTutorPersonalTimeTableWithIncomingPeriodsSet(tutorUniqueIdInDb, subjectUniqueId, programmeDayName, periodNumberToStartSettingSubject, periodNumberToStopSettingSubject);
+                getTutorPersonalTimeTableWithIncomingPeriodsSet(tutorUniqueIdInDb, subjectUniqueId, "programmeCodeDummy", programmeDayName, periodNumberToStartSettingSubject, periodNumberToStopSettingSubject);
         logger.info("TutorPersonalTimeTableDoc generated with set periods =\n{}",
                 PrettyJSON.toPrettyFormat(new Gson().toJson(tutorPersonalTimeTableDoc, typeOfSrc)));
         assertThat(tutorPersonalTimeTableDoc.getProgrammeDaysList().get(2).getPeriodList().get(2).getIsAllocated(), equalTo(true));

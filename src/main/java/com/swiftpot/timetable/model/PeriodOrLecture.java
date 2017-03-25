@@ -37,6 +37,11 @@ public class PeriodOrLecture {
      */
     private String subjectFullName;
 
+    /**
+     * this will only be used to set the {@link com.swiftpot.timetable.repository.db.model.TutorPersonalTimeTableDoc}'s periods,to show the specific class that the tutor is teaching at a particular moment.
+     */
+    private String programmeCodeThatTutorIsTeaching;
+
     public PeriodOrLecture() {
     }
 
@@ -121,5 +126,20 @@ public class PeriodOrLecture {
     public PeriodOrLecture setSubjectFullName(String subjectFullName) {
         this.subjectFullName = subjectFullName;
         return this;
+    }
+
+    /**
+     * @return {@link PeriodOrLecture#programmeCodeThatTutorIsTeaching}
+     * @see PeriodOrLecture#programmeCodeThatTutorIsTeaching
+     */
+    public String getProgrammeCodeThatTutorIsTeaching() {
+        return programmeCodeThatTutorIsTeaching;
+    }
+
+    /**
+     * @see PeriodOrLecture#programmeCodeThatTutorIsTeaching
+     */
+    public void setProgrammeCodeThatTutorIsTeaching(String programmeCodeThatTutorIsTeaching) {
+        this.programmeCodeThatTutorIsTeaching = programmeCodeThatTutorIsTeaching;
     }
 }

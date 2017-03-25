@@ -349,6 +349,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
                 PeriodOrLecture currentPeriodOrLecture = periodOrLecturesList.get(i);
                 currentPeriodOrLecture.setSubjectUniqueIdInDb(practicalSubjectId);
                 currentPeriodOrLecture.setTutorUniqueId(tutorIdResponsibleForSubject);
+                currentPeriodOrLecture.setProgrammeCodeThatTutorIsTeaching(programmeCode);
                 currentPeriodOrLecture.setIsAllocated(true);
                 //now set the new currentPeriodOrLecture to the same position in the list
                 periodOrLecturesList.set(i, currentPeriodOrLecture);
@@ -407,7 +408,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
         TutorPersonalTimeTableDoc tutorPersonalTimeTableDoc =
                 tutorPersonalTimeTableDocServices.
                         updateTutorPersonalTimeTableDocWithPeriodsAndSaveInDb
-                                (tutorIdResponsibleForSubject, subjectUniqueIdInDb, programmeDayName, startingPeriod, stoppingPeriod);
+                                (tutorIdResponsibleForSubject, subjectUniqueIdInDb, programmeDayName, programmeCode, startingPeriod, stoppingPeriod);
 
     }
 
