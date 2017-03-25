@@ -73,7 +73,7 @@ public class TimeTablePopulatorService {
         int numberOfYearGroups = mapOfYearGroupAndProgrammeGroupDocs.size();
         //go through ProgrammeGroupDoc list and set new YearGroup for each instance and add to yearGroupsList
         for (int currentNo = 1; currentNo <= numberOfYearGroups; currentNo++) { //no yearGroup starts from 0,hence we start our loop from 1 instead of 0
-            int currentYearGroup = 1;
+            int currentYearGroup = currentNo;
             String currentYearName = YearGroupNumberAndNames.getYearGroupName(currentYearGroup);
 
             List<ProgrammeGroup> programmeGroupList = new ArrayList<>();
