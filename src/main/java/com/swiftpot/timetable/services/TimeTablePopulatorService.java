@@ -120,7 +120,8 @@ public class TimeTablePopulatorService {
      * @throws Exception
      */
     public TimeTableSuperDoc partTwoAllocateDefaultPeriods(String timeTableDefaultPeriodsAllocatorType, TimeTableSuperDoc timeTableSuperDocWithInitialDefaultDataSet) throws Exception {
-        return timeTableDefaultPeriodsAllocatorFactory.getTimeTableDefaultPeriodsAllocator(timeTableDefaultPeriodsAllocatorType).
+        timeTableDefaultPeriodsAllocatorFactory.setTimeTableDefaultPeriodsAllocator(timeTableDefaultPeriodsAllocatorType);
+        return timeTableDefaultPeriodsAllocatorFactory.getTimeTableDefaultPeriodsAllocator().
                 allocateDefaultPeriodsOnTimeTable(timeTableSuperDocWithInitialDefaultDataSet);
     }
 

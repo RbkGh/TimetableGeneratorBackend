@@ -20,22 +20,32 @@ import java.util.Objects;
 public class TimeTableDefaultPeriodsAllocatorFactory {
 
     @Autowired
+    private TimeTableDefaultPeriodsAllocator timeTableDefaultPeriodsAllocator;
+    @Autowired
     TimeTableDefaultPeriodsAllocatorDefaultImpl timeTableDefaultPeriodsAllocatorDefault;
     public static final String DEFAULT_IMPLEMENTATION = "DEFAULT";
 
     /**
-     * @param timeTableDefaultPeriodsAllocatorType
-     * @return {@link TimeTableDefaultPeriodsAllocator},<br>Returns the specific implementation to be used</br>
-     * <p>the options are "DEFAULT",more will be added as and when needed</p>
+     *
+     * <br>get the specific implementation to be used</br>
+     *
      */
-    public TimeTableDefaultPeriodsAllocator getTimeTableDefaultPeriodsAllocator(String timeTableDefaultPeriodsAllocatorType) {
-        if (Objects.equals(timeTableDefaultPeriodsAllocatorType, DEFAULT_IMPLEMENTATION)) {
-            return timeTableDefaultPeriodsAllocatorDefault;
-        } else {
-            return timeTableDefaultPeriodsAllocatorDefault;
-        }
+    public TimeTableDefaultPeriodsAllocator getTimeTableDefaultPeriodsAllocator() {
+        return this.timeTableDefaultPeriodsAllocator;
     }
 
+    /**
+     * @param timeTableDefaultPeriodsAllocatorType {@link #DEFAULT_IMPLEMENTATION} is a candidate for this method.
+     * <br>set the specific implementation to be used</br>
+     * <p>the options are "DEFAULT",more will be added as and when needed</p>
+     */
+    public void setTimeTableDefaultPeriodsAllocator(String timeTableDefaultPeriodsAllocatorType) {
+        if (Objects.equals(timeTableDefaultPeriodsAllocatorType, DEFAULT_IMPLEMENTATION)) {
+            this.timeTableDefaultPeriodsAllocator = timeTableDefaultPeriodsAllocatorDefault;
+        } else {
+            this.timeTableDefaultPeriodsAllocator = timeTableDefaultPeriodsAllocatorDefault;
+        }
+    }
     public TimeTableDefaultPeriodsAllocatorFactory() {
     }
 }

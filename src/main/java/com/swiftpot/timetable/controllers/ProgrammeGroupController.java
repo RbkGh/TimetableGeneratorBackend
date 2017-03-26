@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.controllers;
 
 import com.swiftpot.timetable.model.ErrorOutgoingPayload;
@@ -42,7 +46,7 @@ public class ProgrammeGroupController {
             } else {
                 List<ProgrammeGroupDoc> programmeGroupDocsSaved =
                         programmeGroupDocCreatorService.createProgramGroupDocWithConstraintsCateredForAndSave(programmeGroupDocsWithProgrammeInitialsInCaps);
-                if (Objects.isNull(programmeGroupDocsSaved) || (!programmeGroupDocsSaved.isEmpty())) {
+                if (Objects.isNull(programmeGroupDocsSaved) || (programmeGroupDocsSaved.isEmpty())) {
                     return new ErrorOutgoingPayload("Error Occured,could not create ProgrammeGroup");
                 } else {
                     return new SuccessfulOutgoingPayload(programmeGroupDocsSaved);
