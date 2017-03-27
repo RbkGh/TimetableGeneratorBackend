@@ -181,6 +181,13 @@ public class ProgrammeDayServices {
                 }
 
             }
+        } else {
+            //the whole day is unallocated,hence,set all the 10 periods in day.
+            UnallocatedPeriodSet unallocatedPeriodSet = new UnallocatedPeriodSet();
+            unallocatedPeriodSet.setPeriodStartingNumber(1);
+            unallocatedPeriodSet.setPeriodEndingNumber(programmeDay.getPeriodList().size());
+            unallocatedPeriodSet.setTotalNumberOfPeriodsForSet(programmeDay.getPeriodList().size());
+            return new ArrayList<>(Arrays.asList(unallocatedPeriodSet));
         }
 
         return new ArrayList<>(finalUnallocatedPeriodSetsList);

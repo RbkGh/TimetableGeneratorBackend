@@ -7,6 +7,7 @@ package com.swiftpot.timetable.services;
 import com.google.gson.Gson;
 import com.swiftpot.timetable.base.TutorSubjectAndProgrammeGroupCombinationDocAllocator;
 import com.swiftpot.timetable.base.impl.TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl;
+import com.swiftpot.timetable.exception.PracticalSubjectForDayNotFoundException;
 import com.swiftpot.timetable.factory.TimeTableDefaultPeriodsAllocatorFactory;
 import com.swiftpot.timetable.model.ProgrammeGroup;
 import com.swiftpot.timetable.model.TutorSubjectIdAndProgrammeCodesListObj;
@@ -131,7 +132,7 @@ public class TimeTablePopulatorService {
      * @param timeTableSuperDocWithDefaultPeriodsSetAlready the {@link TimeTableSuperDoc} with default periods set already.
      * @return final fully generated {@link TimeTableSuperDoc}
      */
-    public TimeTableSuperDoc partThreeAllocatePeriodsForEachTutor(TimeTableSuperDoc timeTableSuperDocWithDefaultPeriodsSetAlready) {
+    public TimeTableSuperDoc partThreeAllocatePeriodsForEachTutor(TimeTableSuperDoc timeTableSuperDocWithDefaultPeriodsSetAlready) throws PracticalSubjectForDayNotFoundException {
         tutorSubjectAndProgrammeGroupCombinationDocAllocator = tutorSubjectAndProgrammeGroupCombinationDocAllocatorDefault;
 
         String timeTableSuperDocString = new Gson().toJson(timeTableSuperDocWithDefaultPeriodsSetAlready);

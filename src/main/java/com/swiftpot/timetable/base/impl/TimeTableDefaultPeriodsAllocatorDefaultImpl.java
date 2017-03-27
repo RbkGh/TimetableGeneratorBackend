@@ -6,6 +6,7 @@ package com.swiftpot.timetable.base.impl;
 
 import com.google.gson.Gson;
 import com.swiftpot.timetable.base.*;
+import com.swiftpot.timetable.exception.UknownPracticalsPeriodAllocation;
 import com.swiftpot.timetable.factory.TutorResponsibleForSubjectRetrieverFactory;
 import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.model.ProgrammeDay;
@@ -16,15 +17,13 @@ import com.swiftpot.timetable.repository.db.model.*;
 import com.swiftpot.timetable.services.ProgrammeDayServices;
 import com.swiftpot.timetable.services.ProgrammeGroupPersonalTimeTableDocServices;
 import com.swiftpot.timetable.services.TutorPersonalTimeTableDocServices;
+import com.swiftpot.timetable.services.servicemodels.PeriodSetForProgrammeDay;
 import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
 import com.swiftpot.timetable.util.ProgrammeDayHelperUtilDefaultImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -52,7 +51,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
     @Autowired
     private ProgrammeDayHelperUtilDefaultImpl programmeDayHelperUtilDefault;
     @Autowired
-    private TutorPersonalTimeTableDocRepository tutorPersonalTimeTableDocRepository;
+    private ProgrammeGroupDayPeriodSetsDocRepository programmeGroupDayPeriodSetsDocRepository;
     @Autowired
     private TutorPersonalTimeTableDocServices tutorPersonalTimeTableDocServices;
     @Autowired
@@ -105,7 +104,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
      * @param timeTableSuperDoc
      * @return
      */
-    public TimeTableSuperDoc allocatePracticalsSubjectPeriodForAllProgrammeGroupsRequiringIt(TimeTableSuperDoc timeTableSuperDoc) {
+    public TimeTableSuperDoc allocatePracticalsSubjectPeriodForAllProgrammeGroupsRequiringIt(TimeTableSuperDoc timeTableSuperDoc) throws UknownPracticalsPeriodAllocation {
         String timeTableSuperDocString = new Gson().toJson(timeTableSuperDoc);
         TimeTableSuperDoc timeTableSuperDocGeneratedFromString = new Gson().fromJson(timeTableSuperDocString, TimeTableSuperDoc.class);
 
@@ -202,6 +201,8 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
                             periodOrLecture.setIsAllocated(true);
                             periodOrLecture.setSubjectUniqueIdInDb(subjectUniqueIdInDb);
                             periodOrLecture.setTutorUniqueId(DUMMY_CLASSMEETING_TUTOR_UNIQUE_ID);
+                            //alter the ProgrammeGroupDayPeriodSetDoc to reflect the new periodset
+                            this.replaceProgrammeGroupDayPeriodSetDocInDbAfterSettingWorshipAndClassMeetingOnFridayMorning(programmeGroup.getProgrammeCode(), programmeDay);
                             numberOfTimesPeriodIsSet[0]++;
                         }
                     });
@@ -213,6 +214,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
 
         //allocate class meeting periods to programmeGroup personal timetable
         this.updateProgrammeGroupTimeTableWithClassMeetingPeriods(subjectUniqueIdInDb);
+
         return timeTableSuperDocGeneratedFromString;
     }
 
@@ -243,7 +245,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
      * @return
      */
     private List<ProgrammeDay> allocatePracticalsPeriodsForProgrammeGroupRequiringIt(ProgrammeGroup currentProgrammeGroup,
-                                                                                     List<ProgrammeDay> programmeDaysList, int programmeYearNo) {
+                                                                                     List<ProgrammeDay> programmeDaysList, int programmeYearNo) throws UknownPracticalsPeriodAllocation {
 
         //we iterate through all programmeDaysList
         int numberOfProgrammeDays = programmeDaysList.size();
@@ -274,7 +276,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
 
     private ProgrammeDay setPracticalsPeriodsByCheckingIfRemainingPeriodsForDayCanSuffice(ProgrammeDay programmeDay,
                                                                                           ProgrammeGroup currentProgrammeGroup,
-                                                                                          int totalPeriodForPracticalCourse) {
+                                                                                          int totalPeriodForPracticalCourse) throws UknownPracticalsPeriodAllocation {
         List<PeriodOrLecture> periodOrLecturesInProgDay = programmeDay.getPeriodList();
 
 
@@ -335,7 +337,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
                                                                                                                List<PeriodOrLecture> periodOrLecturesList,
                                                                                                                String practicalSubjectId,
                                                                                                                String programmeCode,
-                                                                                                               int totalPeriodForPracticalCourse) {
+                                                                                                               int totalPeriodForPracticalCourse) throws UknownPracticalsPeriodAllocation {
         /**
          set subjectCode and tutorCode ,make sure tutorCode has enough periods left,and also ensure totalPeriodAllocation left is enough
          get Tutor Responsible by using the practicalSubjectId to retrieve tutor from db
@@ -387,9 +389,11 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
                                                 int totalPeriodForPracticalCourse,
                                                 String tutorIdResponsibleForSubject,
                                                 int startingPeriod,
-                                                int stoppingPeriod) {
+                                                int stoppingPeriod) throws UknownPracticalsPeriodAllocation {
         String programmeDayName = programmeDay.getDayName();
 
+        //now we reset the programmeDayPeriodSetDoc and set it to new value
+        this.replaceProgrammeGroupDayPeriodSetDocInDbAfterSettingPracticalsPeriods(programmeCode, programmeDay, startingPeriod, stoppingPeriod);
         //now we decrement the value of the totalSubjectsPeriodLeft in db by the totalPeriodsThatHasBeenSet
         TutorSubjectAndProgrammeGroupCombinationDoc tutorSubjectAndProgrammeGroupCombinationDoc = tutorSubjectAndProgrammeGroupCombinationDocRepository.
                 findBySubjectUniqueIdAndProgrammeCode(subjectUniqueIdInDb, programmeCode);
@@ -413,6 +417,119 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
                 tutorPersonalTimeTableDocServices.
                         updateTutorPersonalTimeTableDocWithPeriodsAndSaveInDb
                                 (tutorIdResponsibleForSubject, subjectUniqueIdInDb, programmeDayName, programmeCode, startingPeriod, stoppingPeriod);
+
+    }
+
+    /**
+     * @param programmeCode
+     * @param programmeDay
+     * @param startingPeriodNumberOfPracticalPeriod
+     * @param stoppingPeriodNumberOfPracticalPeriod
+     * @throws com.swiftpot.timetable.exception.UknownPracticalsPeriodAllocation
+     */
+    public void replaceProgrammeGroupDayPeriodSetDocInDbAfterSettingPracticalsPeriods(String programmeCode,
+                                                                                      ProgrammeDay programmeDay,
+                                                                                      int startingPeriodNumberOfPracticalPeriod,
+                                                                                      int stoppingPeriodNumberOfPracticalPeriod) throws UknownPracticalsPeriodAllocation {
+        if (programmeDayServices.isProgrammeDayFullyAllocated(programmeDay)) {
+            //do nothing as the day is fully allocated
+        } else {
+            PeriodSetForProgrammeDay periodSetForProgrammeDay1 = new PeriodSetForProgrammeDay();
+            periodSetForProgrammeDay1.setPeriodStartingNumber(startingPeriodNumberOfPracticalPeriod);
+            periodSetForProgrammeDay1.setPeriodEndingNumber(stoppingPeriodNumberOfPracticalPeriod);
+            int totalNumberOfPeriodsForPracticalSubject = (stoppingPeriodNumberOfPracticalPeriod - startingPeriodNumberOfPracticalPeriod) + (1);
+            periodSetForProgrammeDay1.setTotalNumberOfPeriodsForSet(totalNumberOfPeriodsForPracticalSubject);
+
+            if (totalNumberOfPeriodsForPracticalSubject != 6) {
+                throw new UknownPracticalsPeriodAllocation("Practicals Period of PROGRAMMEcODE =" + programmeCode + " must be 6 or 10 only!!!");
+            }
+            PeriodSetForProgrammeDay periodSetForProgrammeDay2 = new PeriodSetForProgrammeDay();
+            periodSetForProgrammeDay2.setPeriodStartingNumber(stoppingPeriodNumberOfPracticalPeriod + 1);
+            periodSetForProgrammeDay2.setPeriodEndingNumber(8);
+            periodSetForProgrammeDay2.setTotalNumberOfPeriodsForSet(2);
+
+            PeriodSetForProgrammeDay periodSetForProgrammeDay3 = new PeriodSetForProgrammeDay();
+            periodSetForProgrammeDay3.setPeriodStartingNumber(9);
+            periodSetForProgrammeDay3.setPeriodEndingNumber(10);
+            periodSetForProgrammeDay3.setTotalNumberOfPeriodsForSet(2);
+
+            List<PeriodSetForProgrammeDay> periodSetForProgrammeDayList =
+                    new ArrayList<>(Arrays.asList(periodSetForProgrammeDay1,
+                            periodSetForProgrammeDay2,
+                            periodSetForProgrammeDay3));
+
+            ProgrammeGroupDayPeriodSetsDoc programmeGroupDayPeriodSetsDoc = programmeGroupDayPeriodSetsDocRepository.findByProgrammeCode(programmeCode);
+            String programmeDayName = programmeDay.getDayName();
+            //do this because,strangely,if we just change set the List of periodSetForProgrammeDaysList,mongo or whatever does not save it,hence just create a new one with updated values,to avoid any hogwash.
+            ProgrammeGroupDayPeriodSetsDoc programmeGroupDayPeriodSetsDocUpdated = new ProgrammeGroupDayPeriodSetsDoc();
+            programmeGroupDayPeriodSetsDocUpdated.setId(programmeGroupDayPeriodSetsDoc.getId());
+            programmeGroupDayPeriodSetsDocUpdated.setProgrammeCode(programmeGroupDayPeriodSetsDoc.getProgrammeCode());
+
+            Map<String, List<PeriodSetForProgrammeDay>> stringListMapOfPeriodSetForProgDay = programmeGroupDayPeriodSetsDoc.getMapOfProgDayNameAndTheListOfPeriodSets();
+            stringListMapOfPeriodSetForProgDay.replace(programmeDayName, periodSetForProgrammeDayList);
+
+            programmeGroupDayPeriodSetsDocUpdated.setMapOfProgDayNameAndTheListOfPeriodSets(stringListMapOfPeriodSetForProgDay);
+
+            programmeGroupDayPeriodSetsDocRepository.save(programmeGroupDayPeriodSetsDocUpdated);
+
+        }
+
+
+    }
+
+    /**
+     * @param programmeCode
+     * @param programmeDay
+     */
+    public void replaceProgrammeGroupDayPeriodSetDocInDbAfterSettingWorshipAndClassMeetingOnFridayMorning(String programmeCode, ProgrammeDay programmeDay) {
+        ProgrammeGroupDayPeriodSetsDoc programmeGroupDayPeriodSetsDoc = programmeGroupDayPeriodSetsDocRepository.findByProgrammeCode(programmeCode);
+
+        String programmeDayName = programmeDay.getDayName();
+
+        //List<PeriodSetForProgrammeDay> programmeDayToChangePeriodSet = programmeGroupDayPeriodSetsDoc.getMapOfProgDayNameAndTheListOfPeriodSets().get(programmeDayName);
+        PeriodSetForProgrammeDay periodSetForProgrammeDay1 = new PeriodSetForProgrammeDay();
+        periodSetForProgrammeDay1.setPeriodStartingNumber(1);
+        periodSetForProgrammeDay1.setPeriodEndingNumber(1);
+        periodSetForProgrammeDay1.setTotalNumberOfPeriodsForSet(1);
+
+        PeriodSetForProgrammeDay periodSetForProgrammeDay2 = new PeriodSetForProgrammeDay();
+        periodSetForProgrammeDay2.setPeriodStartingNumber(2);
+        periodSetForProgrammeDay2.setPeriodEndingNumber(2);
+        periodSetForProgrammeDay2.setTotalNumberOfPeriodsForSet(1);
+
+        PeriodSetForProgrammeDay periodSetForProgrammeDay3 = new PeriodSetForProgrammeDay();
+        periodSetForProgrammeDay3.setPeriodStartingNumber(3);
+        periodSetForProgrammeDay3.setPeriodEndingNumber(5);
+        periodSetForProgrammeDay3.setTotalNumberOfPeriodsForSet(3);
+
+        PeriodSetForProgrammeDay periodSetForProgrammeDay4 = new PeriodSetForProgrammeDay();
+        periodSetForProgrammeDay4.setPeriodStartingNumber(6);
+        periodSetForProgrammeDay4.setPeriodEndingNumber(7);
+        periodSetForProgrammeDay4.setTotalNumberOfPeriodsForSet(2);
+
+        PeriodSetForProgrammeDay periodSetForProgrammeDay5 = new PeriodSetForProgrammeDay();
+        periodSetForProgrammeDay5.setPeriodStartingNumber(8);
+        periodSetForProgrammeDay5.setPeriodEndingNumber(10);
+        periodSetForProgrammeDay5.setTotalNumberOfPeriodsForSet(3);
+
+        List<PeriodSetForProgrammeDay> periodSetForProgrammeDayList =
+                new ArrayList<>(Arrays.asList(periodSetForProgrammeDay1,
+                        periodSetForProgrammeDay2,
+                        periodSetForProgrammeDay3,
+                        periodSetForProgrammeDay4,
+                        periodSetForProgrammeDay5));
+
+        //do this because,strangely,if we just change set the List of periodSetForProgrammeDaysList,mongo or whatever does not save it,hence just create a new one with updated values,to avoid any hogwash.
+        ProgrammeGroupDayPeriodSetsDoc programmeGroupDayPeriodSetsDocUpdated = new ProgrammeGroupDayPeriodSetsDoc();
+        programmeGroupDayPeriodSetsDocUpdated.setId(programmeGroupDayPeriodSetsDoc.getId());
+        programmeGroupDayPeriodSetsDocUpdated.setProgrammeCode(programmeGroupDayPeriodSetsDoc.getProgrammeCode());
+
+        Map<String, List<PeriodSetForProgrammeDay>> stringListMapOfPeriodSetForProgDay = programmeGroupDayPeriodSetsDoc.getMapOfProgDayNameAndTheListOfPeriodSets();
+        stringListMapOfPeriodSetForProgDay.replace(programmeDayName, periodSetForProgrammeDayList);
+
+        programmeGroupDayPeriodSetsDocUpdated.setMapOfProgDayNameAndTheListOfPeriodSets(stringListMapOfPeriodSetForProgDay);
+
+        programmeGroupDayPeriodSetsDocRepository.save(programmeGroupDayPeriodSetsDocUpdated);
 
     }
 

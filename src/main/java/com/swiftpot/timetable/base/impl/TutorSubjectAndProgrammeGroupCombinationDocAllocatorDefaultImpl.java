@@ -9,16 +9,14 @@ import com.swiftpot.timetable.base.ProgrammeGroupPersonalTimeTableDocInitialGene
 import com.swiftpot.timetable.base.TutorPersonalTimeTableInitialGenerator;
 import com.swiftpot.timetable.base.TutorSubjectAndProgrammeGroupCombinationDocAllocator;
 import com.swiftpot.timetable.base.TutorSubjectAndProgrammeGroupInitialGenerator;
+import com.swiftpot.timetable.exception.PracticalSubjectForDayNotFoundException;
 import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.model.ProgrammeDay;
 import com.swiftpot.timetable.model.ProgrammeGroup;
 import com.swiftpot.timetable.model.YearGroup;
 import com.swiftpot.timetable.repository.*;
 import com.swiftpot.timetable.repository.db.model.*;
-import com.swiftpot.timetable.services.ProgrammeDayServices;
-import com.swiftpot.timetable.services.ProgrammeGroupPersonalTimeTableDocServices;
-import com.swiftpot.timetable.services.SubjectsAssignerService;
-import com.swiftpot.timetable.services.TutorPersonalTimeTableDocServices;
+import com.swiftpot.timetable.services.*;
 import com.swiftpot.timetable.services.servicemodels.PeriodSetForProgrammeDay;
 import com.swiftpot.timetable.services.servicemodels.UnallocatedPeriodSet;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,12 +51,14 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
     private ProgrammeGroupDayPeriodSetsDocRepository programmeGroupDayPeriodSetsDocRepository;
     @Autowired
     private ProgrammeGroupDocRepository programmeGroupDocRepository;
+    @Autowired
+    private ProgrammeDayPeriodSetService programmeDayPeriodSetService;
 
     @Override
     public TimeTableSuperDoc allocateTutorSubjectAndProgrammeGroupCombinationCompletely(String tutorUniqueIdInDb,
                                                                                         int totalSubjectAllocationInDb,
                                                                                         TutorSubjectAndProgrammeGroupCombinationDoc tutorSubjectAndProgrammeGroupCombinationDoc,
-                                                                                        TimeTableSuperDoc timeTableSuperDoc) {
+                                                                                        TimeTableSuperDoc timeTableSuperDoc) throws PracticalSubjectForDayNotFoundException {
         String subjectUniqueIdBefore = tutorSubjectAndProgrammeGroupCombinationDoc.getSubjectUniqueId();
         String programmeCodeBefore = tutorSubjectAndProgrammeGroupCombinationDoc.getProgrammeCode();
 
@@ -79,7 +79,12 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
 
             timeTableSuperDoc = this.
                     allocateTutorSubjectAndProgrammeGroupCombinationAndUpdateDbEntities
-                            (tutorUniqueIdInDb, totalSubjectAllocationInDb, totalPeriodLeftToBeAllocated, programmeCode, subjectUniqueIdInDb, timeTableSuperDoc);
+                            (tutorUniqueIdInDb,
+                                    totalSubjectAllocationInDb,
+                                    totalPeriodLeftToBeAllocated,
+                                    programmeCode,
+                                    subjectUniqueIdInDb,
+                                    timeTableSuperDoc);
         }
         return timeTableSuperDoc;
     }
@@ -89,7 +94,7 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
                                                                                                   int totalPeriodsLeftToBeAllocated,
                                                                                                   String programmeCode,
                                                                                                   String subjectUniqueIdInDb,
-                                                                                                  TimeTableSuperDoc timeTableSuperDoc) {
+                                                                                                  TimeTableSuperDoc timeTableSuperDoc) throws PracticalSubjectForDayNotFoundException {
 
         List<Integer> listOfPeriodAllocation = subjectsAssignerService.getTotalSubjectPeriodAllocationAsList(totalPeriodsLeftToBeAllocated);
         int listOfPeriodAllocationSize = listOfPeriodAllocation.size();
@@ -114,8 +119,14 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
         int periodEndingNumber = 0;  //TODO TEST TO MAKE SURE THAT THIS WILL NOT REMAIN ZERO WHEN USING IT OUTSIDE THE FOR LOOP BELOW.
         //go through programmeGroup personal programmeDay List
         for (ProgrammeDay programmeDay : programmeGroupPersonalProgrammeDaysList) {
+            String programmeDayName = programmeDay.getDayName();
             if (!programmeDayServices.isProgrammeDayFullyAllocated(programmeDay)) {
-                String programmeDayName = programmeDay.getDayName();
+
+                List<PeriodSetForProgrammeDay> periodSetForProgrammeDayFromDb = new ArrayList<>();
+                periodSetForProgrammeDayFromDb =
+                        periodSetForProgrammeDayListMap.get(programmeDayName);
+
+
                 List<UnallocatedPeriodSet> unallocatedPeriodSetList =
                         programmeDayServices.getListOfUnallocatedPeriodSetsInDay(programmeDay);
                 Map<Boolean, List<UnallocatedPeriodSet>> booleanUnallocatedPeriodSetMap =
@@ -124,9 +135,6 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
                 if (booleanUnallocatedPeriodSetMap.containsKey(true)) {
                     //TODO DONE!! COMPLETED!!! find a way to infuse the subject breakdown allocation from the config.properties file,do this in next iteration.
                     //now we check if any of the unallocatedPeriods List can take the periods considering the personal timetable of the tutor too.
-                    List<PeriodSetForProgrammeDay> periodSetForProgrammeDayFromDb =
-                            periodSetForProgrammeDayListMap.get(programmeDayName);
-
                     List<UnallocatedPeriodSet> actualUnallocatedPeriodList =
                             programmeDayServices.
                                     getUnallocatedPeriodSetFromPeriodSetForProgDay
@@ -143,43 +151,51 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
 
                     if (!finalUnallocatedListThatSatisfiesAllConstraints.isEmpty()) {//its not empty thus we can set it now finally
 
-                        List<Integer> listOfPeriodAllocationForTotalPeriods = subjectsAssignerService.getTotalSubjectPeriodAllocationAsList(totalSubjectAllocationInDb);//if subject breakdown for total allocation is >2
+                        List<Integer> listOfPeriodAllocationForTotalPeriods = subjectsAssignerService.
+                                getTotalSubjectPeriodAllocationAsList(totalSubjectAllocationInDb);//if subject breakdown for total allocation is >2
                         if (listOfPeriodAllocationForTotalPeriods.size() > 2 &&
                                 this.isSubjectAllocatedEqualToFourOrFiveOrSixTimesInProgrammeDay(subjectUniqueIdInDb, programmeDay)) {
-                            //the subject has not been set more than five or six period times in a day
+                            //the subject has been set more than five or six period times in a day
                         } else {
 
 
                             UnallocatedPeriodSet unallocatedPeriodSetToUse = new UnallocatedPeriodSet();
+                            boolean isUnallocatedPeriodSetToUseMatchFound = false;
                             for (UnallocatedPeriodSet unallocatedPeriodSet : finalUnallocatedListThatSatisfiesAllConstraints) {
                                 if (unallocatedPeriodSet.getTotalNumberOfPeriodsForSet() == periodAllocationValue1) {
                                     unallocatedPeriodSetToUse = unallocatedPeriodSet;
+                                    isUnallocatedPeriodSetToUseMatchFound = true;
                                     break;
                                 }
                             }
-                            periodStartingNumber = unallocatedPeriodSetToUse.getPeriodStartingNumber(); //SET PERIOD STARTING NUMBER
-                            periodEndingNumber = unallocatedPeriodSetToUse.getPeriodEndingNumber(); //SET PERIOD ENDING NUMBER
+                            if (isUnallocatedPeriodSetToUseMatchFound) {
+                                periodStartingNumber = unallocatedPeriodSetToUse.getPeriodStartingNumber(); //SET PERIOD STARTING NUMBER
+                                periodEndingNumber = unallocatedPeriodSetToUse.getPeriodEndingNumber(); //SET PERIOD ENDING NUMBER
 
-                            programmeDayToSetOnTimeTableSuperObject = programmeDay; //set the programmeDay to use to set the periods to on timetableSuperDoc object
+                                programmeDayToSetOnTimeTableSuperObject = programmeDay; //set the programmeDay to use to set the periods to on timetableSuperDoc object
 
-                            TutorPersonalTimeTableDoc finalTutorPersonalTimeTable =
-                                    tutorPersonalTimeTableDocServices.
-                                            updateTutorPersonalTimeTableDocWithPeriodsAndSaveInDb(tutorUniqueIdInDb,
-                                                    subjectUniqueIdInDb,
-                                                    programmeDayName,
-                                                    programmeCode,
-                                                    periodStartingNumber,
-                                                    periodEndingNumber);
+                                TutorPersonalTimeTableDoc finalTutorPersonalTimeTable =
+                                        tutorPersonalTimeTableDocServices.
+                                                updateTutorPersonalTimeTableDocWithPeriodsAndSaveInDb(tutorUniqueIdInDb,
+                                                        subjectUniqueIdInDb,
+                                                        programmeDayName,
+                                                        programmeCode,
+                                                        periodStartingNumber,
+                                                        periodEndingNumber);
 
-                            this.updateDbWithTotalPeriodsThatHasBeenSet
-                                    (programmeDay,
-                                            programmeCode,
-                                            subjectUniqueIdInDb,
-                                            periodAllocationValue1,
-                                            tutorUniqueIdInDb,
-                                            periodStartingNumber,
-                                            periodEndingNumber);
-                            break; //break out of iterations over programmeDays
+                                this.updateDbWithTotalPeriodsThatHasBeenSet
+                                        (programmeDay,
+                                                programmeCode,
+                                                subjectUniqueIdInDb,
+                                                periodAllocationValue1,
+                                                tutorUniqueIdInDb,
+                                                periodStartingNumber,
+                                                periodEndingNumber);
+                                break; //break out of iterations over programmeDays
+                            } else {
+                                //no match found,thus do nothing.,continue on next programmeDay in loop.
+                            }
+
                         }
                     }
 
@@ -223,6 +239,7 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
         return timeTableSuperDocGeneratedFromString;//TODO CONTINUE HERE NOW IN NEXT ITERATION.
 
     }
+
 
     /**
      * is subjectUniqueIdInDb passed in present in day at least 4,5 or 6 times in the lecture periods? 4,5 or 6 because all periods will have a combination of 2 or 3 thus 2+2=4,2+3=5,3+3=6,that's all the combinations possible.

@@ -4,6 +4,7 @@
 
 package com.swiftpot.timetable.base;
 
+import com.swiftpot.timetable.exception.PracticalSubjectForDayNotFoundException;
 import com.swiftpot.timetable.repository.db.model.SubjectDoc;
 import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
 import com.swiftpot.timetable.repository.db.model.TutorDoc;
@@ -36,5 +37,5 @@ public interface TutorSubjectAndProgrammeGroupCombinationDocAllocator {
     (String tutorUniqueIdInDb,
      int totalSubjectAllocationInDb,
      TutorSubjectAndProgrammeGroupCombinationDoc tutorSubjectAndProgrammeGroupCombinationDoc,
-     TimeTableSuperDoc timeTableSuperDoc);
+     TimeTableSuperDoc timeTableSuperDoc) throws PracticalSubjectForDayNotFoundException;
 }
