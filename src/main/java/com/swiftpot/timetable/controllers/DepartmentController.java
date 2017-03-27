@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.controllers;
 
 import com.swiftpot.timetable.model.ErrorOutgoingPayload;
@@ -155,7 +159,10 @@ public class DepartmentController {
                         tutorDocToRemoveDepartmentId.setTutorSubjectsAndProgrammeCodesList(new ArrayList<>(0)); //set tutorSubjectandProgrammeCodesList to empty
                     })
             );
-            tutorDocRepository.save(tutorDocs);//now save back into db and delete department finally
+
+            //mongo behaves STRANGELY when the stream is saved back straight after making changes in the lambda
+            List<TutorDoc> tutorDocsUpdated = tutorDocs.stream().collect(Collectors.toList());
+            tutorDocRepository.save(tutorDocsUpdated);//now save back into db and delete department finally
             departmentDocRepository.delete(id);
             return new SuccessfulOutgoingPayload("Deleted Successfully");
         } else {

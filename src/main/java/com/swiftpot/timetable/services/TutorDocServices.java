@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.services;
 
 import com.google.gson.Gson;
@@ -39,7 +43,7 @@ public class TutorDocServices {
     /**
      * super Method to ensure that all the validations on the subjects and classes assigned to tutor are passed .<br>
      * 1st check => {@link TutorDocServices#isAllSubjectClassesActuallyOfferingEachSubjectSpecified(TutorDoc)}<br>
-     * 2nd check => {@link TutorDocServices#isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDept(TutorDoc)}<br>
+     * 2nd check => {@link TutorDocServices#isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDeptwITHSAMESUBJECT(TutorDoc)}<br>
      * 3rd check => {@link TutorDocServices#isTotalSubjectsAndClassesAssignedOKAccordingToTutorsMinAndMaxPeriodLoad(TutorDoc)}<br>
      *
      * @param tutorDoc
@@ -49,7 +53,7 @@ public class TutorDocServices {
     public Map<Boolean, String> isEverythingOkWithClassesAndSubjectsAssignedToTutor(TutorDoc tutorDoc) throws Exception {
         Map<Boolean, String> booleanStringMap = this.isAllSubjectClassesActuallyOfferingEachSubjectSpecified(tutorDoc);
         if (booleanStringMap.containsKey(true)) {
-            Map<Boolean, String> booleanStringMapIsTutorClassesNotAssignedAlready = this.isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDept(tutorDoc);
+            Map<Boolean, String> booleanStringMapIsTutorClassesNotAssignedAlready = this.isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDeptwITHSAMESUBJECT(tutorDoc);
             if (booleanStringMapIsTutorClassesNotAssignedAlready.containsKey(true)) {
                 Map<Boolean, String> booleanStringMapIsTotalSubjectsAndClassesAssignedToTutorOk =
                         this.isTotalSubjectsAndClassesAssignedOKAccordingToTutorsMinAndMaxPeriodLoad(tutorDoc);
@@ -67,7 +71,7 @@ public class TutorDocServices {
     }
 
 
-    public Map<Boolean, String> isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDept(TutorDoc tutorDoc) {
+    public Map<Boolean, String> isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDeptwITHSAMESUBJECT(TutorDoc tutorDoc) {
         Map<Boolean, String> isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDept = new HashMap<>();
         String tutorDepartmentId = tutorDoc.getDepartmentId();
         List<TutorSubjectIdAndProgrammeCodesListObj> idAndProgrammeCodesListObjsList = tutorDoc.getTutorSubjectsAndProgrammeCodesList();
@@ -76,15 +80,17 @@ public class TutorDocServices {
                 break;
             }
             for (String programmeCodeToBeCompared : idAndProgrammeCodesListObj.getTutorProgrammeCodesList()) {
-                if (this.isProgrammeCodeAlreadyAssignedInDepartment(tutorDepartmentId, programmeCodeToBeCompared) == true) {
-                    isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDept.put(false, programmeCodeToBeCompared + " is already assigned to a tutor");
+                String subjectUniqueIdInDb = idAndProgrammeCodesListObj.getTutorSubjectId();
+                if (this.isProgrammeCodeAlreadyAssignedInDepartment(tutorDepartmentId, subjectUniqueIdInDb, programmeCodeToBeCompared) == true) {
+                    isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDept.put(false, subjectDocRepository.findOne(subjectUniqueIdInDb).getSubjectFullName() + " is already assigned to a tutor in "
+                            + programmeCodeToBeCompared + " class");
                     break;
                 }
             }
         }
         if (isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDept.containsKey(false)) {
             return isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDept;
-        } else {//isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDept
+        } else {//isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDeptwITHSAMESUBJECT
             isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDept.put(true, "Everything ok");
             return isEachClassAssignedToTutorNotAlreadyAssignedToADifferentTutorInDept;
         }
@@ -94,10 +100,11 @@ public class TutorDocServices {
      * make sure where this is called does not have empty tutors in department
      *
      * @param tutorDepartmentId
+     * @param subjectUniqueIdInDb
      * @param programmeCodeToBeCompared
      * @return
      */
-    protected boolean isProgrammeCodeAlreadyAssignedInDepartment(String tutorDepartmentId, String programmeCodeToBeCompared) throws NoSuchElementException {
+    protected boolean isProgrammeCodeAlreadyAssignedInDepartment(String tutorDepartmentId, String subjectUniqueIdInDb, String programmeCodeToBeCompared) throws NoSuchElementException {
 
         boolean isProgrammeGroupAlreadyAssignedInDepartment = false;
         //get all department tutors
@@ -114,7 +121,8 @@ public class TutorDocServices {
                     List<TutorSubjectIdAndProgrammeCodesListObj> tutorSubjectIdAndProgrammeCodesListObjList =
                             tutorDocWithThisDepartmentId.getTutorSubjectsAndProgrammeCodesList();
                     for (TutorSubjectIdAndProgrammeCodesListObj tutorSubjectIdAndProgrammeCodesListObj : tutorSubjectIdAndProgrammeCodesListObjList) {
-                        if (tutorSubjectIdAndProgrammeCodesListObj.getTutorProgrammeCodesList().contains(programmeCodeToBeCompared)) {
+                        if (tutorSubjectIdAndProgrammeCodesListObj.getTutorProgrammeCodesList().contains(programmeCodeToBeCompared) &&
+                                (Objects.equals(tutorSubjectIdAndProgrammeCodesListObj.getTutorSubjectId(), subjectUniqueIdInDb))) {
                             isProgrammeGroupAlreadyAssignedInDepartment = true; //exists ,therefore return true by setting isProgrammeGroupAlreadyAssignedInDepartment to true and breaking out of loop
                             break;
                         }
