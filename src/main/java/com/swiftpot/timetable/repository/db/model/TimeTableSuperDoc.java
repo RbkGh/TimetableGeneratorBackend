@@ -31,6 +31,11 @@ public class TimeTableSuperDoc {
         this.yearGroupsList = yearGroupsList;
     }
 
+    public TimeTableSuperDoc(String id, List<YearGroup> yearGroupsList) {
+        this.id = id;
+        this.yearGroupsList = yearGroupsList;
+    }
+
     public String getId() {
         return id;
     }

@@ -1,6 +1,11 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.base.impl;
 
 import com.swiftpot.timetable.base.TutorResponsibleForSubjectRetriever;
+import com.swiftpot.timetable.exception.PracticalTutorNotFoundException;
 import com.swiftpot.timetable.model.TutorSubjectIdAndProgrammeCodesListObj;
 import com.swiftpot.timetable.repository.TutorDocRepository;
 import com.swiftpot.timetable.repository.db.model.DepartmentDoc;
@@ -28,7 +33,7 @@ public class TutorResponsibleForSubjectRetrieverDefaultImpl implements TutorResp
     TutorDocRepository tutorDocRepository;
 
     @Override
-    public String getTutorObjectUniqueIdResponsibleForSubject(String subjectUniqueIdInDb) {
+    public String getTutorObjectUniqueIdResponsibleForSubject(String subjectUniqueIdInDb, String programmeCode) throws PracticalTutorNotFoundException {
         DepartmentDoc departmentDocThatSubjectBelongsTo =
                 departmentDocServices.getDepartmentThatSpecificSubjectBelongsTo(subjectUniqueIdInDb);
         String departmentId = departmentDocThatSubjectBelongsTo.getId();
@@ -42,11 +47,16 @@ public class TutorResponsibleForSubjectRetrieverDefaultImpl implements TutorResp
             List<TutorSubjectIdAndProgrammeCodesListObj> tutorSubjectsAndProgrammeCodesList = tutorDoc.getTutorSubjectsAndProgrammeCodesList();
             for (TutorSubjectIdAndProgrammeCodesListObj tutorSubjectIdAndProgrammeCodesListObj : tutorSubjectsAndProgrammeCodesList) {
                 if (Objects.equals(tutorSubjectIdAndProgrammeCodesListObj.getTutorSubjectId(), subjectUniqueIdInDb)) {
-                    foundTutorResponsibleForSubject = true;
-                    tutorObjectUniqueIdResponsibleForSubject = tutorDoc.getId();
-                    break;
+                    if (tutorSubjectIdAndProgrammeCodesListObj.getTutorProgrammeCodesList().contains(programmeCode)) {
+                        foundTutorResponsibleForSubject = true;
+                        tutorObjectUniqueIdResponsibleForSubject = tutorDoc.getId();
+                        break;
+                    }
                 }
             }
+        }
+        if (!foundTutorResponsibleForSubject) {
+            throw new PracticalTutorNotFoundException(" Subject with id " + subjectUniqueIdInDb + " and programmeCode of " + programmeCode + " not found.Practicals tutor is not found");
         }
         return tutorObjectUniqueIdResponsibleForSubject;
     }

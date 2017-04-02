@@ -6,6 +6,7 @@ package com.swiftpot.timetable.base.impl;
 
 import com.google.gson.Gson;
 import com.swiftpot.timetable.base.*;
+import com.swiftpot.timetable.exception.PracticalTutorNotFoundException;
 import com.swiftpot.timetable.exception.UknownPracticalsPeriodAllocationException;
 import com.swiftpot.timetable.factory.TutorResponsibleForSubjectRetrieverFactory;
 import com.swiftpot.timetable.model.PeriodOrLecture;
@@ -104,10 +105,10 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
      * @param timeTableSuperDoc
      * @return
      */
-    public TimeTableSuperDoc allocatePracticalsSubjectPeriodForAllProgrammeGroupsRequiringIt(TimeTableSuperDoc timeTableSuperDoc) throws UknownPracticalsPeriodAllocationException {
+    public TimeTableSuperDoc allocatePracticalsSubjectPeriodForAllProgrammeGroupsRequiringIt(TimeTableSuperDoc timeTableSuperDoc) throws UknownPracticalsPeriodAllocationException, PracticalTutorNotFoundException {
         String timeTableSuperDocString = new Gson().toJson(timeTableSuperDoc);
         TimeTableSuperDoc timeTableSuperDocGeneratedFromString = new Gson().fromJson(timeTableSuperDocString, TimeTableSuperDoc.class);
-
+        //TODO MAJOR PROBLEM HERE BECAUSE PRACTICALS PERIODS ARE ONLY GETTING UPDATED TO THE LAST ONE SET!!!!!!!!
         List<YearGroup> yearGroupList = timeTableSuperDocGeneratedFromString.getYearGroupsList();
         int numberOfYearGroups = yearGroupList.size();
         for (int currentNo = 0; currentNo < numberOfYearGroups; currentNo++) {
@@ -127,6 +128,8 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
                     programmeGroupList.get(currentProgrammeGroupNo).setProgrammeDaysList(newlyCreatedProgrammeDaysList);
                     yearGroupList.get(currentNo).setProgrammeGroupList(programmeGroupList);
                     timeTableSuperDocGeneratedFromString.setYearGroupsList(yearGroupList);
+
+                    timeTableSuperDocGeneratedFromString = new TimeTableSuperDoc(timeTableSuperDocGeneratedFromString.getId(), yearGroupList);
                 }
             }
         }
@@ -245,7 +248,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
      * @return
      */
     private List<ProgrammeDay> allocatePracticalsPeriodsForProgrammeGroupRequiringIt(ProgrammeGroup currentProgrammeGroup,
-                                                                                     List<ProgrammeDay> programmeDaysList, int programmeYearNo) throws UknownPracticalsPeriodAllocationException {
+                                                                                     List<ProgrammeDay> programmeDaysList, int programmeYearNo) throws UknownPracticalsPeriodAllocationException, PracticalTutorNotFoundException {
 
         //we iterate through all programmeDaysList
         int numberOfProgrammeDays = programmeDaysList.size();
@@ -276,7 +279,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
 
     private ProgrammeDay setPracticalsPeriodsByCheckingIfRemainingPeriodsForDayCanSuffice(ProgrammeDay programmeDay,
                                                                                           ProgrammeGroup currentProgrammeGroup,
-                                                                                          int totalPeriodForPracticalCourse) throws UknownPracticalsPeriodAllocationException {
+                                                                                          int totalPeriodForPracticalCourse) throws UknownPracticalsPeriodAllocationException, PracticalTutorNotFoundException {
         List<PeriodOrLecture> periodOrLecturesInProgDay = programmeDay.getPeriodList();
 
 
@@ -337,7 +340,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
                                                                                                                List<PeriodOrLecture> periodOrLecturesList,
                                                                                                                String practicalSubjectId,
                                                                                                                String programmeCode,
-                                                                                                               int totalPeriodForPracticalCourse) throws UknownPracticalsPeriodAllocationException {
+                                                                                                               int totalPeriodForPracticalCourse) throws UknownPracticalsPeriodAllocationException, PracticalTutorNotFoundException {
         /**
          set subjectCode and tutorCode ,make sure tutorCode has enough periods left,and also ensure totalPeriodAllocation left is enough
          get Tutor Responsible by using the practicalSubjectId to retrieve tutor from db
@@ -345,9 +348,9 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
          */
         String tutorIdResponsibleForSubject =
                 tutorResponsibleForSubjectRetrieverFactory.getTutorResponsibleForSubjectRetrieverImpl()
-                        .getTutorObjectUniqueIdResponsibleForSubject(practicalSubjectId);
+                        .getTutorObjectUniqueIdResponsibleForSubject(practicalSubjectId, programmeCode);
         int totalPeriodsToIterateThrough = periodOrLecturesList.size();
-        int totalPeriodsThatHasBeenSet = 0;
+        int totalPeriodsThatHasBeenSet = 1;
         for (int i = 0; i < totalPeriodsToIterateThrough; i++) {
             if ((periodOrLecturesList.get(i).getPeriodNumber() >= periodToStartSettingSubjectFrom) && (totalPeriodsThatHasBeenSet <= totalPeriodForPracticalCourse)) {
                 //we increment totalPeriodsThatHasBeenSet by 1 setSubjectUniqueIdInDbAndTutorUniqueIdForAllAffectedPeriodsOfferingPracticals
