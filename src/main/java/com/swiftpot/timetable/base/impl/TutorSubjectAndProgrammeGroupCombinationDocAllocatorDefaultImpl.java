@@ -9,11 +9,9 @@ import com.swiftpot.timetable.base.ProgrammeGroupPersonalTimeTableDocInitialGene
 import com.swiftpot.timetable.base.TutorPersonalTimeTableInitialGenerator;
 import com.swiftpot.timetable.base.TutorSubjectAndProgrammeGroupCombinationDocAllocator;
 import com.swiftpot.timetable.base.TutorSubjectAndProgrammeGroupInitialGenerator;
+import com.swiftpot.timetable.exception.NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException;
 import com.swiftpot.timetable.exception.PracticalSubjectForDayNotFoundException;
-import com.swiftpot.timetable.model.PeriodOrLecture;
-import com.swiftpot.timetable.model.ProgrammeDay;
-import com.swiftpot.timetable.model.ProgrammeGroup;
-import com.swiftpot.timetable.model.YearGroup;
+import com.swiftpot.timetable.model.*;
 import com.swiftpot.timetable.repository.*;
 import com.swiftpot.timetable.repository.db.model.*;
 import com.swiftpot.timetable.services.*;
@@ -58,7 +56,7 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
     public TimeTableSuperDoc allocateTutorSubjectAndProgrammeGroupCombinationCompletely(String tutorUniqueIdInDb,
                                                                                         int totalSubjectAllocationInDb,
                                                                                         TutorSubjectAndProgrammeGroupCombinationDoc tutorSubjectAndProgrammeGroupCombinationDoc,
-                                                                                        TimeTableSuperDoc timeTableSuperDoc) throws PracticalSubjectForDayNotFoundException {
+                                                                                        TimeTableSuperDoc timeTableSuperDoc) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException {
         String subjectUniqueIdBefore = tutorSubjectAndProgrammeGroupCombinationDoc.getSubjectUniqueId();
         String programmeCodeBefore = tutorSubjectAndProgrammeGroupCombinationDoc.getProgrammeCode();
 
@@ -94,17 +92,101 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
                                                                                                   int totalPeriodsLeftToBeAllocated,
                                                                                                   String programmeCode,
                                                                                                   String subjectUniqueIdInDb,
-                                                                                                  TimeTableSuperDoc timeTableSuperDoc) throws PracticalSubjectForDayNotFoundException {
+                                                                                                  TimeTableSuperDoc timeTableSuperDoc) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException {
 
         List<Integer> listOfPeriodAllocation = subjectsAssignerService.getTotalSubjectPeriodAllocationAsList(totalPeriodsLeftToBeAllocated);
-        int listOfPeriodAllocationSize = listOfPeriodAllocation.size();
+
         int periodAllocationValue1 = listOfPeriodAllocation.get(0);//THERE WILL ALWAYS BE A VALUE IN THIS
-        TutorPersonalTimeTableDoc tutorPersonalTimeTableDoc = tutorPersonalTimeTableDocRepository.findByTutorUniqueIdInDb(tutorUniqueIdInDb);
-        List<ProgrammeDay> tutorPersonalTimeTableDocProgrammeDaysList = tutorPersonalTimeTableDoc.getProgrammeDaysList();
+
 
         ProgrammeGroupPersonalTimeTableDoc programmeGroupPersonalTimeTableDoc =
                 programmeGroupPersonalTimeTableDocRepository.findByProgrammeCodeIgnoreCase(programmeCode);
         List<ProgrammeDay> programmeGroupPersonalProgrammeDaysList = programmeGroupPersonalTimeTableDoc.getProgrammeDaysList();
+
+        TutorPeriodsToSetForProgrammeDay tutorPeriodsToSetForProgrammeDay = null;
+        for (Integer periodAllocationValue : listOfPeriodAllocation) {
+            tutorPeriodsToSetForProgrammeDay =
+                    this.findAndSetProgrammeDayPeriodsForTutorIfAvailable
+                            (programmeGroupPersonalProgrammeDaysList,
+                                    tutorUniqueIdInDb,
+                                    totalSubjectAllocationInDb,
+                                    periodAllocationValue,
+                                    programmeCode,
+                                    subjectUniqueIdInDb);
+
+            if (Objects.isNull(tutorPeriodsToSetForProgrammeDay.getProgrammeDayToSetPeriodsTo())) {
+                throw new NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException
+                        (NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException.DEFAULT_MESSAGE);
+            } else {
+                break; //continue because the programmeDayToSetPeriodsTo was not null,meaning a day was found that satisfies tutor's timetable constraints.
+            }
+
+        }
+
+        ProgrammeDay programmeDayToSetOnTimeTableSuperObject = tutorPeriodsToSetForProgrammeDay.getProgrammeDayToSetPeriodsTo();
+
+        int periodStartingNumber = tutorPeriodsToSetForProgrammeDay.getPeriodStartingNumber();
+        int periodEndingNumber = tutorPeriodsToSetForProgrammeDay.getPeriodEndingNumber();
+
+        //TODO IMPORTANT!!!! THROW EXCEPTION WHEN NO DAY MET THE CRITERIA !!!!!!
+        String programmeDayNameToFind = programmeDayToSetOnTimeTableSuperObject.getDayName();
+
+        ProgrammeGroupDoc programmeGroupDocToUpdate = programmeGroupDocRepository.findByProgrammeCode(programmeCode);
+        int yearGroupOfProgrammeCode = programmeGroupDocToUpdate.getYearGroup();
+
+        String timeTableSuperDocString = new Gson().toJson(timeTableSuperDoc);
+        TimeTableSuperDoc timeTableSuperDocGeneratedFromString = new Gson().fromJson(timeTableSuperDocString, TimeTableSuperDoc.class); //CONVERT BACK TO OBJECT FROM JSON TO PREVENT PROBLEMS OF WRONG WRITES IN UNSOLICITED PLACES
+
+        final int periodStartingNumberFinal = periodStartingNumber;
+        final int periodEndingNumberFinal = periodEndingNumber;
+        timeTableSuperDocGeneratedFromString.getYearGroupsList().forEach((YearGroup yearGroup) -> {
+            if (yearGroup.getYearNumber() == yearGroupOfProgrammeCode) {
+                yearGroup.getProgrammeGroupList().forEach((ProgrammeGroup programmeGroup) -> {
+                    if (programmeGroup.getProgrammeCode().equalsIgnoreCase(programmeCode)) {
+                        programmeGroup.getProgrammeDaysList().forEach((ProgrammeDay programmeDay) -> {
+                            if (programmeDay.getDayName().equalsIgnoreCase(programmeDayNameToFind)) {
+                                programmeDay.getPeriodList().forEach((PeriodOrLecture periodOrLecture) -> {
+                                    if ((periodOrLecture.getPeriodNumber() >= periodStartingNumberFinal) &&
+                                            (periodOrLecture.getPeriodNumber() <= periodEndingNumberFinal)) {
+                                        periodOrLecture.setTutorUniqueId(tutorUniqueIdInDb); //set tutor unique id in db
+                                        periodOrLecture.setSubjectUniqueIdInDb(subjectUniqueIdInDb); //set subjectUniqueIdInDb
+                                        periodOrLecture.setIsAllocated(true);//set allocated to true.
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+
+        return timeTableSuperDocGeneratedFromString;//TODO CONTINUE HERE NOW IN NEXT ITERATION.
+
+    }
+
+    /**
+     * this will find and set a programmeDay periods for a tutor <br>
+     * if an appropriate day is found that does not collide with tutor's schedule,<br>
+     * the returning object must be checked to make sure {@link TutorPeriodsToSetForProgrammeDay#programmeDayToSetPeriodsTo} is not null,<br>
+     * if it is null,it means there was no match found,if non null,meaning a befitting day was found.
+     *
+     * @param programmeGroupPersonalProgrammeDaysList {@link List} of {@link ProgrammeDay} <br>
+     * @param tutorUniqueIdInDb                       the {@link TutorDoc#id}
+     * @param totalSubjectAllocationInDb              @see {@link #allocateTutorSubjectAndProgrammeGroupCombinationCompletely(String, int, TutorSubjectAndProgrammeGroupCombinationDoc, TimeTableSuperDoc)} totalSubjectAllocation Field
+     * @param periodAllocationValue1                  the period allocation value to search and set ,for example 3 periods is being searched for a fit for the tutor .
+     * @param programmeCode                           the {@link ProgrammeGroupDoc#programmeCode} or {@link ProgrammeGroup#programmeCode}
+     * @param subjectUniqueIdInDb                     the {@link SubjectDoc#id}
+     * @return {@link TutorPeriodsToSetForProgrammeDay}
+     */
+    private TutorPeriodsToSetForProgrammeDay findAndSetProgrammeDayPeriodsForTutorIfAvailable(List<ProgrammeDay> programmeGroupPersonalProgrammeDaysList,
+                                                                                              String tutorUniqueIdInDb,
+                                                                                              int totalSubjectAllocationInDb,
+                                                                                              int periodAllocationValue1,
+                                                                                              String programmeCode,
+                                                                                              String subjectUniqueIdInDb) {
+        TutorPersonalTimeTableDoc tutorPersonalTimeTableDoc = tutorPersonalTimeTableDocRepository.findByTutorUniqueIdInDb(tutorUniqueIdInDb);
+        List<ProgrammeDay> tutorPersonalTimeTableDocProgrammeDaysList = tutorPersonalTimeTableDoc.getProgrammeDaysList();
 
         ProgrammeGroupDayPeriodSetsDoc programmeGroupDayPeriodSetsDoc =
                 programmeGroupDayPeriodSetsDocRepository.findByProgrammeCode(programmeCode);
@@ -112,11 +194,10 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
         Map<String, List<PeriodSetForProgrammeDay>> periodSetForProgrammeDayListMap =
                 programmeGroupDayPeriodSetsDoc.getMapOfProgDayNameAndTheListOfPeriodSets();
 
-
-        ProgrammeDay programmeDayToSetOnTimeTableSuperObject = new ProgrammeDay();
-
         int periodStartingNumber = 0; //TODO TEST TO MAKE SURE THAT THIS WILL NOT REMAIN ZERO WHEN USING IT OUTSIDE THE FOR LOOP BELOW.
         int periodEndingNumber = 0;  //TODO TEST TO MAKE SURE THAT THIS WILL NOT REMAIN ZERO WHEN USING IT OUTSIDE THE FOR LOOP BELOW.
+
+        ProgrammeDay programmeDayToSetOnTimeTableSuperObject = null;// initialize to null
         //go through programmeGroup personal programmeDay List
         for (ProgrammeDay programmeDay : programmeGroupPersonalProgrammeDaysList) {
             String programmeDayName = programmeDay.getDayName();
@@ -172,6 +253,7 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
                                 periodStartingNumber = unallocatedPeriodSetToUse.getPeriodStartingNumber(); //SET PERIOD STARTING NUMBER
                                 periodEndingNumber = unallocatedPeriodSetToUse.getPeriodEndingNumber(); //SET PERIOD ENDING NUMBER
 
+                                programmeDayToSetOnTimeTableSuperObject = new ProgrammeDay();
                                 programmeDayToSetOnTimeTableSuperObject = programmeDay; //set the programmeDay to use to set the periods to on timetableSuperDoc object
 
                                 TutorPersonalTimeTableDoc finalTutorPersonalTimeTable =
@@ -195,51 +277,14 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
                             } else {
                                 //no match found,thus do nothing.,continue on next programmeDay in loop.
                             }
-
                         }
                     }
-
                 }
             }
         }
-
-        //TODO IMPORTANT!!!! THROW EXCEPTION WHEN NO DAY MET THE CRITERIA !!!!!!
-        String programmeDayNameToFind = programmeDayToSetOnTimeTableSuperObject.getDayName();
-
-        ProgrammeGroupDoc programmeGroupDocToUpdate = programmeGroupDocRepository.findByProgrammeCode(programmeCode);
-        int yearGroupOfProgrammeCode = programmeGroupDocToUpdate.getYearGroup();
-
-        String timeTableSuperDocString = new Gson().toJson(timeTableSuperDoc);
-        TimeTableSuperDoc timeTableSuperDocGeneratedFromString = new Gson().fromJson(timeTableSuperDocString, TimeTableSuperDoc.class); //CONVERT BACK TO OBJECT FROM JSON TO PREVENT PROBLEMS OF WRONG WRITES IN UNSOLICITED PLACES
-
-        final int periodStartingNumberFinal = periodStartingNumber;
-        final int periodEndingNumberFinal = periodEndingNumber;
-        timeTableSuperDocGeneratedFromString.getYearGroupsList().forEach((YearGroup yearGroup) -> {
-            if (yearGroup.getYearNumber() == yearGroupOfProgrammeCode) {
-                yearGroup.getProgrammeGroupList().forEach((ProgrammeGroup programmeGroup) -> {
-                    if (programmeGroup.getProgrammeCode().equalsIgnoreCase(programmeCode)) {
-                        programmeGroup.getProgrammeDaysList().forEach((ProgrammeDay programmeDay) -> {
-                            if (programmeDay.getDayName().equalsIgnoreCase(programmeDayNameToFind)) {
-                                programmeDay.getPeriodList().forEach((PeriodOrLecture periodOrLecture) -> {
-                                    if ((periodOrLecture.getPeriodNumber() >= periodStartingNumberFinal) &&
-                                            (periodOrLecture.getPeriodNumber() <= periodEndingNumberFinal)) {
-                                        periodOrLecture.setTutorUniqueId(tutorUniqueIdInDb); //set tutor unique id in db
-                                        periodOrLecture.setSubjectUniqueIdInDb(subjectUniqueIdInDb); //set subjectUniqueIdInDb
-                                        periodOrLecture.setIsAllocated(true);//set allocated to true.
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-        });
-
-
-        return timeTableSuperDocGeneratedFromString;//TODO CONTINUE HERE NOW IN NEXT ITERATION.
-
+        TutorPeriodsToSetForProgrammeDay tutorPeriodsToSetForProgrammeDay = new TutorPeriodsToSetForProgrammeDay(programmeDayToSetOnTimeTableSuperObject, periodStartingNumber, periodEndingNumber);
+        return tutorPeriodsToSetForProgrammeDay;
     }
-
 
     /**
      * is subjectUniqueIdInDb passed in present in day at least 4,5 or 6 times in the lecture periods? 4,5 or 6 because all periods will have a combination of 2 or 3 thus 2+2=4,2+3=5,3+3=6,that's all the combinations possible.

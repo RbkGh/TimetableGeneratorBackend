@@ -6,9 +6,14 @@ package com.swiftpot.timetable.controllers;
 
 import com.sun.istack.Nullable;
 import com.swiftpot.timetable.command.TimeTableGenerationClient;
+import com.swiftpot.timetable.exception.NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException;
+import com.swiftpot.timetable.exception.PracticalSubjectForDayNotFoundException;
 import com.swiftpot.timetable.model.*;
 import com.swiftpot.timetable.repository.*;
 import com.swiftpot.timetable.repository.db.model.*;
+import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,8 +45,10 @@ public class TimeTableGenerationController {
     private SubjectDocRepository subjectDocRepository;
     @Autowired
     private TimeTableMainDocRepository timeTableMainDocRepository;
+    @Autowired
+    private BusinessLogicConfigurationProperties businessLogicConfigurationProperties;
 
-
+    public static final Logger logger = LogManager.getLogger();
     /**
      * So tired that I wrote stupid code here!!
      *
@@ -62,9 +69,26 @@ public class TimeTableGenerationController {
         return new SuccessfulOutgoingPayload(timeTableMainDocs);
     }
 
-    private TimeTableMainDoc generateFullTimeTableObject(TimeTableGenerationRequest timeTableGenerationRequest) throws Exception {
+    private TimeTableMainDoc generateFullTimeTableObject(TimeTableGenerationRequest timeTableGenerationRequest) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException, Exception {
         //generate timetable and pick result from db.
-        timeTableGenerationClient.generateTimeTable();
+        try {
+            timeTableGenerationClient.generateTimeTable();
+        } catch (NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException e) {
+            int numberOfTimeTableGenerationRetriesFromFile = Integer.valueOf
+                    (businessLogicConfigurationProperties.NUMBER_OF_TIMES_TO_GENERATE_IF_MATCH_IS_NOT_FOUND);
+
+            int numberOfTimeTableGenerationRetries = numberOfTimeTableGenerationRetriesFromFile;
+            while (numberOfTimeTableGenerationRetries > 0) {
+                numberOfTimeTableGenerationRetries -= numberOfTimeTableGenerationRetries;
+                try {
+                    timeTableGenerationClient.generateTimeTable();
+                    break;//if there was no error thrown,we can break out of it.
+                } catch (NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException ex) {
+                    //do nothing for now,just log it.
+                    logger.debug(ex);
+                }
+            }
+        }
 
         //get list of all tutors personal timetable from database.
         List<TutorPersonalTimeTableDoc> tutorPersonalTimeTableDocsList =

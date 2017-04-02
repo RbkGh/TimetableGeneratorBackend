@@ -139,5 +139,6 @@ public class BusinessLogicConfigurationProperties {
     @Value("${day.period.allocation.combination.3}")
     public String DAY_PERIOD_ALLOCATION_COMBINATION_3;
 
-
+    @Value("${generation.number.of.times}")
+    public String NUMBER_OF_TIMES_TO_GENERATE_IF_MATCH_IS_NOT_FOUND;
 }

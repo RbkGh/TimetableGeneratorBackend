@@ -6,7 +6,7 @@ package com.swiftpot.timetable.base.impl;
 
 import com.google.gson.Gson;
 import com.swiftpot.timetable.base.*;
-import com.swiftpot.timetable.exception.UknownPracticalsPeriodAllocation;
+import com.swiftpot.timetable.exception.UknownPracticalsPeriodAllocationException;
 import com.swiftpot.timetable.factory.TutorResponsibleForSubjectRetrieverFactory;
 import com.swiftpot.timetable.model.PeriodOrLecture;
 import com.swiftpot.timetable.model.ProgrammeDay;
@@ -104,7 +104,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
      * @param timeTableSuperDoc
      * @return
      */
-    public TimeTableSuperDoc allocatePracticalsSubjectPeriodForAllProgrammeGroupsRequiringIt(TimeTableSuperDoc timeTableSuperDoc) throws UknownPracticalsPeriodAllocation {
+    public TimeTableSuperDoc allocatePracticalsSubjectPeriodForAllProgrammeGroupsRequiringIt(TimeTableSuperDoc timeTableSuperDoc) throws UknownPracticalsPeriodAllocationException {
         String timeTableSuperDocString = new Gson().toJson(timeTableSuperDoc);
         TimeTableSuperDoc timeTableSuperDocGeneratedFromString = new Gson().fromJson(timeTableSuperDocString, TimeTableSuperDoc.class);
 
@@ -245,7 +245,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
      * @return
      */
     private List<ProgrammeDay> allocatePracticalsPeriodsForProgrammeGroupRequiringIt(ProgrammeGroup currentProgrammeGroup,
-                                                                                     List<ProgrammeDay> programmeDaysList, int programmeYearNo) throws UknownPracticalsPeriodAllocation {
+                                                                                     List<ProgrammeDay> programmeDaysList, int programmeYearNo) throws UknownPracticalsPeriodAllocationException {
 
         //we iterate through all programmeDaysList
         int numberOfProgrammeDays = programmeDaysList.size();
@@ -276,7 +276,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
 
     private ProgrammeDay setPracticalsPeriodsByCheckingIfRemainingPeriodsForDayCanSuffice(ProgrammeDay programmeDay,
                                                                                           ProgrammeGroup currentProgrammeGroup,
-                                                                                          int totalPeriodForPracticalCourse) throws UknownPracticalsPeriodAllocation {
+                                                                                          int totalPeriodForPracticalCourse) throws UknownPracticalsPeriodAllocationException {
         List<PeriodOrLecture> periodOrLecturesInProgDay = programmeDay.getPeriodList();
 
 
@@ -337,7 +337,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
                                                                                                                List<PeriodOrLecture> periodOrLecturesList,
                                                                                                                String practicalSubjectId,
                                                                                                                String programmeCode,
-                                                                                                               int totalPeriodForPracticalCourse) throws UknownPracticalsPeriodAllocation {
+                                                                                                               int totalPeriodForPracticalCourse) throws UknownPracticalsPeriodAllocationException {
         /**
          set subjectCode and tutorCode ,make sure tutorCode has enough periods left,and also ensure totalPeriodAllocation left is enough
          get Tutor Responsible by using the practicalSubjectId to retrieve tutor from db
@@ -389,7 +389,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
                                                 int totalPeriodForPracticalCourse,
                                                 String tutorIdResponsibleForSubject,
                                                 int startingPeriod,
-                                                int stoppingPeriod) throws UknownPracticalsPeriodAllocation {
+                                                int stoppingPeriod) throws UknownPracticalsPeriodAllocationException {
         String programmeDayName = programmeDay.getDayName();
 
         //now we reset the programmeDayPeriodSetDoc and set it to new value
@@ -425,12 +425,12 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
      * @param programmeDay
      * @param startingPeriodNumberOfPracticalPeriod
      * @param stoppingPeriodNumberOfPracticalPeriod
-     * @throws com.swiftpot.timetable.exception.UknownPracticalsPeriodAllocation
+     * @throws UknownPracticalsPeriodAllocationException
      */
     public void replaceProgrammeGroupDayPeriodSetDocInDbAfterSettingPracticalsPeriods(String programmeCode,
                                                                                       ProgrammeDay programmeDay,
                                                                                       int startingPeriodNumberOfPracticalPeriod,
-                                                                                      int stoppingPeriodNumberOfPracticalPeriod) throws UknownPracticalsPeriodAllocation {
+                                                                                      int stoppingPeriodNumberOfPracticalPeriod) throws UknownPracticalsPeriodAllocationException {
         if (programmeDayServices.isProgrammeDayFullyAllocated(programmeDay)) {
             //do nothing as the day is fully allocated
         } else {
@@ -441,7 +441,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
             periodSetForProgrammeDay1.setTotalNumberOfPeriodsForSet(totalNumberOfPeriodsForPracticalSubject);
 
             if (totalNumberOfPeriodsForPracticalSubject != 6) {
-                throw new UknownPracticalsPeriodAllocation("Practicals Period of PROGRAMMEcODE =" + programmeCode + " must be 6 or 10 only!!!");
+                throw new UknownPracticalsPeriodAllocationException("Practicals Period of PROGRAMMEcODE =" + programmeCode + " must be 6 or 10 only!!!");
             }
             PeriodSetForProgrammeDay periodSetForProgrammeDay2 = new PeriodSetForProgrammeDay();
             periodSetForProgrammeDay2.setPeriodStartingNumber(stoppingPeriodNumberOfPracticalPeriod + 1);

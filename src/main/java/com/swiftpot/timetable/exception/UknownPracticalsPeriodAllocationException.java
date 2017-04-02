@@ -9,8 +9,8 @@ package com.swiftpot.timetable.exception;
  *         <Rodney Kwabena Boachie at [rodney@swiftpot.com,rbk.unlimited@gmail.com]> on
  *         27-Mar-17 @ 12:27 AM
  */
-public class UknownPracticalsPeriodAllocation extends Exception {
-    public UknownPracticalsPeriodAllocation(String s) {
+public class UknownPracticalsPeriodAllocationException extends Exception {
+    public UknownPracticalsPeriodAllocationException(String s) {
         super(s);
     }
 }

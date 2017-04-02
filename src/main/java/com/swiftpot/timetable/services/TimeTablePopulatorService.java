@@ -7,6 +7,8 @@ package com.swiftpot.timetable.services;
 import com.google.gson.Gson;
 import com.swiftpot.timetable.base.TutorSubjectAndProgrammeGroupCombinationDocAllocator;
 import com.swiftpot.timetable.base.impl.TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl;
+import com.swiftpot.timetable.command.TimeTableGenerationClient;
+import com.swiftpot.timetable.exception.NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException;
 import com.swiftpot.timetable.exception.PracticalSubjectForDayNotFoundException;
 import com.swiftpot.timetable.factory.TimeTableDefaultPeriodsAllocatorFactory;
 import com.swiftpot.timetable.model.ProgrammeGroup;
@@ -14,7 +16,10 @@ import com.swiftpot.timetable.model.TutorSubjectIdAndProgrammeCodesListObj;
 import com.swiftpot.timetable.model.YearGroup;
 import com.swiftpot.timetable.repository.*;
 import com.swiftpot.timetable.repository.db.model.*;
+import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
 import com.swiftpot.timetable.util.YearGroupNumberAndNames;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -52,6 +57,12 @@ public class TimeTablePopulatorService {
     private DepartmentDocRepository departmentDocRepository;
     @Autowired
     private ProgrammeGroupDocServices programmeGroupDocServices;
+    @Autowired
+    private BusinessLogicConfigurationProperties businessLogicConfigurationProperties;
+    @Autowired
+    private TimeTableGenerationClient timeTableGenerationClient;
+
+    private static final Logger logger = LogManager.getLogger();
 
 
     /**
@@ -132,7 +143,7 @@ public class TimeTablePopulatorService {
      * @param timeTableSuperDocWithDefaultPeriodsSetAlready the {@link TimeTableSuperDoc} with default periods set already.
      * @return final fully generated {@link TimeTableSuperDoc}
      */
-    public TimeTableSuperDoc partThreeAllocatePeriodsForEachTutor(TimeTableSuperDoc timeTableSuperDocWithDefaultPeriodsSetAlready) throws PracticalSubjectForDayNotFoundException {
+    public TimeTableSuperDoc partThreeAllocatePeriodsForEachTutor(TimeTableSuperDoc timeTableSuperDocWithDefaultPeriodsSetAlready) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException {
         tutorSubjectAndProgrammeGroupCombinationDocAllocator = tutorSubjectAndProgrammeGroupCombinationDocAllocatorDefault;
 
         String timeTableSuperDocString = new Gson().toJson(timeTableSuperDocWithDefaultPeriodsSetAlready);

@@ -5,6 +5,8 @@
 package com.swiftpot.timetable.command;
 
 import com.sun.istack.Nullable;
+import com.swiftpot.timetable.exception.NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException;
+import com.swiftpot.timetable.exception.PracticalSubjectForDayNotFoundException;
 import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
 import org.springframework.stereotype.Component;
 
@@ -21,5 +23,5 @@ public interface TimetableGenerationCommand {
      * @param timeTableSuperDoc The {@link Nullable}{@link TimeTableSuperDoc} object to operate on.
      * @return {@link TimeTableSuperDoc}
      */
-    TimeTableSuperDoc executeTimeTableGenerationOperation(@Nullable TimeTableSuperDoc timeTableSuperDoc) throws Exception;
+    TimeTableSuperDoc executeTimeTableGenerationOperation(@Nullable TimeTableSuperDoc timeTableSuperDoc) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException, Exception;
 }
