@@ -61,6 +61,8 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
     private ProgrammeGroupPersonalTimeTableDocRepository programmeGroupPersonalTimeTableDocRepository;
     @Autowired
     private ProgrammeDayServices programmeDayServices;
+    @Autowired
+    private TutorPersonalTimeTableDocRepository tutorPersonalTimeTableDocRepository;
 
     private static final String CLASS_MEETING_DAY_NUMBER_KEY = "CLASS_MEETING_DAYNUMBER";
     private static final String CLASS_MEETING_PERIOD_NUMBER_KEY = "CLASS_MEETING_PERIODNUMBER";
@@ -264,17 +266,52 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
                 if (iProgrammeDayHelper.
                         isProgrammeDayCapableOfAcceptingTheIncomingNumberOfPeriodsAssumingUnallocatedDaysAreSequential
                                 (currentProgrammeDay, practicalsTotalPeriods)) {
-                    //double check ,but double check is better than once.
-                    ProgrammeDay newCurrentProgrammeDay = this.
-                            setPracticalsPeriodsByCheckingIfRemainingPeriodsForDayCanSuffice(currentProgrammeDay, currentProgrammeGroup, practicalsTotalPeriods);
-                    //we set the newlycreatedprogrammeDay with all periods subject set to the programmeDaysList
-                    programmeDaysList.set(currentProgrammeDayNumber, newCurrentProgrammeDay);
-                    break;
+                    String practicalSubjectId = this.getPracticalSubjectUniqueIdInProgrammeGroup(currentProgrammeGroup);
+                    String programmeCode = currentProgrammeGroup.getProgrammeCode();
+                    String tutorResponsibleForPracticalSubjectUniqueIdInDb =
+                            tutorResponsibleForSubjectRetrieverFactory.getTutorResponsibleForSubjectRetrieverImpl()
+                                    .getTutorObjectUniqueIdResponsibleForSubject(practicalSubjectId, programmeCode);
+                    if (!this.isTutorAssignedAPracticalSubjectAlreadyInDay(tutorResponsibleForPracticalSubjectUniqueIdInDb, currentProgrammeDay)) {
+                        //double check ,but double check is better than once.
+                        ProgrammeDay newCurrentProgrammeDay = this.
+                                setPracticalsPeriodsByCheckingIfRemainingPeriodsForDayCanSuffice(currentProgrammeDay, currentProgrammeGroup, practicalsTotalPeriods);
+                        //we set the newlycreatedprogrammeDay with all periods subject set to the programmeDaysList
+                        programmeDaysList.set(currentProgrammeDayNumber, newCurrentProgrammeDay);
+                        break;
+                    }
                 }
             }
-
         }
         return programmeDaysList;
+    }
+
+    /**
+     * is tutor's personal timetable ie {@link TutorPersonalTimeTableDoc}'s day allocated to a different practical subject already?
+     *
+     * @param tutorUniqueIdInDb
+     * @param programmeDayToCheck
+     * @return {@link Boolean}
+     */
+    private boolean isTutorAssignedAPracticalSubjectAlreadyInDay(String tutorUniqueIdInDb, ProgrammeDay programmeDayToCheck) {
+        boolean isTutorAssignedAPracticalSubjectAlreadyInDay = false;
+        TutorDoc tutorDoc = tutorDocRepository.findOne(tutorUniqueIdInDb);
+        TutorPersonalTimeTableDoc tutorPersonalTimeTableDoc =
+                tutorPersonalTimeTableDocRepository.findByTutorUniqueIdInDb(tutorUniqueIdInDb);
+        for (ProgrammeDay programmeDay : tutorPersonalTimeTableDoc.getProgrammeDaysList()) {
+            if (Objects.equals(programmeDay.getDayName(), programmeDayToCheck.getDayName())) {
+                for (PeriodOrLecture periodOrLecture : programmeDay.getPeriodList()) {
+                    if (periodOrLecture.getIsAllocated()) {
+                        //the tutor's day is assigned a different practical subject already,thus break and return true;
+                        isTutorAssignedAPracticalSubjectAlreadyInDay = true;
+                        break;
+                    }
+                }
+            }
+            if (isTutorAssignedAPracticalSubjectAlreadyInDay) {
+                break;//break out once its true
+            }
+        }
+        return isTutorAssignedAPracticalSubjectAlreadyInDay;
     }
 
     private ProgrammeDay setPracticalsPeriodsByCheckingIfRemainingPeriodsForDayCanSuffice(ProgrammeDay programmeDay,
@@ -285,18 +322,8 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
 
         //to get totalNumberOfProgrammeSubjectsUniqueIdInDbList practicalCourseTotalPeriod,scan and check that SubjectDoc property isSubjectAPracticalSubject = true
         List<String> programmeSubjectsUniqueIdInDbList = currentProgrammeGroup.getProgrammeSubjectsUniqueIdInDbList();
-        int totalNumberOfProgrammeSubjectsUniqueIdInDbList = programmeSubjectsUniqueIdInDbList.size();
         String programmeCode = currentProgrammeGroup.getProgrammeCode();
-        String practicalSubjectId = null;
-        for (int currentSubjectCodeNo = 0; currentSubjectCodeNo < totalNumberOfProgrammeSubjectsUniqueIdInDbList; currentSubjectCodeNo++) {
-            String currentSubjectUniqueIdInDb = programmeSubjectsUniqueIdInDbList.get(currentSubjectCodeNo);
-            //fetch the subjectDoc from db using the subjectCode
-            SubjectDoc currentSubjectDoc = subjectDocRepository.findOne(currentSubjectUniqueIdInDb);
-            if (currentSubjectDoc.isSubjectAPracticalSubject() == true) {
-                practicalSubjectId = currentSubjectDoc.getId();
-                break;
-            }
-        }
+        String practicalSubjectId = this.getPracticalSubjectUniqueIdInProgrammeGroup(currentProgrammeGroup);
         //now we can set the practical subjectId and tutorid to the periods and update dayIsAllocated if the existing day is exhausted
 
         int periodToStartSettingSubjectFrom = this.getIndexToStartSettingPeriodsFrom(periodOrLecturesInProgDay);
@@ -309,6 +336,31 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
         return programmeDay;
     }
 
+    /**
+     * get the practical subject's {@link SubjectDoc#id} from the {@link ProgrammeGroup#programmeSubjectsUniqueIdInDbList}
+     *
+     * @param programmeGroup
+     * @return {@link SubjectDoc#id}
+     */
+    private String getPracticalSubjectUniqueIdInProgrammeGroup(ProgrammeGroup programmeGroup) {
+        List<String> programmeSubjectsUniqueIdInDbList = programmeGroup.getProgrammeSubjectsUniqueIdInDbList();
+        int totalNumberOfProgrammeSubjectsUniqueIdInDbList = programmeSubjectsUniqueIdInDbList.size();
+        String practicalSubjectId = null;
+        for (int currentSubjectCodeNo = 0; currentSubjectCodeNo < totalNumberOfProgrammeSubjectsUniqueIdInDbList; currentSubjectCodeNo++) {
+            String currentSubjectUniqueIdInDb = programmeSubjectsUniqueIdInDbList.get(currentSubjectCodeNo);
+            //fetch the subjectDoc from db using the subjectCode
+            SubjectDoc currentSubjectDoc = subjectDocRepository.findOne(currentSubjectUniqueIdInDb);
+            if (currentSubjectDoc.isSubjectAPracticalSubject() == true) {
+                practicalSubjectId = currentSubjectDoc.getId();
+                break;
+            }
+        }
+        if (Objects.nonNull(practicalSubjectId)) {
+            return practicalSubjectId;
+        } else {
+            throw new NullPointerException("No practical subject found for ProgrammeGroup with programmeCode of " + programmeGroup.getProgrammeCode());
+        }
+    }
     /**
      * get total periods for practical subject in programmeGroup Subjects .practical subject is one for each programmeGroup that does practical work requiring a workshop or kitchen
      *

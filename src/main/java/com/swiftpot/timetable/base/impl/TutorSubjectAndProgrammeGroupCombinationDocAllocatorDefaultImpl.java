@@ -96,9 +96,6 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
 
         List<Integer> listOfPeriodAllocation = subjectsAssignerService.getTotalSubjectPeriodAllocationAsList(totalPeriodsLeftToBeAllocated);
 
-        int periodAllocationValue1 = listOfPeriodAllocation.get(0);//THERE WILL ALWAYS BE A VALUE IN THIS
-
-
         ProgrammeGroupPersonalTimeTableDoc programmeGroupPersonalTimeTableDoc =
                 programmeGroupPersonalTimeTableDocRepository.findByProgrammeCodeIgnoreCase(programmeCode);
         List<ProgrammeDay> programmeGroupPersonalProgrammeDaysList = programmeGroupPersonalTimeTableDoc.getProgrammeDaysList();
@@ -194,8 +191,8 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
         Map<String, List<PeriodSetForProgrammeDay>> periodSetForProgrammeDayListMap =
                 programmeGroupDayPeriodSetsDoc.getMapOfProgDayNameAndTheListOfPeriodSets();
 
-        int periodStartingNumber = 0; //TODO TEST TO MAKE SURE THAT THIS WILL NOT REMAIN ZERO WHEN USING IT OUTSIDE THE FOR LOOP BELOW.
-        int periodEndingNumber = 0;  //TODO TEST TO MAKE SURE THAT THIS WILL NOT REMAIN ZERO WHEN USING IT OUTSIDE THE FOR LOOP BELOW.
+        int periodStartingNumber = 0; //TODO DONE!! TEST TO MAKE SURE THAT THIS WILL NOT REMAIN ZERO WHEN USING IT OUTSIDE THE FOR LOOP BELOW.
+        int periodEndingNumber = 0;  //TODO DONE!! TEST TO MAKE SURE THAT THIS WILL NOT REMAIN ZERO WHEN USING IT OUTSIDE THE FOR LOOP BELOW.
 
         ProgrammeDay programmeDayToSetOnTimeTableSuperObject = null;// initialize to null
         //go through programmeGroup personal programmeDay List
