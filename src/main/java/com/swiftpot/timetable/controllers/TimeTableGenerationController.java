@@ -49,6 +49,7 @@ public class TimeTableGenerationController {
     private BusinessLogicConfigurationProperties businessLogicConfigurationProperties;
 
     public static final Logger logger = LogManager.getLogger();
+
     /**
      * So tired that I wrote stupid code here!!
      *
@@ -58,9 +59,13 @@ public class TimeTableGenerationController {
      */
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     private OutgoingPayload generateTimeTable(@RequestBody TimeTableGenerationRequest timeTableGenerationRequest) throws Exception {
-        TimeTableMainDoc timeTableMainDoc = this.generateFullTimeTableObject(timeTableGenerationRequest);
-        timeTableMainDocRepository.save(timeTableMainDoc);
-        return new SuccessfulOutgoingPayload(timeTableMainDoc);
+        try {
+            TimeTableMainDoc timeTableMainDoc = this.generateFullTimeTableObject(timeTableGenerationRequest);
+            timeTableMainDocRepository.save(timeTableMainDoc);
+            return new SuccessfulOutgoingPayload(timeTableMainDoc);
+        } catch (NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException e) {
+            return new ErrorOutgoingPayload("Could not generate timetable.Sad!.Please Try Again.");
+        }
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -77,15 +82,18 @@ public class TimeTableGenerationController {
             int numberOfTimeTableGenerationRetriesFromFile = Integer.valueOf
                     (businessLogicConfigurationProperties.NUMBER_OF_TIMES_TO_GENERATE_IF_MATCH_IS_NOT_FOUND);
 
-            int numberOfTimeTableGenerationRetries = numberOfTimeTableGenerationRetriesFromFile;
-            while (numberOfTimeTableGenerationRetries > 0) {
-                numberOfTimeTableGenerationRetries -= numberOfTimeTableGenerationRetries;
+            int numberOfTimeTableGenerationRetries = 0;
+
+            while (numberOfTimeTableGenerationRetries != numberOfTimeTableGenerationRetriesFromFile) {
+                numberOfTimeTableGenerationRetries += 1;
                 try {
                     timeTableGenerationClient.generateTimeTable();
                     break;//if there was no error thrown,we can break out of it.
                 } catch (NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException ex) {
-                    //do nothing for now,just log it.
-                    logger.debug(ex);
+                    if (numberOfTimeTableGenerationRetries == numberOfTimeTableGenerationRetriesFromFile) {
+                        logger.debug(ex + " \nNumber of timetable generation retries before unsuccessful = " + numberOfTimeTableGenerationRetries);
+                        throw new NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException("Timetable Generation Unsuccessful");
+                    }
                 }
             }
         }
