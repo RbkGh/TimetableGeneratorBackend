@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.repository.db.model;
 
 import com.swiftpot.timetable.base.Person;
@@ -14,6 +18,15 @@ import java.util.List;
  */
 @Document(collection = "TutorDoc")
 public class TutorDoc extends Person {
+
+    /**
+     * CORE TUTOR
+     */
+    public static final String CORE_TUTOR = "CORE";
+    /**
+     * ELECTIVE TUTOR
+     */
+    public static final String ELECTIVE_TUTOR = "ELECTIVE";
 
     @Id
     private String id;
@@ -33,7 +46,7 @@ public class TutorDoc extends Person {
     private String assignedYearGroup;
 
     /**
-     * either "CORE" or "ELECTIVE"
+     * either {@link #CORE_TUTOR} or {@link #ELECTIVE_TUTOR}
      */
     private String tutorSubjectSpeciality;
 

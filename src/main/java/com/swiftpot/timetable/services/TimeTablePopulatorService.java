@@ -138,20 +138,35 @@ public class TimeTablePopulatorService {
     }
 
     /**
-     * the final stage of generation of {@link TimeTableSuperDoc} ,this will generate and allocate all periods for {@link TutorDoc} ie all {@link TutorDoc#tutorSubjectsAndProgrammeCodesList}
+     * allocate periods for all tutors in database,both core and elective tutors.
+     *
+     * @param timeTableSuperDocWithDefaultPeriodsSetAlready
+     * @return
+     * @throws PracticalSubjectForDayNotFoundException
+     * @throws NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException
+     */
+    public TimeTableSuperDoc partThreeAllocatePeriodsForAllTutors(TimeTableSuperDoc timeTableSuperDocWithDefaultPeriodsSetAlready) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException {
+        TimeTableSuperDoc timetableSuperDocAfterCoreTutorsAllocated =
+                this.allocatePeriodsForCoreTutors(timeTableSuperDocWithDefaultPeriodsSetAlready);
+        TimeTableSuperDoc finalTimeTableSuperDocAfterElectiveTutorsAllocated =
+                this.allocatePeriodsForElectiveTutors(timetableSuperDocAfterCoreTutorsAllocated);
+
+        return finalTimeTableSuperDocAfterElectiveTutorsAllocated;
+    }
+
+    /**
+     * this will generate and allocate all periods for supplied {@link TutorDoc}s ie all {@link TutorDoc#tutorSubjectsAndProgrammeCodesList}
      *
      * @param timeTableSuperDocWithDefaultPeriodsSetAlready the {@link TimeTableSuperDoc} with default periods set already.
      * @return final fully generated {@link TimeTableSuperDoc}
      */
-    public TimeTableSuperDoc partThreeAllocatePeriodsForEachTutor(TimeTableSuperDoc timeTableSuperDocWithDefaultPeriodsSetAlready) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException {
+    private TimeTableSuperDoc allocatePeriodsForSuppliedTutors(TimeTableSuperDoc timeTableSuperDocWithDefaultPeriodsSetAlready, List<TutorDoc> tutorDocsSupplied) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException {
         tutorSubjectAndProgrammeGroupCombinationDocAllocator = tutorSubjectAndProgrammeGroupCombinationDocAllocatorDefault;
 
         String timeTableSuperDocString = new Gson().toJson(timeTableSuperDocWithDefaultPeriodsSetAlready);
         TimeTableSuperDoc timeTableSuperDocGeneratedFromString = new Gson().fromJson(timeTableSuperDocString, TimeTableSuperDoc.class);
 
-        List<TutorDoc> tutorDocsInDb =
-                tutorDocRepository.findAll();
-        for (TutorDoc tutorDoc : tutorDocsInDb) {
+        for (TutorDoc tutorDoc : tutorDocsSupplied) {
             List<TutorSubjectIdAndProgrammeCodesListObj> tutorSubjectIdAndProgrammeCodesListObjs =
                     tutorDoc.getTutorSubjectsAndProgrammeCodesList();
 
@@ -183,6 +198,26 @@ public class TimeTablePopulatorService {
         }
 
         return timeTableSuperDocGeneratedFromString;
+    }
+
+    protected TimeTableSuperDoc allocatePeriodsForCoreTutors(TimeTableSuperDoc timeTableSuperDoc) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException {
+        List<TutorDoc> coreTutorDocs =
+                tutorDocRepository.findByTutorSubjectSpeciality(TutorDoc.CORE_TUTOR);
+        if (coreTutorDocs.isEmpty()) {
+            return timeTableSuperDoc;
+        } else {
+            return this.allocatePeriodsForSuppliedTutors(timeTableSuperDoc, coreTutorDocs);
+        }
+    }
+
+    protected TimeTableSuperDoc allocatePeriodsForElectiveTutors(TimeTableSuperDoc timeTableSuperDoc) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException {
+        List<TutorDoc> electiveTutorDocs =
+                tutorDocRepository.findByTutorSubjectSpeciality(TutorDoc.ELECTIVE_TUTOR);
+        if (electiveTutorDocs.isEmpty()) {
+            return timeTableSuperDoc;
+        } else {
+            return this.allocatePeriodsForSuppliedTutors(timeTableSuperDoc, electiveTutorDocs);
+        }
     }
 
     /**

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.repository;
 
 import com.swiftpot.timetable.repository.db.model.TutorDoc;
@@ -19,8 +23,16 @@ public interface TutorDocRepository extends MongoRepository<TutorDoc, String> {
      * find all tutors belonging to a particular department
      *
      * @param departmentId
-     * @return
+     * @return {@link List} of {@link TutorDoc}
      */
     List<TutorDoc> findByDepartmentId(String departmentId);
+
+    /**
+     * find all tutors that are either {@link TutorDoc#ELECTIVE_TUTOR} or {@link TutorDoc#CORE_TUTOR}
+     *
+     * @param tutorSubjectSpeciality
+     * @return {@link List} of {@link TutorDoc}
+     */
+    List<TutorDoc> findByTutorSubjectSpeciality(String tutorSubjectSpeciality);
 
 }

@@ -27,6 +27,7 @@ public class AllocatePeriodsForAllTutorsCommand implements TimetableGenerationCo
 
     @Override
     public TimeTableSuperDoc executeTimeTableGenerationOperation(TimeTableSuperDoc timeTableSuperDoc) throws Exception {
-        return timeTablePopulatorService.partThreeAllocatePeriodsForEachTutor(timeTableSuperDoc);
+        return timeTablePopulatorService.partThreeAllocatePeriodsForAllTutors(timeTableSuperDoc);
     }
+
 }
