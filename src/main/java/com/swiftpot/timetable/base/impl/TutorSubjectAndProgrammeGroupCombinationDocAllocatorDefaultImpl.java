@@ -111,7 +111,7 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
                                     programmeCode,
                                     subjectUniqueIdInDb);
 
-            if (Objects.isNull(tutorPeriodsToSetForProgrammeDay.getProgrammeDayToSetPeriodsTo())) {
+            if (Objects.isNull(tutorPeriodsToSetForProgrammeDay)) {
                 throw new NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException
                         (NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException.DEFAULT_MESSAGE);
             } else {
@@ -174,7 +174,7 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
      * @param periodAllocationValue1                  the period allocation value to search and set ,for example 3 periods is being searched for a fit for the tutor .
      * @param programmeCode                           the {@link ProgrammeGroupDoc#programmeCode} or {@link ProgrammeGroup#programmeCode}
      * @param subjectUniqueIdInDb                     the {@link SubjectDoc#id}
-     * @return {@link TutorPeriodsToSetForProgrammeDay}
+     * @return {@link TutorPeriodsToSetForProgrammeDay} or null value is returned for further operation if no programmeDay Match is found
      */
     private TutorPeriodsToSetForProgrammeDay findAndSetProgrammeDayPeriodsForTutorIfAvailable(List<ProgrammeDay> programmeGroupPersonalProgrammeDaysList,
                                                                                               String tutorUniqueIdInDb,
@@ -279,8 +279,16 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
                 }
             }
         }
-        TutorPeriodsToSetForProgrammeDay tutorPeriodsToSetForProgrammeDay = new TutorPeriodsToSetForProgrammeDay(programmeDayToSetOnTimeTableSuperObject, periodStartingNumber, periodEndingNumber);
-        return tutorPeriodsToSetForProgrammeDay;
+        if (Objects.isNull(programmeDayToSetOnTimeTableSuperObject) ||
+                Objects.isNull(periodStartingNumber) ||
+                Objects.isNull(periodEndingNumber)) {
+            return null; //do this to ensure null is returned for further correct operations.
+        } else {
+            TutorPeriodsToSetForProgrammeDay tutorPeriodsToSetForProgrammeDay =
+                    new TutorPeriodsToSetForProgrammeDay
+                            (programmeDayToSetOnTimeTableSuperObject, periodStartingNumber, periodEndingNumber);
+            return tutorPeriodsToSetForProgrammeDay;
+        }
     }
 
     /**
