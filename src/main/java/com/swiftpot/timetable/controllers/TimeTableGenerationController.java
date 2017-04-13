@@ -84,14 +84,14 @@ public class TimeTableGenerationController {
 
             int numberOfTimeTableGenerationRetries = 0;
 
-            while (numberOfTimeTableGenerationRetries != numberOfTimeTableGenerationRetriesFromFile) {
+            while (!Objects.equals(numberOfTimeTableGenerationRetries, numberOfTimeTableGenerationRetriesFromFile)) {
                 numberOfTimeTableGenerationRetries += 1;
                 try {
                     timeTableGenerationClient.generateTimeTable();
                     logger.debug("Generated in " + numberOfTimeTableGenerationRetries + " different number of retries!");
                     break;//if there was no error thrown,we can break out of it.
                 } catch (NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException ex) {
-                    if (numberOfTimeTableGenerationRetries == numberOfTimeTableGenerationRetriesFromFile) {
+                    if (Objects.equals(numberOfTimeTableGenerationRetries, numberOfTimeTableGenerationRetriesFromFile)) {
                         logger.debug(ex + " \nNumber of timetable generation retries before unsuccessful = " + numberOfTimeTableGenerationRetries);
                         throw new NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException("Timetable Generation Unsuccessful");
                     }
