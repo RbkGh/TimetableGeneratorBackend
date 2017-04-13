@@ -88,6 +88,7 @@ public class TimeTableGenerationController {
                 numberOfTimeTableGenerationRetries += 1;
                 try {
                     timeTableGenerationClient.generateTimeTable();
+                    logger.debug("Generated in " + numberOfTimeTableGenerationRetries + " different number of retries!");
                     break;//if there was no error thrown,we can break out of it.
                 } catch (NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException ex) {
                     if (numberOfTimeTableGenerationRetries == numberOfTimeTableGenerationRetriesFromFile) {
