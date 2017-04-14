@@ -148,6 +148,20 @@ public class ProgrammeDayServices {
         }
     }
 
+    /**
+     * check if {@link ProgrammeDay}'s {@link List} of {@link PeriodOrLecture} are all unallocated
+     *
+     * @param programmeDay
+     * @return {@link Boolean#TRUE} if {@link ProgrammeDay}'s {@link List} of {@link PeriodOrLecture} are all {@link PeriodOrLecture#isAllocated} =={@link Boolean#FALSE},{@link Boolean#TRUE} if otherwise
+     */
+    public boolean isProgrammeDayFullyUnAllocated(ProgrammeDay programmeDay) {
+        if (Objects.equals(this.getNumberOfUnallocatedPeriodsInDay(programmeDay), programmeDay.getPeriodList().size())) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public List<UnallocatedPeriodSet> getListOfUnallocatedPeriodSetsInDay(ProgrammeDay programmeDay) {
         List<UnallocatedPeriodSet> finalUnallocatedPeriodSetsList = new ArrayList<>();
         if (this.isProgrammeDayFullyAllocated(programmeDay)) {

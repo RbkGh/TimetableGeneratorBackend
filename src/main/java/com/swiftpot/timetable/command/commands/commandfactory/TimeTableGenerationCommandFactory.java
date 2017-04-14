@@ -36,6 +36,10 @@ public class TimeTableGenerationCommandFactory {
      * use this for {@link ResetTemporaryDatabaseEntitiesCommand}
      */
     public static final String RESET_TEMPORARY_DATABASE_ENTITIES = "RESET_TEMPORARY_DATABASE_ENTITIES";
+    /**
+     * USE THIS FOR {@link GenerateTwoPeriodsForFormThreeClassesHavingEightPeriodsAsSubjectPeriodsCommand}
+     */
+    public static final String GENERATE_TWO_PERIODS_ONLY_IN_PROGRAMME_GROUP_NEEDING_IT = "GENERATE_TWO_PERIODS_ONLY_IN_PROGRAMME_GROUP_NEEDING_IT";
 
     @Autowired
     private AllocateDefaultPeriodsForAllProgrammeGroupsCommand allocateDefaultPeriodsForAllProgrammeGroupsCommand;
@@ -47,6 +51,8 @@ public class TimeTableGenerationCommandFactory {
     private GenerateInitialTimeTableSuperDocWithDefaultDataCommand generateInitialTimeTableSuperDocWithDefaultDataCommand;
     @Autowired
     private ResetTemporaryDatabaseEntitiesCommand resetTemporaryDatabaseEntitiesCommand;
+    @Autowired
+    private GenerateTwoPeriodsForFormThreeClassesHavingEightPeriodsAsSubjectPeriodsCommand generateTwoPeriodsForFormThreeClassesHavingEightPeriodsAsSubjectPeriodsCommand;
 
     /**
      * @param implementationType at least one of the static final Strings from {@link TimeTableGenerationCommandFactory} ,<br>
@@ -59,6 +65,9 @@ public class TimeTableGenerationCommandFactory {
 
             case ALLOCATE_DEFAULT_PERIODS_FOR_ALL_PROGRAMMEGROUPS:
                 return allocateDefaultPeriodsForAllProgrammeGroupsCommand;
+
+            case GENERATE_TWO_PERIODS_ONLY_IN_PROGRAMME_GROUP_NEEDING_IT:
+                return generateTwoPeriodsForFormThreeClassesHavingEightPeriodsAsSubjectPeriodsCommand;
 
             case ALLOCATE_PERIODS_FOR_ALL_TUTORS:
                 return allocatePeriodsForAllTutorsCommand;

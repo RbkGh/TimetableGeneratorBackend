@@ -7,25 +7,24 @@ package com.swiftpot.timetable.services;
 import com.google.gson.Gson;
 import com.swiftpot.timetable.base.TutorSubjectAndProgrammeGroupCombinationDocAllocator;
 import com.swiftpot.timetable.base.impl.TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl;
-import com.swiftpot.timetable.command.TimeTableGenerationClient;
 import com.swiftpot.timetable.exception.NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException;
 import com.swiftpot.timetable.exception.PracticalSubjectForDayNotFoundException;
+import com.swiftpot.timetable.exception.SubjectWithEightPeriodsInDepartmentNotFoundException;
 import com.swiftpot.timetable.factory.TimeTableDefaultPeriodsAllocatorFactory;
+import com.swiftpot.timetable.model.ProgrammeDay;
 import com.swiftpot.timetable.model.ProgrammeGroup;
 import com.swiftpot.timetable.model.TutorSubjectIdAndProgrammeCodesListObj;
 import com.swiftpot.timetable.model.YearGroup;
 import com.swiftpot.timetable.repository.*;
 import com.swiftpot.timetable.repository.db.model.*;
-import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
+import com.swiftpot.timetable.services.servicemodels.PeriodSetForProgrammeDay;
 import com.swiftpot.timetable.util.YearGroupNumberAndNames;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Ace Programmer Rbk
@@ -58,9 +57,11 @@ public class TimeTablePopulatorService {
     @Autowired
     private ProgrammeGroupDocServices programmeGroupDocServices;
     @Autowired
-    private BusinessLogicConfigurationProperties businessLogicConfigurationProperties;
+    private ProgrammeGroupDayPeriodSetsDocRepository programmeGroupDayPeriodSetsDocRepository;
     @Autowired
-    private TimeTableGenerationClient timeTableGenerationClient;
+    private ProgrammeGroupPersonalTimeTableDocRepository programmeGroupPersonalTimeTableDocRepository;
+    @Autowired
+    private ProgrammeDayServices programmeDayServices;
 
     private static final Logger logger = LogManager.getLogger();
 
@@ -138,6 +139,197 @@ public class TimeTablePopulatorService {
     }
 
     /**
+     * generate 2 periods for day ie {2,2,2,2,2} for all elective subjects that have 8periods as subject allocation
+     *
+     * @return 0 to only show that method has completed execution
+     */
+    public int partThreeGenerateTwoPeriodsForAtLeastOneDayInWeekForProgrammesThatHaveEightPeriodsSubjectAllocation() {
+        //todo THROW AN EXCEPTION IF A CORE SUBJECT HAS 8 PERIOD ALLOCATIONS LATER,TO NULLIFY THE ASSUMPTION BEING USED HERE
+        List<DepartmentDoc> electiveDepartmentDocs = departmentDocRepository.findByDeptType(DepartmentDoc.DEPARTMENT_TYPE_ELECTIVE);
+        List<DepartmentDoc> departmentDocsThatHaveAtLeastOneSubjectHavingEightPeriodAllcoation = new ArrayList<>(0);
+        int yearGroupNumberToCheck = 3;
+        int numberOfPeriodsToMatchAgainst = 8;
+        for (DepartmentDoc departmentDoc : electiveDepartmentDocs) {
+            List<String> subjectsDocIdList = departmentDoc.getProgrammeSubjectsDocIdList();
+            for (String subjectDocId : subjectsDocIdList) {
+                SubjectDoc subjectDoc = subjectDocRepository.findOne(subjectDocId);
+                if (subjectDoc.getSubjectYearGroupList().contains(yearGroupNumberToCheck)) { //if the yearGroups contain 3rd years,
+                    SubjectAllocationDoc subjectAllocationDoc =
+                            subjectAllocationDocRepository.findBySubjectCodeAndYearGroup(subjectDoc.getSubjectCode(), yearGroupNumberToCheck);
+                    if (Objects.equals(subjectAllocationDoc.getTotalSubjectAllocation(), numberOfPeriodsToMatchAgainst)) {
+                        departmentDocsThatHaveAtLeastOneSubjectHavingEightPeriodAllcoation.add(departmentDoc);
+                        break; //we expect only one subject to be 8 periods,TODO refactor and throw exception if more than one subject is 8periods in department later
+                    }
+                }
+            }
+        }
+
+        if (!departmentDocsThatHaveAtLeastOneSubjectHavingEightPeriodAllcoation.isEmpty()) {
+            for (DepartmentDoc departmentDoc : departmentDocsThatHaveAtLeastOneSubjectHavingEightPeriodAllcoation) {
+                String subjectDocIdThatHasEightPeriodsAsSubjectAllocation = null;
+                try {
+                    subjectDocIdThatHasEightPeriodsAsSubjectAllocation =
+                            this.findSubjectDocIdThatHasEightPeriodsAsSubjectAllocation(departmentDoc);
+                } catch (SubjectWithEightPeriodsInDepartmentNotFoundException e) {
+                    subjectDocIdThatHasEightPeriodsAsSubjectAllocation = null; //reset to null for further operation
+                }
+                if (!Objects.isNull(subjectDocIdThatHasEightPeriodsAsSubjectAllocation)) {
+                    List<TutorDoc> tutorDocsThatBelongToDepartment =
+                            tutorDocRepository.findByDepartmentId(departmentDoc.getId());
+                    for (TutorDoc tutorDoc : tutorDocsThatBelongToDepartment) {
+                        List<TutorSubjectIdAndProgrammeCodesListObj> tutorSubjectIdAndProgrammeCodesListObjsList =
+                                tutorDoc.getTutorSubjectsAndProgrammeCodesList();
+
+                        for (TutorSubjectIdAndProgrammeCodesListObj tutorSubjectIdAndProgrammeCodesListObj : tutorSubjectIdAndProgrammeCodesListObjsList) {
+                            String currentSubjectId = tutorSubjectIdAndProgrammeCodesListObj.getTutorSubjectId();
+                            if (Objects.equals(currentSubjectId, subjectDocIdThatHasEightPeriodsAsSubjectAllocation)) {
+                                List<String> programmeCodeList = tutorSubjectIdAndProgrammeCodesListObj.getTutorProgrammeCodesList();
+                                for (String programmeCode : programmeCodeList) {
+                                    ProgrammeGroupDoc programmeGroupDoc = programmeGroupDocRepository.findByProgrammeCode(programmeCode);
+                                    if (Objects.equals(programmeGroupDoc.getYearGroup(), yearGroupNumberToCheck)) {
+                                        this.updateProgrammeGroupDayPeriodSetDocWithTwoPeriodsOnlyForDay(programmeGroupDoc);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return 0;//just to denote finished,this is because mongo behaves strangely in void methods.
+    }
+
+    /**
+     * update programmeGroup day periodset with only 2 periods for day {2,2,2,2,2}.
+     *
+     * @param programmeGroupDoc
+     */
+    private synchronized void updateProgrammeGroupDayPeriodSetDocWithTwoPeriodsOnlyForDay(ProgrammeGroupDoc programmeGroupDoc) {
+
+
+        ProgrammeGroupDayPeriodSetsDoc programmeGroupDayPeriodSetsDoc =
+                programmeGroupDayPeriodSetsDocRepository.findByProgrammeCode(programmeGroupDoc.getProgrammeCode());
+        Map<String, List<PeriodSetForProgrammeDay>> mapOfProgrammeDayNamesAndListOfPeriodSets =
+                programmeGroupDayPeriodSetsDoc.getMapOfProgDayNameAndTheListOfPeriodSets();
+
+        //todo NICE TO HAVE SOME RANDOMIZATION IN HERE LATER!,NOR PRIORITY THOUGH
+
+        mapOfProgrammeDayNamesAndListOfPeriodSets.forEach((programmeDayName, periodSetForProgrammeDays) -> {
+            if (isProgrammeDayFullyUnAllocatedForProgrammeGroup(programmeGroupDoc, programmeDayName)) {
+                mapOfProgrammeDayNamesAndListOfPeriodSets.replace(programmeDayName, this.createAndRetrieveTwoPeriodSetsOnlyForDay());
+            }
+        });
+
+        //do this because,strangely,if we just change set the List of periodSetForProgrammeDaysList,mongo or whatever does not save it,hence just create a new one with updated values,to avoid any hogwash.
+        ProgrammeGroupDayPeriodSetsDoc programmeGroupDayPeriodSetsDocUpdated = new ProgrammeGroupDayPeriodSetsDoc();
+        programmeGroupDayPeriodSetsDocUpdated.setId(programmeGroupDayPeriodSetsDoc.getId());
+        programmeGroupDayPeriodSetsDocUpdated.setProgrammeCode(programmeGroupDayPeriodSetsDoc.getProgrammeCode());
+        programmeGroupDayPeriodSetsDocUpdated.setMapOfProgDayNameAndTheListOfPeriodSets(mapOfProgrammeDayNamesAndListOfPeriodSets);
+
+        programmeGroupDayPeriodSetsDocRepository.save(programmeGroupDayPeriodSetsDocUpdated);
+    }
+
+    /**
+     * create and retrieve two periods set only for the day ie 2,2,2,2,2 for day
+     *
+     * @return {@link List} of {@link PeriodSetForProgrammeDay}
+     */
+    private List<PeriodSetForProgrammeDay> createAndRetrieveTwoPeriodSetsOnlyForDay() {
+        int totalNumberOfPeriodsForEach = 2;
+
+        PeriodSetForProgrammeDay periodSetDay1 = new PeriodSetForProgrammeDay();
+        periodSetDay1.setPeriodStartingNumber(1);
+        periodSetDay1.setPeriodEndingNumber(2);
+        periodSetDay1.setTotalNumberOfPeriodsForSet(totalNumberOfPeriodsForEach);
+
+        PeriodSetForProgrammeDay periodSetDay2 = new PeriodSetForProgrammeDay();
+        periodSetDay2.setPeriodStartingNumber(3);
+        periodSetDay2.setPeriodEndingNumber(4);
+        periodSetDay2.setTotalNumberOfPeriodsForSet(totalNumberOfPeriodsForEach);
+
+        PeriodSetForProgrammeDay periodSetDay3 = new PeriodSetForProgrammeDay();
+        periodSetDay3.setPeriodStartingNumber(5);
+        periodSetDay3.setPeriodEndingNumber(6);
+        periodSetDay3.setTotalNumberOfPeriodsForSet(totalNumberOfPeriodsForEach);
+
+        PeriodSetForProgrammeDay periodSetDay4 = new PeriodSetForProgrammeDay();
+        periodSetDay4.setPeriodStartingNumber(7);
+        periodSetDay4.setPeriodEndingNumber(8);
+        periodSetDay4.setTotalNumberOfPeriodsForSet(totalNumberOfPeriodsForEach);
+
+        PeriodSetForProgrammeDay periodSetDay5 = new PeriodSetForProgrammeDay();
+        periodSetDay5.setPeriodStartingNumber(9);
+        periodSetDay5.setPeriodEndingNumber(10);
+        periodSetDay5.setTotalNumberOfPeriodsForSet(totalNumberOfPeriodsForEach);
+
+        List<PeriodSetForProgrammeDay> periodSetForProgrammeDaysList =
+                new ArrayList<>(
+                        Arrays.asList(periodSetDay1,
+                                periodSetDay2,
+                                periodSetDay3,
+                                periodSetDay4,
+                                periodSetDay5));
+        return periodSetForProgrammeDaysList;
+    }
+
+    /**
+     * is programmeDay fully <b>UNALLOCATED</b>,NOT ALLOCATED!, for the particular programmeGroup?
+     *
+     * @param programmeGroupDoc
+     * @param programmeDayName
+     * @return {@link Boolean}
+     */
+    private boolean isProgrammeDayFullyUnAllocatedForProgrammeGroup(ProgrammeGroupDoc programmeGroupDoc, String programmeDayName) {
+
+        ProgrammeGroupPersonalTimeTableDoc programmeGroupPersonalTimeTableDoc =
+                programmeGroupPersonalTimeTableDocRepository.findByProgrammeCodeIgnoreCase(programmeGroupDoc.getProgrammeCode());
+        List<ProgrammeDay> programmeDaysList = programmeGroupPersonalTimeTableDoc.getProgrammeDaysList();
+
+        boolean isProgrammeDayFullyUnAllocatedForProgrammeGroup = false;
+        for (ProgrammeDay programmeDay : programmeDaysList) {
+            if (programmeDay.getDayName().equalsIgnoreCase(programmeDayName)) {
+                if (programmeDayServices.isProgrammeDayFullyUnAllocated(programmeDay)) {
+                    isProgrammeDayFullyUnAllocatedForProgrammeGroup = true;
+                    break;
+                }
+            }
+        }
+        return isProgrammeDayFullyUnAllocatedForProgrammeGroup;
+    }
+
+    /**
+     * find {@link SubjectDoc#id} that has 8 periods as subject allocation in department provided
+     *
+     * @param departmentDoc
+     * @return {@link SubjectDoc#id} of the subject
+     * @throws {@link SubjectWithEightPeriodsInDepartmentNotFoundException} to show that no subject has 8 periods allocation in department provided
+     */
+    private String findSubjectDocIdThatHasEightPeriodsAsSubjectAllocation(DepartmentDoc departmentDoc) throws SubjectWithEightPeriodsInDepartmentNotFoundException {
+        String subjectDocIdThatHasEightPeriodsAsSubjectAllocation = null;
+        List<String> subjectsDocIdList = departmentDoc.getProgrammeSubjectsDocIdList();
+        for (String subjectDocId : subjectsDocIdList) {
+            SubjectDoc subjectDoc = subjectDocRepository.findOne(subjectDocId);
+            int yearGroupNumberToCheck = 3;
+            int numberOfPeriodsToMatchAgainst = 8;
+            if (subjectDoc.getSubjectYearGroupList().contains(yearGroupNumberToCheck)) { //if the yearGroups contain 3rd years,
+                SubjectAllocationDoc subjectAllocationDoc =
+                        subjectAllocationDocRepository.findBySubjectCodeAndYearGroup(subjectDoc.getSubjectCode(), yearGroupNumberToCheck);
+                if (Objects.equals(subjectAllocationDoc.getTotalSubjectAllocation(), numberOfPeriodsToMatchAgainst)) {
+                    subjectDocIdThatHasEightPeriodsAsSubjectAllocation = subjectDocId;
+                    break; //we expect only one subject to be 8 periods,TODO refactor and throw exception if more than one subject is 8periods in department later
+                }
+            }
+        }
+        if (!Objects.isNull(subjectDocIdThatHasEightPeriodsAsSubjectAllocation)) {
+            return subjectDocIdThatHasEightPeriodsAsSubjectAllocation;
+        } else {
+            throw new SubjectWithEightPeriodsInDepartmentNotFoundException("No subject found in " + departmentDoc.getDeptName() +
+                    " with id of(" + departmentDoc.getId() + ") that has 8 periods as subject allocation");
+        }
+    }
+
+    /**
      * allocate periods for all tutors in database,both core and elective tutors.
      *
      * @param timeTableSuperDocWithDefaultPeriodsSetAlready
@@ -145,7 +337,7 @@ public class TimeTablePopulatorService {
      * @throws PracticalSubjectForDayNotFoundException
      * @throws NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException
      */
-    public TimeTableSuperDoc partThreeAllocatePeriodsForAllTutors(TimeTableSuperDoc timeTableSuperDocWithDefaultPeriodsSetAlready) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException {
+    public TimeTableSuperDoc partFourAllocatePeriodsForAllTutors(TimeTableSuperDoc timeTableSuperDocWithDefaultPeriodsSetAlready) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException {
         TimeTableSuperDoc timetableSuperDocAfterCoreTutorsAllocated =
                 this.allocatePeriodsForCoreTutors(timeTableSuperDocWithDefaultPeriodsSetAlready);
         TimeTableSuperDoc finalTimeTableSuperDocAfterElectiveTutorsAllocated =

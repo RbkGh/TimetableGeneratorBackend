@@ -24,6 +24,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -60,6 +61,27 @@ public class ProgrammeDayServicesTests {
         boolean isProgrammeDayFullyAllocated =
                 programmeDayServices.isProgrammeDayFullyAllocated(programmeDaysList.get(3));
         assertThat(isProgrammeDayFullyAllocated, equalTo(true));
+    }
+
+    @Test
+    public void testIfProgrammeDayIsFullyUnAllocatedExpectTrueAndFalse() {
+        programmeDaysList.get(3).getPeriodList().forEach(periodOrLecture -> periodOrLecture.setIsAllocated(false));
+        boolean isProgrammeDayFullyUnallocated =
+                programmeDayServices.isProgrammeDayFullyUnAllocated(programmeDaysList.get(3));
+        System.out.println("ProgrammeDay -->" + PrettyJSON.toListPrettyFormat(programmeDaysList.get(3).getPeriodList()) +
+                "\n isProgrammeDayFullyUnallocated : expect true ,answer = "
+                + isProgrammeDayFullyUnallocated);
+        assertThat(isProgrammeDayFullyUnallocated, equalTo(true));
+
+
+        programmeDaysList.get(3).getPeriodList().forEach(periodOrLecture -> {
+            if (Objects.equals(periodOrLecture.getPeriodNumber(), 1))
+                periodOrLecture.setIsAllocated(true);
+        });
+        System.out.println("ProgrammeDay -->" + PrettyJSON.toListPrettyFormat(programmeDaysList.get(3).getPeriodList()) +
+                "\n isProgrammeDayFullyUnallocated : expect false ,answer = "
+                + programmeDayServices.isProgrammeDayFullyUnAllocated(programmeDaysList.get(3)));
+        assertThat(programmeDayServices.isProgrammeDayFullyUnAllocated(programmeDaysList.get(3)), equalTo(false));
     }
 
     @Test

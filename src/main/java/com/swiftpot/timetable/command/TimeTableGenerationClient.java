@@ -52,13 +52,18 @@ public class TimeTableGenerationClient {
                 timeTableGenerationInvoker.
                         executeTimeTableGenerationOperation(timeTableSuperDocWithDefaultData);
 
+        //generate 2 periods only ie {2,2,2,2,2} for programme group that has one of its subjects having 8periods as its subject allocation.
+        timeTableGenerationInvoker.setTimeTableGenerationImplType(TimeTableGenerationCommandFactory.GENERATE_TWO_PERIODS_ONLY_IN_PROGRAMME_GROUP_NEEDING_IT);
+        TimeTableSuperDoc timeTableSuperDocWithTwoPeriodsForProgrammeDayPeriodSetRequiringIt =
+                timeTableGenerationInvoker.
+                        executeTimeTableGenerationOperation(timeTableSuperDocWithDefaultData);
 
         //allocate periods for all tutors
         timeTableGenerationInvoker.setTimeTableGenerationImplType(TimeTableGenerationCommandFactory.ALLOCATE_PERIODS_FOR_ALL_TUTORS);
         TimeTableSuperDoc finalTimeTableSuperDoc =
                 timeTableGenerationInvoker.
                         executeTimeTableGenerationOperation
-                                (timeTableSuperDocWithAllDefaultPeriodsSet);
+                                (timeTableSuperDocWithTwoPeriodsForProgrammeDayPeriodSetRequiringIt);
 
         return finalTimeTableSuperDoc;
     }
