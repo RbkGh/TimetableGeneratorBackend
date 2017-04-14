@@ -9,6 +9,7 @@ import com.swiftpot.timetable.command.TimetableGenerationCommand;
 import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
 import com.swiftpot.timetable.services.TimeTablePopulatorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * generate 2 periods only ie {2,2,2,2,2} for programmeGroups that have 8periods as one of their subjects period allocation.
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  *         <Rodney Kwabena Boachie at [rodney@swiftpot.com,rbk.unlimited@gmail.com]> on
  *         13-Apr-17 @ 7:00 PM
  */
+@Component
 public class GenerateTwoPeriodsForFormThreeClassesHavingEightPeriodsAsSubjectPeriodsCommand implements TimetableGenerationCommand {
 
     @Autowired
