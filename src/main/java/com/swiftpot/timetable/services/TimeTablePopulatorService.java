@@ -7,6 +7,7 @@ package com.swiftpot.timetable.services;
 import com.google.gson.Gson;
 import com.swiftpot.timetable.base.TutorSubjectAndProgrammeGroupCombinationDocAllocator;
 import com.swiftpot.timetable.base.impl.TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl;
+import com.swiftpot.timetable.exception.FullyUnallocatedDayNotFoundException;
 import com.swiftpot.timetable.exception.NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException;
 import com.swiftpot.timetable.exception.PracticalSubjectForDayNotFoundException;
 import com.swiftpot.timetable.exception.SubjectWithEightPeriodsInDepartmentNotFoundException;
@@ -143,7 +144,7 @@ public class TimeTablePopulatorService {
      *
      * @return 0 to only show that method has completed execution
      */
-    public int partThreeGenerateTwoPeriodsForAtLeastOneDayInWeekForProgrammesThatHaveEightPeriodsSubjectAllocation() {
+    public int partThreeGenerateTwoPeriodsForAtLeastOneDayInWeekForProgrammesThatHaveEightPeriodsSubjectAllocation() throws FullyUnallocatedDayNotFoundException {
         //todo THROW AN EXCEPTION IF A CORE SUBJECT HAS 8 PERIOD ALLOCATIONS LATER,TO NULLIFY THE ASSUMPTION BEING USED HERE
         List<DepartmentDoc> electiveDepartmentDocs = departmentDocRepository.findByDeptType(DepartmentDoc.DEPARTMENT_TYPE_ELECTIVE);
         List<DepartmentDoc> departmentDocsThatHaveAtLeastOneSubjectHavingEightPeriodAllcoation = new ArrayList<>(0);
@@ -205,7 +206,7 @@ public class TimeTablePopulatorService {
      *
      * @param programmeGroupDoc
      */
-    private synchronized void updateProgrammeGroupDayPeriodSetDocWithTwoPeriodsOnlyForDay(ProgrammeGroupDoc programmeGroupDoc) {
+    private synchronized void updateProgrammeGroupDayPeriodSetDocWithTwoPeriodsOnlyForDay(ProgrammeGroupDoc programmeGroupDoc) throws FullyUnallocatedDayNotFoundException {
 
 
         ProgrammeGroupDayPeriodSetsDoc programmeGroupDayPeriodSetsDoc =
@@ -213,13 +214,24 @@ public class TimeTablePopulatorService {
         Map<String, List<PeriodSetForProgrammeDay>> mapOfProgrammeDayNamesAndListOfPeriodSets =
                 programmeGroupDayPeriodSetsDoc.getMapOfProgDayNameAndTheListOfPeriodSets();
 
-        //todo NICE TO HAVE SOME RANDOMIZATION IN HERE LATER!,NOR PRIORITY THOUGH
+        //todo NICE TO HAVE SOME RANDOMIZATION IN HERE LATER!,NOt PRIORITY THOUGH
 
-        mapOfProgrammeDayNamesAndListOfPeriodSets.forEach((programmeDayName, periodSetForProgrammeDays) -> {
+        Set<Map.Entry<String, List<PeriodSetForProgrammeDay>>> mapEntry = mapOfProgrammeDayNamesAndListOfPeriodSets.entrySet();
+
+        String programmeDayNameToReplace = null;
+        for (Map.Entry<String, List<PeriodSetForProgrammeDay>> mapEntryForProgrammeDays : mapEntry) {
+            String programmeDayName = mapEntryForProgrammeDays.getKey();
             if (isProgrammeDayFullyUnAllocatedForProgrammeGroup(programmeGroupDoc, programmeDayName)) {
-                mapOfProgrammeDayNamesAndListOfPeriodSets.replace(programmeDayName, this.createAndRetrieveTwoPeriodSetsOnlyForDay());
+                programmeDayNameToReplace = programmeDayName;
+                break;
             }
-        });
+        }
+        if (!Objects.isNull(programmeDayNameToReplace)) {
+            mapOfProgrammeDayNamesAndListOfPeriodSets.replace(programmeDayNameToReplace, this.createAndRetrieveTwoPeriodSetsOnlyForDay());
+        } else {
+            throw new FullyUnallocatedDayNotFoundException
+                    ("No Day found that is unallocated in ProgrammeCode :: ==>" + programmeGroupDoc.getProgrammeCode());
+        }
 
         //do this because,strangely,if we just change set the List of periodSetForProgrammeDaysList,mongo or whatever does not save it,hence just create a new one with updated values,to avoid any hogwash.
         ProgrammeGroupDayPeriodSetsDoc programmeGroupDayPeriodSetsDocUpdated = new ProgrammeGroupDayPeriodSetsDoc();
