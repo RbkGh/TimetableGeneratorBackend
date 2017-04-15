@@ -97,19 +97,28 @@ public class TimeTableGenerationController {
         while (!Objects.equals(numberOfTimeTableGenerationRetries, numberOfTimeTableGenerationRetriesFromFile)) {
             try {
                 numberOfTimeTableGenerationRetries += 1;
+                this.getAndResetCurrentValueToZero();//reset current value to 0 before every generation of timetable
                 //generate timetable and pick result from db.
                 timeTableGenerationClient.generateTimeTable();
-                TotalNumberOfTimesTutorSubjectWasUnallocatedDoc totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterGeneration =
-                        totalNumberOfTimesTutorSubjectWasUnallocatedDocRepository.findOne(businessLogicConfigurationProperties.TOTAL_NUMBER_OF_UNALLOCATED_SUBJECTS_ID_FOR_SAVING_INTO_DB);
-                int currentValue = totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterGeneration.getTotalNumberOfTimesTutorSubjectWasUnallocatedCurrentValue();
-                int bestValue = totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterGeneration.getTotalNumberOfTimesTutorSubjectWasUnallocatedBestValue();
+//
 
                 if (Objects.equals
-                        (currentValue, 0)) {
+                        (totalNumberOfTimesTutorSubjectWasUnallocatedDocRepository.
+                                findOne(businessLogicConfigurationProperties.
+                                        TOTAL_NUMBER_OF_UNALLOCATED_SUBJECTS_ID_FOR_SAVING_INTO_DB).getTotalNumberOfTimesTutorSubjectWasUnallocatedCurrentValue(), 0)) {
                     logger.info("This is the best and PERFECT SOLUTION TO BE EVER GENERATED.tHIS IS DIAMOND!!!!!!!!!!!!!!POOOF POOOOOF POOOOOF!!!!!!!!!!!!!");
                     return this.saveAndReturnTimeTableMainDoc(timeTableGenerationRequest);
                     //BREAK BECAUSE WE FOUND THE PERFECT SOLUTION,THERE WAS NO SUBJECT UNALLOCATED FOR ANY TUTOR!!!!,THIS IS DIAMOND
-                } else if (currentValue < bestValue) {
+                } else if (totalNumberOfTimesTutorSubjectWasUnallocatedDocRepository.
+                        findOne(businessLogicConfigurationProperties.
+                                TOTAL_NUMBER_OF_UNALLOCATED_SUBJECTS_ID_FOR_SAVING_INTO_DB).getTotalNumberOfTimesTutorSubjectWasUnallocatedCurrentValue() <
+                        totalNumberOfTimesTutorSubjectWasUnallocatedDocRepository.
+                                findOne(businessLogicConfigurationProperties.
+                                        TOTAL_NUMBER_OF_UNALLOCATED_SUBJECTS_ID_FOR_SAVING_INTO_DB).getTotalNumberOfTimesTutorSubjectWasUnallocatedBestValue()) {
+                    TotalNumberOfTimesTutorSubjectWasUnallocatedDoc totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterGeneration =
+                            totalNumberOfTimesTutorSubjectWasUnallocatedDocRepository.findOne(businessLogicConfigurationProperties.TOTAL_NUMBER_OF_UNALLOCATED_SUBJECTS_ID_FOR_SAVING_INTO_DB);
+                    int currentValue = totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterGeneration.getTotalNumberOfTimesTutorSubjectWasUnallocatedCurrentValue();
+
                     TotalNumberOfTimesTutorSubjectWasUnallocatedDoc totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterBetterAlternative =
                             new TotalNumberOfTimesTutorSubjectWasUnallocatedDoc();
                     totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterBetterAlternative.setId(totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterGeneration.getId());
@@ -125,6 +134,21 @@ public class TimeTableGenerationController {
             }
         }
         return this.returnAlreadySavedTimeTableMainDoc(timeTableGenerationRequest);
+    }
+
+    private synchronized int getAndResetCurrentValueToZero() {
+        TotalNumberOfTimesTutorSubjectWasUnallocatedDoc totalNumberOfTimesTutorSubjectWasUnallocatedDoc =
+                totalNumberOfTimesTutorSubjectWasUnallocatedDocRepository.findOne(businessLogicConfigurationProperties.TOTAL_NUMBER_OF_UNALLOCATED_SUBJECTS_ID_FOR_SAVING_INTO_DB);
+
+        TotalNumberOfTimesTutorSubjectWasUnallocatedDoc resetCurrentValue =
+                new TotalNumberOfTimesTutorSubjectWasUnallocatedDoc(); //new instance all together because of some bug in mongo or my db driver,not really sure,so i just have to do this to save my document in peace!!
+        resetCurrentValue.setId(businessLogicConfigurationProperties.TOTAL_NUMBER_OF_UNALLOCATED_SUBJECTS_ID_FOR_SAVING_INTO_DB);
+        resetCurrentValue.setTotalNumberOfTimesTutorSubjectWasUnallocatedBestValue
+                (totalNumberOfTimesTutorSubjectWasUnallocatedDoc.getTotalNumberOfTimesTutorSubjectWasUnallocatedBestValue()); //set to absurd value in the beginning
+        resetCurrentValue.setTotalNumberOfTimesTutorSubjectWasUnallocatedCurrentValue(0);//set to 0,so that if it remains 0 after generation,it means the perfect solution was found
+
+        totalNumberOfTimesTutorSubjectWasUnallocatedDocRepository.save(resetCurrentValue);
+        return 0;//just to signify completed
     }
 
     /**
