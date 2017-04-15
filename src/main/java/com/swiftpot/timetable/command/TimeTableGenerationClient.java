@@ -56,7 +56,7 @@ public class TimeTableGenerationClient {
         timeTableGenerationInvoker.setTimeTableGenerationImplType(TimeTableGenerationCommandFactory.GENERATE_TWO_PERIODS_ONLY_IN_PROGRAMME_GROUP_NEEDING_IT);
         TimeTableSuperDoc timeTableSuperDocWithTwoPeriodsForProgrammeDayPeriodSetRequiringIt =
                 timeTableGenerationInvoker.
-                        executeTimeTableGenerationOperation(timeTableSuperDocWithDefaultData);
+                        executeTimeTableGenerationOperation(timeTableSuperDocWithAllDefaultPeriodsSet);
 
         //allocate periods for all tutors
         timeTableGenerationInvoker.setTimeTableGenerationImplType(TimeTableGenerationCommandFactory.ALLOCATE_PERIODS_FOR_ALL_TUTORS);
