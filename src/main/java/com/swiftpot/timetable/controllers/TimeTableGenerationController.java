@@ -64,12 +64,10 @@ public class TimeTableGenerationController {
         try {
             TimeTableMainDoc timeTableMainDoc = this.generateFullTimeTableObject(timeTableGenerationRequest);
             return new SuccessfulOutgoingPayload(timeTableMainDoc);
-        } catch (NoPeriodsFoundInProgrammeDaysThatSatisfiesElectiveTutorTimeTableException e) {
-            return new ErrorOutgoingPayload("Marshmallow Error,Please Try Again.");
         } catch (PracticalSubjectForDayNotFoundException e) {
             return new ErrorOutgoingPayload("Practical Subject For Day Not found.Please Check to ensure all input is fully correct and try again.");
         } catch (Exception e) {
-            return new ErrorOutgoingPayload("Serious Error Occured.Ensure all input is correct and Try Again.");
+            return new ErrorOutgoingPayload("Serious Error Occured{Nougat}.Please Just Try Again.");
         }
     }
 
@@ -97,31 +95,34 @@ public class TimeTableGenerationController {
         int numberOfTimeTableGenerationRetries = 0;
 
         while (!Objects.equals(numberOfTimeTableGenerationRetries, numberOfTimeTableGenerationRetriesFromFile)) {
-            numberOfTimeTableGenerationRetries += 1;
-            //generate timetable and pick result from db.
-            timeTableGenerationClient.generateTimeTable();
-            TotalNumberOfTimesTutorSubjectWasUnallocatedDoc totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterGeneration =
-                    totalNumberOfTimesTutorSubjectWasUnallocatedDocRepository.findOne(businessLogicConfigurationProperties.TOTAL_NUMBER_OF_UNALLOCATED_SUBJECTS_ID_FOR_SAVING_INTO_DB);
-            int currentValue = totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterGeneration.getTotalNumberOfTimesTutorSubjectWasUnallocatedCurrentValue();
-            int bestValue = totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterGeneration.getTotalNumberOfTimesTutorSubjectWasUnallocatedBestValue();
+            try {
+                numberOfTimeTableGenerationRetries += 1;
+                //generate timetable and pick result from db.
+                timeTableGenerationClient.generateTimeTable();
+                TotalNumberOfTimesTutorSubjectWasUnallocatedDoc totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterGeneration =
+                        totalNumberOfTimesTutorSubjectWasUnallocatedDocRepository.findOne(businessLogicConfigurationProperties.TOTAL_NUMBER_OF_UNALLOCATED_SUBJECTS_ID_FOR_SAVING_INTO_DB);
+                int currentValue = totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterGeneration.getTotalNumberOfTimesTutorSubjectWasUnallocatedCurrentValue();
+                int bestValue = totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterGeneration.getTotalNumberOfTimesTutorSubjectWasUnallocatedBestValue();
 
-            if (Objects.equals
-                    (currentValue, 0)) {
-                logger.info("This is the best and PERFECT SOLUTION TO BE EVER GENERATED.tHIS IS DIAMOND!!!!!!!!!!!!!!POOOF POOOOOF POOOOOF!!!!!!!!!!!!!");
-                return this.saveAndReturnTimeTableMainDoc(timeTableGenerationRequest);
-                //BREAK BECAUSE WE FOUND THE PERFECT SOLUTION,THERE WAS NO SUBJECT UNALLOCATED FOR ANY TUTOR!!!!,THIS IS DIAMOND
-            } else if (currentValue < bestValue) {
-                TotalNumberOfTimesTutorSubjectWasUnallocatedDoc totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterBetterAlternative =
-                        new TotalNumberOfTimesTutorSubjectWasUnallocatedDoc();
-                totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterBetterAlternative.setId(totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterGeneration.getId());
-                totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterBetterAlternative.setTotalNumberOfTimesTutorSubjectWasUnallocatedCurrentValue(currentValue);
-                totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterBetterAlternative.setTotalNumberOfTimesTutorSubjectWasUnallocatedBestValue(currentValue);
+                if (Objects.equals
+                        (currentValue, 0)) {
+                    logger.info("This is the best and PERFECT SOLUTION TO BE EVER GENERATED.tHIS IS DIAMOND!!!!!!!!!!!!!!POOOF POOOOOF POOOOOF!!!!!!!!!!!!!");
+                    return this.saveAndReturnTimeTableMainDoc(timeTableGenerationRequest);
+                    //BREAK BECAUSE WE FOUND THE PERFECT SOLUTION,THERE WAS NO SUBJECT UNALLOCATED FOR ANY TUTOR!!!!,THIS IS DIAMOND
+                } else if (currentValue < bestValue) {
+                    TotalNumberOfTimesTutorSubjectWasUnallocatedDoc totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterBetterAlternative =
+                            new TotalNumberOfTimesTutorSubjectWasUnallocatedDoc();
+                    totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterBetterAlternative.setId(totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterGeneration.getId());
+                    totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterBetterAlternative.setTotalNumberOfTimesTutorSubjectWasUnallocatedCurrentValue(currentValue);
+                    totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterBetterAlternative.setTotalNumberOfTimesTutorSubjectWasUnallocatedBestValue(currentValue);
 
-                totalNumberOfTimesTutorSubjectWasUnallocatedDocRepository.save(totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterBetterAlternative);
-                //save and overwrite currentValue
-                this.saveAndReturnTimeTableMainDoc(timeTableGenerationRequest);
+                    totalNumberOfTimesTutorSubjectWasUnallocatedDocRepository.save(totalNumberOfTimesTutorSubjectWasUnallocatedDocAfterBetterAlternative);
+                    //save and overwrite currentValue
+                    this.saveAndReturnTimeTableMainDoc(timeTableGenerationRequest);
+                }
+            } catch (NoPeriodsFoundInProgrammeDaysThatSatisfiesElectiveTutorTimeTableException e) {
+                //do not consider this one because elective tutor was affected.
             }
-
         }
         return this.returnAlreadySavedTimeTableMainDoc(timeTableGenerationRequest);
     }
