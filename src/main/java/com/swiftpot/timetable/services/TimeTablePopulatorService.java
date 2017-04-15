@@ -8,7 +8,7 @@ import com.google.gson.Gson;
 import com.swiftpot.timetable.base.TutorSubjectAndProgrammeGroupCombinationDocAllocator;
 import com.swiftpot.timetable.base.impl.TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl;
 import com.swiftpot.timetable.exception.FullyUnallocatedDayNotFoundException;
-import com.swiftpot.timetable.exception.NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException;
+import com.swiftpot.timetable.exception.NoPeriodsFoundInProgrammeDaysThatSatisfiesElectiveTutorTimeTableException;
 import com.swiftpot.timetable.exception.PracticalSubjectForDayNotFoundException;
 import com.swiftpot.timetable.exception.SubjectWithEightPeriodsInDepartmentNotFoundException;
 import com.swiftpot.timetable.factory.TimeTableDefaultPeriodsAllocatorFactory;
@@ -347,15 +347,17 @@ public class TimeTablePopulatorService {
      * @param timeTableSuperDocWithDefaultPeriodsSetAlready
      * @return
      * @throws PracticalSubjectForDayNotFoundException
-     * @throws NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException
+     * @throws NoPeriodsFoundInProgrammeDaysThatSatisfiesElectiveTutorTimeTableException
      */
-    public TimeTableSuperDoc partFourAllocatePeriodsForAllTutors(TimeTableSuperDoc timeTableSuperDocWithDefaultPeriodsSetAlready) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException {
-        TimeTableSuperDoc timetableSuperDocAfterCoreTutorsAllocated =
-                this.allocatePeriodsForCoreTutors(timeTableSuperDocWithDefaultPeriodsSetAlready);
-        TimeTableSuperDoc finalTimeTableSuperDocAfterElectiveTutorsAllocated =
-                this.allocatePeriodsForElectiveTutors(timetableSuperDocAfterCoreTutorsAllocated);
+    public TimeTableSuperDoc partFourAllocatePeriodsForAllTutors(TimeTableSuperDoc timeTableSuperDocWithDefaultPeriodsSetAlready) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesElectiveTutorTimeTableException {
 
-        return finalTimeTableSuperDocAfterElectiveTutorsAllocated;
+        TimeTableSuperDoc finalTimeTableSuperDocAfterElectiveTutorsAllocated =
+                this.allocatePeriodsForElectiveTutors(timeTableSuperDocWithDefaultPeriodsSetAlready);
+        //priority is given to elective tutors before core tutors are considered.
+        TimeTableSuperDoc timetableSuperDocAfterCoreTutorsAllocated =
+                this.allocatePeriodsForCoreTutors(finalTimeTableSuperDocAfterElectiveTutorsAllocated);
+
+        return timetableSuperDocAfterCoreTutorsAllocated;
     }
 
     /**
@@ -364,7 +366,7 @@ public class TimeTablePopulatorService {
      * @param timeTableSuperDocWithDefaultPeriodsSetAlready the {@link TimeTableSuperDoc} with default periods set already.
      * @return final fully generated {@link TimeTableSuperDoc}
      */
-    private TimeTableSuperDoc allocatePeriodsForSuppliedTutors(TimeTableSuperDoc timeTableSuperDocWithDefaultPeriodsSetAlready, List<TutorDoc> tutorDocsSupplied) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException {
+    private TimeTableSuperDoc allocatePeriodsForSuppliedTutors(TimeTableSuperDoc timeTableSuperDocWithDefaultPeriodsSetAlready, List<TutorDoc> tutorDocsSupplied) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesElectiveTutorTimeTableException {
         tutorSubjectAndProgrammeGroupCombinationDocAllocator = tutorSubjectAndProgrammeGroupCombinationDocAllocatorDefault;
 
         String timeTableSuperDocString = new Gson().toJson(timeTableSuperDocWithDefaultPeriodsSetAlready);
@@ -404,7 +406,7 @@ public class TimeTablePopulatorService {
         return timeTableSuperDocGeneratedFromString;
     }
 
-    protected TimeTableSuperDoc allocatePeriodsForCoreTutors(TimeTableSuperDoc timeTableSuperDoc) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException {
+    protected TimeTableSuperDoc allocatePeriodsForCoreTutors(TimeTableSuperDoc timeTableSuperDoc) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesElectiveTutorTimeTableException {
         List<TutorDoc> coreTutorDocs =
                 tutorDocRepository.findByTutorSubjectSpeciality(TutorDoc.CORE_TUTOR);
         if (coreTutorDocs.isEmpty()) {
@@ -414,7 +416,7 @@ public class TimeTablePopulatorService {
         }
     }
 
-    protected TimeTableSuperDoc allocatePeriodsForElectiveTutors(TimeTableSuperDoc timeTableSuperDoc) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException {
+    protected TimeTableSuperDoc allocatePeriodsForElectiveTutors(TimeTableSuperDoc timeTableSuperDoc) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesElectiveTutorTimeTableException {
         List<TutorDoc> electiveTutorDocs =
                 tutorDocRepository.findByTutorSubjectSpeciality(TutorDoc.ELECTIVE_TUTOR);
         if (electiveTutorDocs.isEmpty()) {

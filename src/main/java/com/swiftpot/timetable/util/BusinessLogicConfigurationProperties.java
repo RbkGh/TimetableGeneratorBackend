@@ -141,4 +141,7 @@ public class BusinessLogicConfigurationProperties {
 
     @Value("${generation.number.of.times}")
     public String NUMBER_OF_TIMES_TO_GENERATE_IF_MATCH_IS_NOT_FOUND;
+
+    @Value("${total.number.of.unallocated.subjects.id}")
+    public String TOTAL_NUMBER_OF_UNALLOCATED_SUBJECTS_ID_FOR_SAVING_INTO_DB;
 }

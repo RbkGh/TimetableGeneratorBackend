@@ -4,15 +4,13 @@
 
 package com.swiftpot.timetable.repository;
 
-import com.swiftpot.timetable.repository.db.model.TimeTableMainDoc;
+import com.swiftpot.timetable.repository.db.model.TotalNumberOfTimesTutorSubjectWasUnallocatedDoc;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 /**
  * @author Ace Programmer Rbk
  *         <Rodney Kwabena Boachie at [rodney@swiftpot.com,rbk.unlimited@gmail.com]> on
- *         16-Mar-17 @ 4:09 PM
+ *         14-Apr-17 @ 9:43 PM
  */
-public interface TimeTableMainDocRepository extends MongoRepository<TimeTableMainDoc, String> {
-
-    TimeTableMainDoc findByYearAndTimeTableName(int year, String timeTableName);
+public interface TotalNumberOfTimesTutorSubjectWasUnallocatedDocRepository extends MongoRepository<TotalNumberOfTimesTutorSubjectWasUnallocatedDoc, String> {
 }

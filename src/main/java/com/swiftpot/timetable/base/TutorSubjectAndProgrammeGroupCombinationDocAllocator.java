@@ -4,7 +4,7 @@
 
 package com.swiftpot.timetable.base;
 
-import com.swiftpot.timetable.exception.NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException;
+import com.swiftpot.timetable.exception.NoPeriodsFoundInProgrammeDaysThatSatisfiesElectiveTutorTimeTableException;
 import com.swiftpot.timetable.exception.PracticalSubjectForDayNotFoundException;
 import com.swiftpot.timetable.repository.db.model.SubjectDoc;
 import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
@@ -33,11 +33,11 @@ public interface TutorSubjectAndProgrammeGroupCombinationDocAllocator {
      * @param timeTableSuperDoc                           the {@link TimeTableSuperDoc}  With At Least Default Periods Set Already ,at least the timetable object must have passed through <br><br>
      *                                                    {@link TimeTableDefaultPeriodsAllocator#allocateDefaultPeriodsOnTimeTable(TimeTableSuperDoc)} already
      * @return {@link TimeTableSuperDoc} with updated values if there was any need for any update
-     * @throws PracticalSubjectForDayNotFoundException,NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException
+     * @throws PracticalSubjectForDayNotFoundException,NoPeriodsFoundInProgrammeDaysThatSatisfiesElectiveTutorTimeTableException
      */
     TimeTableSuperDoc allocateTutorSubjectAndProgrammeGroupCombinationCompletely
     (String tutorUniqueIdInDb,
      int totalSubjectAllocationInDb,
      TutorSubjectAndProgrammeGroupCombinationDoc tutorSubjectAndProgrammeGroupCombinationDoc,
-     TimeTableSuperDoc timeTableSuperDoc) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException;
+     TimeTableSuperDoc timeTableSuperDoc) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesElectiveTutorTimeTableException;
 }

@@ -9,14 +9,18 @@ import com.swiftpot.timetable.base.ProgrammeGroupPersonalTimeTableDocInitialGene
 import com.swiftpot.timetable.base.TutorPersonalTimeTableInitialGenerator;
 import com.swiftpot.timetable.base.TutorSubjectAndProgrammeGroupCombinationDocAllocator;
 import com.swiftpot.timetable.base.TutorSubjectAndProgrammeGroupInitialGenerator;
-import com.swiftpot.timetable.exception.NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException;
+import com.swiftpot.timetable.exception.NoPeriodsFoundInProgrammeDaysThatSatisfiesElectiveTutorTimeTableException;
 import com.swiftpot.timetable.exception.PracticalSubjectForDayNotFoundException;
 import com.swiftpot.timetable.model.*;
 import com.swiftpot.timetable.repository.*;
 import com.swiftpot.timetable.repository.db.model.*;
-import com.swiftpot.timetable.services.*;
+import com.swiftpot.timetable.services.ProgrammeDayServices;
+import com.swiftpot.timetable.services.ProgrammeGroupPersonalTimeTableDocServices;
+import com.swiftpot.timetable.services.SubjectsAssignerService;
+import com.swiftpot.timetable.services.TutorPersonalTimeTableDocServices;
 import com.swiftpot.timetable.services.servicemodels.PeriodSetForProgrammeDay;
 import com.swiftpot.timetable.services.servicemodels.UnallocatedPeriodSet;
+import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -50,13 +54,17 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
     @Autowired
     private ProgrammeGroupDocRepository programmeGroupDocRepository;
     @Autowired
-    private ProgrammeDayPeriodSetService programmeDayPeriodSetService;
+    private TutorDocRepository tutorDocRepository;
+    @Autowired
+    private TotalNumberOfTimesTutorSubjectWasUnallocatedDocRepository totalNumberOfTimesTutorSubjectWasUnallocatedDocRepository;
+    @Autowired
+    private BusinessLogicConfigurationProperties businessLogicConfigurationProperties;
 
     @Override
     public TimeTableSuperDoc allocateTutorSubjectAndProgrammeGroupCombinationCompletely(String tutorUniqueIdInDb,
                                                                                         int totalSubjectAllocationInDb,
                                                                                         TutorSubjectAndProgrammeGroupCombinationDoc tutorSubjectAndProgrammeGroupCombinationDoc,
-                                                                                        TimeTableSuperDoc timeTableSuperDoc) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException {
+                                                                                        TimeTableSuperDoc timeTableSuperDoc) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesElectiveTutorTimeTableException {
         String subjectUniqueIdBefore = tutorSubjectAndProgrammeGroupCombinationDoc.getSubjectUniqueId();
         String programmeCodeBefore = tutorSubjectAndProgrammeGroupCombinationDoc.getProgrammeCode();
 
@@ -92,8 +100,11 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
                                                                                                   int totalPeriodsLeftToBeAllocated,
                                                                                                   String programmeCode,
                                                                                                   String subjectUniqueIdInDb,
-                                                                                                  TimeTableSuperDoc timeTableSuperDoc) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException {
+                                                                                                  TimeTableSuperDoc timeTableSuperDoc) throws PracticalSubjectForDayNotFoundException, NoPeriodsFoundInProgrammeDaysThatSatisfiesElectiveTutorTimeTableException {
+        String timeTableSuperDocString = new Gson().toJson(timeTableSuperDoc);
+        TimeTableSuperDoc timeTableSuperDocGeneratedFromString = new Gson().fromJson(timeTableSuperDocString, TimeTableSuperDoc.class); //CONVERT BACK TO OBJECT FROM JSON TO PREVENT PROBLEMS OF WRONG WRITES IN UNSOLICITED PLACES
 
+        TutorDoc tutorDoc = tutorDocRepository.findOne(tutorUniqueIdInDb);
         List<Integer> listOfPeriodAllocation = subjectsAssignerService.getTotalSubjectPeriodAllocationAsList(totalPeriodsLeftToBeAllocated);
 
         ProgrammeGroupPersonalTimeTableDoc programmeGroupPersonalTimeTableDoc =
@@ -101,6 +112,8 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
         List<ProgrammeDay> programmeGroupPersonalProgrammeDaysList = programmeGroupPersonalTimeTableDoc.getProgrammeDaysList();
 
         TutorPeriodsToSetForProgrammeDay tutorPeriodsToSetForProgrammeDay = null;
+        int totalNumberOfTimesNoPeriodFound = 0;
+        int sizeOfListOfPeriodAllocation = listOfPeriodAllocation.size();
         for (Integer periodAllocationValue : listOfPeriodAllocation) {
             tutorPeriodsToSetForProgrammeDay =
                     this.findAndSetProgrammeDayPeriodsForTutorIfAvailable
@@ -112,8 +125,35 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
                                     subjectUniqueIdInDb);
 
             if (Objects.isNull(tutorPeriodsToSetForProgrammeDay)) {
-                throw new NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException
-                        (NoPeriodsFoundInProgrammeDaysThatSatisfiesTutorTimeTableException.DEFAULT_MESSAGE);
+                totalNumberOfTimesNoPeriodFound += 1;
+
+                TotalNumberOfTimesTutorSubjectWasUnallocatedDoc totalNumberOfTimesTutorSubjectWasUnallocatedDoc =
+                        totalNumberOfTimesTutorSubjectWasUnallocatedDocRepository.findOne(businessLogicConfigurationProperties.TOTAL_NUMBER_OF_UNALLOCATED_SUBJECTS_ID_FOR_SAVING_INTO_DB);
+
+                TotalNumberOfTimesTutorSubjectWasUnallocatedDoc totalNumberOfTimesTutorSubjectWasUnallocatedDocUpdated =
+                        new TotalNumberOfTimesTutorSubjectWasUnallocatedDoc(); //new instance all together because of some bug in mongo or my db driver,not really sure,so i just have to do this to save my document in peace!!
+                totalNumberOfTimesTutorSubjectWasUnallocatedDocUpdated.setId(totalNumberOfTimesTutorSubjectWasUnallocatedDoc.getId());
+                totalNumberOfTimesTutorSubjectWasUnallocatedDocUpdated.setTotalNumberOfTimesTutorSubjectWasUnallocatedBestValue
+                        (totalNumberOfTimesTutorSubjectWasUnallocatedDoc.getTotalNumberOfTimesTutorSubjectWasUnallocatedBestValue());
+                int currentValue = totalNumberOfTimesTutorSubjectWasUnallocatedDoc.getTotalNumberOfTimesTutorSubjectWasUnallocatedCurrentValue() + 1;
+                totalNumberOfTimesTutorSubjectWasUnallocatedDocUpdated.setTotalNumberOfTimesTutorSubjectWasUnallocatedCurrentValue
+                        (currentValue);
+
+                totalNumberOfTimesTutorSubjectWasUnallocatedDocRepository.save(totalNumberOfTimesTutorSubjectWasUnallocatedDocUpdated);
+
+                //TODO VERY IMPORTANT AND URGENT ABOVE ALL!!!!! LOG ALL TUTORS AND THEIR SUBJECTS WHICH WERE NOT UNALLOCATED==>DO THIS IN NEXT PUSH
+
+                if (Objects.equals(totalNumberOfTimesNoPeriodFound, sizeOfListOfPeriodAllocation) &&
+                        Objects.equals(tutorDoc.getTutorSubjectSpeciality(), TutorDoc.ELECTIVE_TUTOR)) {
+                    throw new NoPeriodsFoundInProgrammeDaysThatSatisfiesElectiveTutorTimeTableException
+                            (NoPeriodsFoundInProgrammeDaysThatSatisfiesElectiveTutorTimeTableException.DEFAULT_MESSAGE);
+                } else if ((Objects.equals(totalNumberOfTimesNoPeriodFound, sizeOfListOfPeriodAllocation))) {
+                    this.forceUpdateOfTutorSubjectAndProgrammeGroupCombinationIfNoMatchFound(subjectUniqueIdInDb, programmeCode);//by force
+                    return timeTableSuperDocGeneratedFromString;
+                } else {
+                    this.forceUpdateOfTutorSubjectAndProgrammeGroupCombinationIfNoMatchFound(subjectUniqueIdInDb, programmeCode);//by force
+                    return timeTableSuperDocGeneratedFromString;
+                }
             } else {
                 break; //continue because the programmeDayToSetPeriodsTo was not null,meaning a day was found that satisfies tutor's timetable constraints.
             }
@@ -130,9 +170,6 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
 
         ProgrammeGroupDoc programmeGroupDocToUpdate = programmeGroupDocRepository.findByProgrammeCode(programmeCode);
         int yearGroupOfProgrammeCode = programmeGroupDocToUpdate.getYearGroup();
-
-        String timeTableSuperDocString = new Gson().toJson(timeTableSuperDoc);
-        TimeTableSuperDoc timeTableSuperDocGeneratedFromString = new Gson().fromJson(timeTableSuperDocString, TimeTableSuperDoc.class); //CONVERT BACK TO OBJECT FROM JSON TO PREVENT PROBLEMS OF WRONG WRITES IN UNSOLICITED PLACES
 
         final int periodStartingNumberFinal = periodStartingNumber;
         final int periodEndingNumberFinal = periodEndingNumber;
@@ -158,7 +195,7 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
         });
 
 
-        return timeTableSuperDocGeneratedFromString;//TODO CONTINUE HERE NOW IN NEXT ITERATION.
+        return timeTableSuperDocGeneratedFromString;
 
     }
 
@@ -378,6 +415,31 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
         }
 
         return finalUnallocatedListConsideringTutorTimeTableConstraints;
+    }
+
+    /**
+     * force reset to zero(0) after making sure that no match was found for the combination
+     *
+     * @param subjectUniqueIdInDb
+     * @param programmeCode
+     */
+    private synchronized void forceUpdateOfTutorSubjectAndProgrammeGroupCombinationIfNoMatchFound(String subjectUniqueIdInDb,
+                                                                                                  String programmeCode) {
+        //now we decrement the value of the totalSubjectsPeriodLeft in db by the totalPeriodsThatHasBeenSet
+        TutorSubjectAndProgrammeGroupCombinationDoc tutorSubjectAndProgrammeGroupCombinationDoc =
+                tutorSubjectAndProgrammeGroupCombinationDocRepository.
+                        findBySubjectUniqueIdAndProgrammeCode
+                                (subjectUniqueIdInDb, programmeCode);
+
+        int currentTotalPeriodsLeft = tutorSubjectAndProgrammeGroupCombinationDoc.getTotalPeriodLeftToBeAllocated();
+        int periodLoadLeftAfterDeduction = 0; //force it to 0
+        tutorSubjectAndProgrammeGroupCombinationDoc.setTotalPeriodLeftToBeAllocated(periodLoadLeftAfterDeduction);
+
+        TutorSubjectAndProgrammeGroupCombinationDoc tutorSubjectAndProgrammeGroupCombinationDocUpdated =
+                new TutorSubjectAndProgrammeGroupCombinationDoc(subjectUniqueIdInDb, programmeCode, periodLoadLeftAfterDeduction);
+        tutorSubjectAndProgrammeGroupCombinationDocUpdated.setId(tutorSubjectAndProgrammeGroupCombinationDoc.getId());
+
+        tutorSubjectAndProgrammeGroupCombinationDocRepository.save(tutorSubjectAndProgrammeGroupCombinationDocUpdated);
     }
 
     /**
