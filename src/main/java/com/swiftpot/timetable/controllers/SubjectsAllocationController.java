@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.controllers;
 
 import com.swiftpot.timetable.model.ErrorOutgoingPayload;
@@ -22,7 +26,7 @@ import java.util.Objects;
  *         02-Jan-17 @ 6:55 PM
  */
 @RestController
-@RequestMapping(path = "/subject/allocation")
+@RequestMapping(path = "/api/v1/subject/allocation")
 public class SubjectsAllocationController {
 
     @Autowired

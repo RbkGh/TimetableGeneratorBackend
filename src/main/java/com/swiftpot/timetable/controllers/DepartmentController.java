@@ -25,7 +25,7 @@ import java.util.stream.StreamSupport;
  *         02-Jan-17 @ 9:11 PM
  */
 @RestController
-@RequestMapping(path = "/department")
+@RequestMapping(path = "/api/v1/department")
 public class DepartmentController {
 
     @Autowired

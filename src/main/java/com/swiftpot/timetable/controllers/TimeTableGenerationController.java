@@ -30,7 +30,7 @@ import java.util.Objects;
  *         16-Mar-17 @ 2:56 PM
  */
 @RestController
-@RequestMapping(path = "/timetable")
+@RequestMapping(path = "/api/v1/timetable")
 public class TimeTableGenerationController {
 
     @Autowired

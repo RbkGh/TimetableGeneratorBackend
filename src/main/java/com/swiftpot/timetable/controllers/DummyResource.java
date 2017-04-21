@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.controllers;
 
 import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
@@ -16,7 +20,7 @@ public class DummyResource {
     @Autowired
     BusinessLogicConfigurationProperties businessLogicConfigurationProperties;
 
-    @RequestMapping(path = "/dummy",method= RequestMethod.GET)
+    @RequestMapping(path = "/api/v1/dummy", method = RequestMethod.GET)
     public String getDummyText(){
         System.out.println(businessLogicConfigurationProperties.PERIOD_DURATION_IN_SECONDS);
         return "Hello";

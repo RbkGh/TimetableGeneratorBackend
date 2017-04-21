@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.controllers;
 
 import com.swiftpot.timetable.model.ErrorOutgoingPayload;
@@ -26,7 +30,7 @@ import java.util.stream.Collectors;
  *         TODO DONE!! ADD Initialization and crud of SubjectAllocationDoc upon every CRUD of SubjectDoc
  */
 @RestController
-@RequestMapping(path = "/subject")
+@RequestMapping(path = "/api/v1/subject")
 public class SubjectsController {
 
     @Autowired

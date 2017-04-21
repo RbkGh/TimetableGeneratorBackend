@@ -24,7 +24,7 @@ import java.util.Objects;
  *         18-Dec-16 @ 2:26 PM
  */
 @RestController
-@RequestMapping(path = "/programmegroup")
+@RequestMapping(path = "/api/v1/programmegroup")
 public class ProgrammeGroupController {
 
     @Autowired

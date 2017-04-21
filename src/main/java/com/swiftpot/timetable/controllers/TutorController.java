@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) SwiftPot Solutions Limited
+ */
+
 package com.swiftpot.timetable.controllers;
 
 import com.swiftpot.timetable.model.ErrorOutgoingPayload;
@@ -22,7 +26,7 @@ import java.util.Objects;
  *         02-Jan-17 @ 9:29 PM
  */
 @RestController
-@RequestMapping(path = "/tutor")
+@RequestMapping(path = "/api/v1/tutor")
 public class TutorController {
 
     @Autowired

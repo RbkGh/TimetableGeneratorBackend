@@ -52,6 +52,9 @@ dependencies {
 	compile('com.google.code.gson:gson:2.8.0')
 	compile('org.apache.commons:commons-lang3:3.5')
 
+	//jsonwebtoken
+	compile('io.jsonwebtoken:jjwt:0.7.0')
+
 	compile('com.sun.istack:istack-commons-runtime:3.0.5')
 	compile("org.springframework.boot:spring-boot-devtools")
 
