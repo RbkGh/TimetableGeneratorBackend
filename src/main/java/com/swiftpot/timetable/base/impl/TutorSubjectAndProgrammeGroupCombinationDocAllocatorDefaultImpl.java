@@ -270,7 +270,7 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
                                 getTotalSubjectPeriodAllocationAsList(totalSubjectAllocationInDb);//if subject breakdown for total allocation is >2
                         if (listOfPeriodAllocationForTotalPeriods.size() > 2 &&
                                 this.isSubjectAllocatedTwiceOrMoreInProgrammeDay(subjectUniqueIdInDb, programmeDay)) {
-                            //the subject has been set more at least twice or more in day
+                            //the subject has been set at least twice or more in day
                         } else {
 
 
