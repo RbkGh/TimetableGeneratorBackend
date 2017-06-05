@@ -122,7 +122,7 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorTests {
 
 
     @Test
-    public void isSubjectAllocatedEqualToFourFiveOrSixTimesInProgrammeDay() {
+    public void isSubjectAllocatedTwiceOrMoreInProgrammeDay() {
 
         List<PeriodOrLecture> periodOrLecturesForDay3 = new ArrayList<>();
         List<Integer> periodNumbersToSetToTrue = new ArrayList<>(Arrays.asList(2, 3, 4, 5, 8));
@@ -142,8 +142,8 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorTests {
         logger.info("ProgrammeDay Before anything ==>{}", PrettyJSON.toPrettyFormat(new Gson().toJson(programmeDay)));
 
         boolean resultOfComputation = tutorSubjectAndProgrammeGroupCombinationDocAllocator.
-                isSubjectAllocatedEqualToFourOrFiveOrSixTimesInProgrammeDay(subjectDummy, programmeDay);
-        System.out.println("isSubjectAllocatedEqualToFourOrFiveOrSixTimesInProgrammeDay ===>" + resultOfComputation);
+                isSubjectAllocatedTwiceOrMoreInProgrammeDay(subjectDummy, programmeDay);
+        System.out.println("isSubjectAllocatedTwiceOrMoreInProgrammeDay ===>" + resultOfComputation);
 
         assertTrue(resultOfComputation);
 
@@ -151,8 +151,8 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorTests {
         programmeDay.getPeriodList().get(9).setSubjectUniqueIdInDb(subjectDummy);
 
         boolean resultOfComputation2 = tutorSubjectAndProgrammeGroupCombinationDocAllocator.
-                isSubjectAllocatedEqualToFourOrFiveOrSixTimesInProgrammeDay(subjectDummy, programmeDay);
-        System.out.println("isSubjectAllocatedEqualToFourOrFiveOrSixTimesInProgrammeDay ===>when true is six times,expect true again " + resultOfComputation2);
+                isSubjectAllocatedTwiceOrMoreInProgrammeDay(subjectDummy, programmeDay);
+        System.out.println("isSubjectAllocatedTwiceOrMoreInProgrammeDay ===>when true is six times,expect true again " + resultOfComputation2);
 
         assertTrue(resultOfComputation2);
 
@@ -169,30 +169,10 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorTests {
         programmeDay.setPeriodList(periodOrLecturesForDay3);
 
         boolean resultOfComputation3 = tutorSubjectAndProgrammeGroupCombinationDocAllocator.
-                isSubjectAllocatedEqualToFourOrFiveOrSixTimesInProgrammeDay(subjectDummy, programmeDay);
-        System.out.println("isSubjectAllocatedEqualToFourOrFiveOrSixTimesInProgrammeDay ===>when false all day,expect false here ==>" + resultOfComputation3);
+                isSubjectAllocatedTwiceOrMoreInProgrammeDay(subjectDummy, programmeDay);
+        System.out.println("isSubjectAllocatedTwiceOrMoreInProgrammeDay ===>when false all day,expect false here ==>" + resultOfComputation3);
 
         assertFalse(resultOfComputation3);
-
-        List<Integer> periodNumbersToSetToTrue2 = new ArrayList<>(Arrays.asList(2, 3, 4));
-        periodOrLecturesForDay3 = new ArrayList<>();
-        for (int i = 1; i <= 10; i++) {
-            PeriodOrLecture periodOrLecture = new PeriodOrLecture();
-            periodOrLecture.setPeriodNumber(i);
-            if (periodNumbersToSetToTrue2.contains(i)) {
-                periodOrLecture.setIsAllocated(true);
-                periodOrLecture.setSubjectUniqueIdInDb(subjectDummy);
-            }
-            periodOrLecturesForDay3.add(periodOrLecture);
-        }
-
-        programmeDay.setPeriodList(periodOrLecturesForDay3);
-
-        boolean resultOfComputation4 = tutorSubjectAndProgrammeGroupCombinationDocAllocator.
-                isSubjectAllocatedEqualToFourOrFiveOrSixTimesInProgrammeDay(subjectDummy, programmeDay);
-        System.out.println("isSubjectAllocatedEqualToFourOrFiveOrSixTimesInProgrammeDay ===>when number of times subject is seen is less than 4,5 and 6 ==>" + resultOfComputation4);
-
-        assertFalse(resultOfComputation4);
 
     }
 }

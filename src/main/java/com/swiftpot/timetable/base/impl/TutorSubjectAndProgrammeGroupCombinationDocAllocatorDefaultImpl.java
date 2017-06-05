@@ -269,8 +269,8 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
                         List<Integer> listOfPeriodAllocationForTotalPeriods = subjectsAssignerService.
                                 getTotalSubjectPeriodAllocationAsList(totalSubjectAllocationInDb);//if subject breakdown for total allocation is >2
                         if (listOfPeriodAllocationForTotalPeriods.size() > 2 &&
-                                this.isSubjectAllocatedEqualToFourOrFiveOrSixTimesInProgrammeDay(subjectUniqueIdInDb, programmeDay)) {
-                            //the subject has been set more than five or six period times in a day
+                                this.isSubjectAllocatedTwiceOrMoreInProgrammeDay(subjectUniqueIdInDb, programmeDay)) {
+                            //the subject has been set more at least twice or more in day
                         } else {
 
 
@@ -329,14 +329,14 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
     }
 
     /**
-     * is subjectUniqueIdInDb passed in present in day at least 4,5 or 6 times in the lecture periods? 4,5 or 6 because all periods will have a combination of 2 or 3 thus 2+2=4,2+3=5,3+3=6,that's all the combinations possible.
+     * is subjectUniqueIdInDb passed in present in day at least 2 or more times in the lecture periods? 2 or more because all periods will have a combination of 2 or 3 thus 2+2=4,2+3=5,3+3=6,that's all the combinations possible.
      *
      * @param subjectUniqueIdInDb the {@link SubjectDoc#id}
      * @param programmeDay        the {@link ProgrammeDay} to search its {@link List} of {@link PeriodOrLecture}
-     * @return {@link Boolean#TRUE} IF subjectUniqueIdInDb passed in present day IS at least 5 or 6 times in the lecture periods.{@link Boolean#FALSE} if otherwise
+     * @return {@link Boolean#TRUE} IF subjectUniqueIdInDb passed in present day IS at least 2 or more times in the lecture periods.{@link Boolean#FALSE} if otherwise
      */
-    public boolean isSubjectAllocatedEqualToFourOrFiveOrSixTimesInProgrammeDay(String subjectUniqueIdInDb, ProgrammeDay programmeDay) {
-        boolean isSubjectAllocatedEqualToFiveTimesOrEqualToSixTimesInProgrammeDay = false;
+    public boolean isSubjectAllocatedTwiceOrMoreInProgrammeDay(String subjectUniqueIdInDb, ProgrammeDay programmeDay) {
+        boolean isSubjectAllocatedTwiceOrMoreInProgrammeDay = false;
         int numberOfTimesSubjectUniqueIdInDbIsFoundInListOfPeriodsForDay = 0;
 
         for (PeriodOrLecture periodOrLecture : programmeDay.getPeriodList()) {
@@ -345,13 +345,11 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
             }
         }
 
-        if ((numberOfTimesSubjectUniqueIdInDbIsFoundInListOfPeriodsForDay == 4) ||
-                (numberOfTimesSubjectUniqueIdInDbIsFoundInListOfPeriodsForDay == 5) ||
-                ((numberOfTimesSubjectUniqueIdInDbIsFoundInListOfPeriodsForDay == 6))
-                ) {
-            isSubjectAllocatedEqualToFiveTimesOrEqualToSixTimesInProgrammeDay = true;
+        //TODO DONE!!!!!! VERY URGENT!!!! ADD 2 AND 3 SO THAT NUMBER OF TIMES FOR ONE SUBJECT WILL NOT GO BEYOND 2 OR 3 PERIODS
+        if ((numberOfTimesSubjectUniqueIdInDbIsFoundInListOfPeriodsForDay >= 2)) {
+            isSubjectAllocatedTwiceOrMoreInProgrammeDay = true;
         }
-        return isSubjectAllocatedEqualToFiveTimesOrEqualToSixTimesInProgrammeDay;
+        return isSubjectAllocatedTwiceOrMoreInProgrammeDay;
     }
 
     /**
