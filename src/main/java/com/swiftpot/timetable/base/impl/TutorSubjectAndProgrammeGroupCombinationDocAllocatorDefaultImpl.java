@@ -266,13 +266,9 @@ public class TutorSubjectAndProgrammeGroupCombinationDocAllocatorDefaultImpl imp
 
                     if (!finalUnallocatedListThatSatisfiesAllConstraints.isEmpty()) {//its not empty thus we can set it now finally
 
-                        List<Integer> listOfPeriodAllocationForTotalPeriods = subjectsAssignerService.
-                                getTotalSubjectPeriodAllocationAsList(totalSubjectAllocationInDb);//if subject breakdown for total allocation is >2
-                        if (listOfPeriodAllocationForTotalPeriods.size() > 2 &&
-                                this.isSubjectAllocatedTwiceOrMoreInProgrammeDay(subjectUniqueIdInDb, programmeDay)) {
+                        if (this.isSubjectAllocatedTwiceOrMoreInProgrammeDay(subjectUniqueIdInDb, programmeDay)) {
                             //the subject has been set at least twice or more in day
                         } else {
-
 
                             UnallocatedPeriodSet unallocatedPeriodSetToUse = new UnallocatedPeriodSet();
                             boolean isUnallocatedPeriodSetToUseMatchFound = false;
