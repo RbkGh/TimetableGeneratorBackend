@@ -1,0 +1,229 @@
+{
+  "yearGroupsList": [
+    {
+      "yearName": "YEAR_ONE",
+      "yearNumber": 1,
+      "programmeGroupList": [
+        {
+          "programmeCode": "PCE",
+          "isProgrammeRequiringPracticalsClassroom":false,
+          "programmeSubjectsUniqueIdInDbList": [
+            "GMA",
+            "ENG",
+            "MATH"
+          ],
+          "programmeDaysList": [
+            {
+              "dayName": "Monday",
+              "periodList": [
+                {
+                  "periodName": "PERIOD 1",
+                  "periodNumber": 1,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectUniqueIdInDb": "ENG",
+                  "tutorUniqueId": "48"
+                },
+                {
+                  "periodName": "PERIOD 2",
+                  "periodNumber": 2,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectUniqueIdInDb": "ENG",
+                  "tutorUniqueId": "48"
+                },
+                {
+                  "periodName": "PERIOD 3",
+                  "periodNumber": 3,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectUniqueIdInDb": "ENG",
+                  "tutorUniqueId": "48"
+                }
+              ]
+            },
+            {
+              "dayName": "Tuesday",
+              "periodList": [
+                {
+                  "periodName": "PERIOD 1",
+                  "periodNumber": 1,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectUniqueIdInDb": "ENG",
+                  "tutorUniqueId": "48"
+                },
+                {
+                  "periodName": "PERIOD 2",
+                  "periodNumber": 2,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectUniqueIdInDb": "ENG",
+                  "tutorUniqueId": "48"
+                },
+                {
+                  "periodName": "PERIOD 3",
+                  "periodNumber": 3,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectUniqueIdInDb": "ENG",
+                  "tutorUniqueId": "48"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "yearName": "YEAR_TWO",
+      "yearNumber": 2,
+      "programmeGroupList": [
+        {
+          "programmeCode": "PCE",
+          "isProgrammeRequiringPracticalsClassroom":false,
+          "programmeSubjectsUniqueIdInDbList": [
+            "GMA",
+            "ENG",
+            "MATH"
+          ],
+          "programmeDaysList": [
+            {
+              "dayName": "Monday",
+              "periodList": [
+                {
+                  "periodName": "PERIOD 1",
+                  "periodNumber": 1,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectUniqueIdInDb": "ENG",
+                  "tutorUniqueId": "48"
+                },
+                {
+                  "periodName": "PERIOD 2",
+                  "periodNumber": 2,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectUniqueIdInDb": "ENG",
+                  "tutorUniqueId": "48"
+                },
+                {
+                  "periodName": "PERIOD 3",
+                  "periodNumber": 3,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectUniqueIdInDb": "ENG",
+                  "tutorUniqueId": "48"
+                }
+              ]
+            },
+            {
+              "dayName": "Tuesday",
+              "periodList": [
+                {
+                  "periodName": "PERIOD 1",
+                  "periodNumber": 1,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectUniqueIdInDb": "ENG",
+                  "tutorUniqueId": "48"
+                },
+                {
+                  "periodName": "PERIOD 2",
+                  "periodNumber": 2,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectUniqueIdInDb": "ENG",
+                  "tutorUniqueId": "48"
+                },
+                {
+                  "periodName": "PERIOD 3",
+                  "periodNumber": 3,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectUniqueIdInDb": "ENG",
+                  "tutorUniqueId": "48"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "yearName": "YEAR_THREE",
+      "yearNumber": 3,
+      "programmeGroupList": [
+        {
+          "programmeCode": "PCE",
+          "isProgrammeRequiringPracticalsClassroom":false,
+          "programmeSubjectsUniqueIdInDbList": [
+            "GMA",
+            "ENG",
+            "MATH"
+          ],
+          "programmeDaysList": [
+            {
+              "dayName": "Monday",
+              "periodList": [
+                {
+                  "periodName": "PERIOD 1",
+                  "periodNumber": 1,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectUniqueIdInDb": "ENG",
+                  "tutorUniqueId": "48"
+                },
+                {
+                  "periodName": "PERIOD 2",
+                  "periodNumber": 2,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectUniqueIdInDb": "ENG",
+                  "tutorUniqueId": "48"
+                },
+                {
+                  "periodName": "PERIOD 3",
+                  "periodNumber": 3,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectUniqueIdInDb": "ENG",
+                  "tutorUniqueId": "48"
+                }
+              ]
+            },
+            {
+              "dayName": "Tuesday",
+              "periodList": [
+                {
+                  "periodName": "PERIOD 1",
+                  "periodNumber": 1,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectUniqueIdInDb": "ENG",
+                  "tutorUniqueId": "48"
+                },
+                {
+                  "periodName": "PERIOD 2",
+                  "periodNumber": 2,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectUniqueIdInDb": "ENG",
+                  "tutorUniqueId": "48"
+                },
+                {
+                  "periodName": "PERIOD 3",
+                  "periodNumber": 3,
+                  "periodStartandEndTime": "07:30-08:10GMT",
+                  "isAllocated": true,
+                  "subjectUniqueIdInDb": "ENG",
+                  "tutorUniqueId": "48"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

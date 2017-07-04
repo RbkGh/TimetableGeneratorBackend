@@ -23,6 +23,7 @@ import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
 import com.swiftpot.timetable.util.ProgrammeDayHelperUtilDefaultImpl;
 import com.swiftpot.timetable.util.RandomNumberGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -247,7 +248,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
      *
      * @param currentProgrammeGroup the {@link ProgrammeGroup} object to allocate practicals period for.
      * @param programmeDaysList     List of {@link ProgrammeDay}s of the programmeGroup
-     * @param programmeYearNo       the {@link com.swiftpot.timetable.repository.db.model.ProgrammeGroupDoc#yearGroup} ie. the yearGroup of the programme group
+     * @param programmeYearNo       the {@link ProgrammeGroupDoc#yearGroup} ie. the yearGroup of the programme group
      * @return
      */
     private List<ProgrammeDay> allocatePracticalsPeriodsForProgrammeGroupRequiringIt(ProgrammeGroup currentProgrammeGroup,
@@ -401,7 +402,7 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
         /**
          set subjectCode and tutorCode ,make sure tutorCode has enough periods left,and also ensure totalPeriodAllocation left is enough
          get Tutor Responsible by using the practicalSubjectId to retrieve tutor from db
-         remember todo FIXED!!!!!! the implementation of the {@link com.swiftpot.timetable.base.TutorResponsibleForSubjectRetriever} Interface,as it's not done yet
+         remember todo FIXED!!!!!! the implementation of the {@link TutorResponsibleForSubjectRetriever} Interface,as it's not done yet
          */
         String tutorIdResponsibleForSubject =
                 tutorResponsibleForSubjectRetrieverFactory.getTutorResponsibleForSubjectRetrieverImpl()
@@ -432,8 +433,8 @@ public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDef
 
     /**
      * TODO DONE!!!!! Remember to initialize the {@link TutorSubjectAndProgrammeGroupCombinationDoc} <br> immediately during first initialization so that we can search for it and retrieve and set periods left for a tutor's subject and programmeGroup {@link TutorPersonalTimeTableInitialGenerator#generatePersonalTimeTableForAllTutorsInDbAndSaveIntoDb()} handles that <br><br>
-     * TODO DONE!!!!! Remember to initialize the {@link com.swiftpot.timetable.repository.db.model.ProgrammeGroupPersonalTimeTableDoc} <br> immediately during first initialization so that we can search for it and update the timetable of each programmeGroup upon every write on {@link TimeTableSuperDoc}<br>{@link ProgrammeGroupPersonalTimeTableDocInitialGenerator#generateAllProgrammeGroupPersonalTimetableDocForAllProgrammeGroupDocsInDbAndSaveInDb()} handles that. <br><br>
-     * TODO DONE!!!!! Remember to initialize the {@link com.swiftpot.timetable.repository.db.model.TutorSubjectAndProgrammeGroupCombinationDoc} <br> immediately during first initialization so that we can search for it and update the {@link TutorSubjectAndProgrammeGroupCombinationDoc#totalPeriodLeftToBeAllocated} for that tutor for that subject upon every write on {@link TimeTableSuperDoc} object <br> {@link TutorSubjectAndProgrammeGroupInitialGenerator#generateAllInitialSubjectAndProgrammeGroupCombinationDocsForAllTutorsInDBAndSaveInDb()} handles that <br><br>
+     * TODO DONE!!!!! Remember to initialize the {@link ProgrammeGroupPersonalTimeTableDoc} <br> immediately during first initialization so that we can search for it and update the timetable of each programmeGroup upon every write on {@link TimeTableSuperDoc}<br>{@link ProgrammeGroupPersonalTimeTableDocInitialGenerator#generateAllProgrammeGroupPersonalTimetableDocForAllProgrammeGroupDocsInDbAndSaveInDb()} handles that. <br><br>
+     * TODO DONE!!!!! Remember to initialize the {@link TutorSubjectAndProgrammeGroupCombinationDoc} <br> immediately during first initialization so that we can search for it and update the {@link TutorSubjectAndProgrammeGroupCombinationDoc#totalPeriodLeftToBeAllocated} for that tutor for that subject upon every write on {@link TimeTableSuperDoc} object <br> {@link TutorSubjectAndProgrammeGroupInitialGenerator#generateAllInitialSubjectAndProgrammeGroupCombinationDocsForAllTutorsInDBAndSaveInDb()} handles that <br><br>
      * <br><b>THE LOAD OF PARAMETERS ON THIS METHOD IS ABSURD,VERY STUPID,BUT IT HAPPENED BY ACCIDENT,SO ENJOY UNTIL THIS SIDE GETS REFACTORED =D :P</b> <br><br>
      *
      * @param programmeCode

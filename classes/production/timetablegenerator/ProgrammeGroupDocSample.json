@@ -1,0 +1,12 @@
+{
+  "programmeFullName":"BUSINESS-IT",
+  "programmeInitials":"BUS-IT",
+  "numberOfClasses":3,
+  "yearGroup":2,
+  "programmeCode":"",
+  "yearGroupList":[
+    "1","2","3"
+  ],
+  "electiveSubjectsCodeList":[],
+  "technicalWorkshopOrLabRequired":true
+}
