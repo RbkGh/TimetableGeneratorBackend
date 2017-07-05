@@ -32,7 +32,8 @@ gradle build
 ```
 
 **6.finally run :**
-```$xslt
+
+```
 gradle bootRun
 ```
 
@@ -44,7 +45,7 @@ http://localhost:8085
 
 #default username and password is:
  
- ```
+```
  username : Kotech
- password : pass1234
- ```
+ password : pass1234 
+```
