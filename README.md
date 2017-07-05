@@ -26,12 +26,12 @@ jwt.secret.key=WHATEVERKEYYOUWANT
 mongorestore -d timetableTestEnvironment1 timetableTestEnvironment1/
 ```
 
-**2.run the following command:**
+**5.run the following command:**
 ```
 gradle build
 ```
 
-**3.finally run :**
+**6.finally run :**
 ```$xslt
 gradle bootRun
 ```
