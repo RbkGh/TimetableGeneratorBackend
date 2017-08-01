@@ -23,7 +23,6 @@ import com.swiftpot.timetable.util.BusinessLogicConfigurationProperties;
 import com.swiftpot.timetable.util.ProgrammeDayHelperUtilDefaultImpl;
 import com.swiftpot.timetable.util.RandomNumberGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -34,6 +33,7 @@ import java.util.concurrent.atomic.AtomicReference;
  *         <Rodney Kwabena Boachie at [rodney@swiftpot.com,rbk.unlimited@gmail.com]> on
  *         22-Dec-16 @ 12:39 PM
  */
+@SuppressWarnings("Duplicates")
 @Component
 public class TimeTableDefaultPeriodsAllocatorDefaultImpl implements TimeTableDefaultPeriodsAllocator {
 
