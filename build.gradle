@@ -22,7 +22,8 @@ apply plugin: 'org.springframework.boot'
 
 
 war {
-	baseName = 'timetable-technical'
+	baseName = 'timetable-technical-kotech'
+	archiveName = 'timetable-technical-kotech.war'
 	version =  '0.0.1-SNAPSHOT'
 }
 jar {
