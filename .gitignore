@@ -24,4 +24,4 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
-/src/main/resources/securityconfig.properties
+#/src/main/resources/securityconfig.properties
