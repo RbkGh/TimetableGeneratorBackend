@@ -12,6 +12,7 @@ import com.swiftpot.timetable.model.ProgrammeGroup;
 import com.swiftpot.timetable.model.YearGroup;
 import com.swiftpot.timetable.repository.DepartmentDocRepository;
 import com.swiftpot.timetable.repository.ProgrammeGroupDocRepository;
+import com.swiftpot.timetable.repository.ProgrammeGroupPersonalTimeTableDocRepository;
 import com.swiftpot.timetable.repository.db.model.DepartmentDoc;
 import com.swiftpot.timetable.repository.db.model.ProgrammeGroupDoc;
 import com.swiftpot.timetable.repository.db.model.TimeTableSuperDoc;
@@ -59,6 +60,8 @@ public class TimeTableGenerationWithMockitoTests {
     ProgrammeGroupDocRepository programmeGroupDocRepository;
     @MockBean
     private DepartmentDocRepository departmentDocRepository;
+    @MockBean
+    private ProgrammeGroupPersonalTimeTableDocRepository programmeGroupPersonalTimeTableDocRepository;
 
     TimeTableSuperDoc timeTableSuperDoc;
     private static final Logger logger = LogManager.getLogger();
@@ -121,6 +124,8 @@ public class TimeTableGenerationWithMockitoTests {
         Mockito.when(departmentDocRepository.findByDeptProgrammeInitials(programmeInitials1)).thenReturn(departmentDoc);
         Mockito.when(departmentDocRepository.findByDeptProgrammeInitials(programmeInitials2)).thenReturn(departmentDoc);
         Mockito.when(departmentDocRepository.findByDeptProgrammeInitials(programmeInitials2)).thenReturn(departmentDoc);
+
+        Mockito.when(programmeGroupPersonalTimeTableDocRepository.findAll()).thenReturn(new ArrayList<>(0));
 
         timeTableSuperDoc = timeTablePopulatorService.partOneGenerateInitialTimeTableSuperDocWithInitialData();
     }
